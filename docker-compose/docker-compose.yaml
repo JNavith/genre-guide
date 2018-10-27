@@ -1,0 +1,32 @@
+version: '3.6'
+
+services:
+  purgecss:
+    build:
+      args:
+        node_tag: 10.12.0-alpine
+        purgecss_version: 1.1.0
+      context: ..
+      dockerfile: ./Dockerfile/purgecss.Dockerfile
+    container_name: purgecss
+    hostname: purgecss
+    image: purgecss:1.1.0
+    volumes:
+      - "../html:/home/node/html:ro"
+      - "../css:/home/node/css"
+  
+  tailwind:
+    build:
+      args:
+        node_tag: 10.12.0-alpine
+        tailwindcss_version: 0.6.6
+        tailwindcss_transition_version: 1.0.5
+      context: ..
+      dockerfile: ./Dockerfile/tailwind.Dockerfile
+    container_name: tailwind
+    hostname: tailwind
+    image: tailwind:0.6.6
+    volumes:
+      - "../js/tailwind.js:/home/node/tailwind.js:ro"
+      - "../css/input.css:/home/node/input.css:ro"
+      - "../css/styles.css:/home/node/styles.css"
