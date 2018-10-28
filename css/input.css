@@ -67,18 +67,6 @@ nav a:hover {
 	@apply no-underline;
 }
 
-::selection {
-	@apply bg-genre-this text-white;
-}
-
-.selection-normal::selection, .selection-normal *::selection {
-	@apply bg-genre-this text-white !important;
-}
-
-.selection-inverted::selection, .selection-inverted *::selection {
-	@apply bg-white text-genre-this;
-}
-
 /**
  * This injects all of Tailwind's utility classes, generated based on your
  * config file.
@@ -103,3 +91,15 @@ nav a:hover {
  * @import "utilities/background-patterns";
  * @import "utilities/skew-transforms";
  */
+
+::selection {
+	@apply bg-genre-this text-white;
+}
+
+.selection-normal::selection, .selection-normal *::selection {
+	@apply bg-genre-this text-white !important;
+}
+
+.selection-inverted::selection, .selection-inverted *::selection {
+	@apply bg-white text-genre-this;
+}
