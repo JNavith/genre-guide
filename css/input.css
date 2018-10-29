@@ -68,7 +68,7 @@ nav a:hover {
 }
 
 .c-track {
-	@apply flex items-center mb-4;
+	@apply flex items-center mb-6;
 }
 
 /**
