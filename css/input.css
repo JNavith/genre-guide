@@ -103,3 +103,55 @@ nav a:hover {
 .selection-inverted::selection, .selection-inverted *::selection {
 	@apply bg-white text-genre-this;
 }
+
+.text-lg-responsive {
+	@apply text-sm;
+}
+
+.text-xl-responsive {
+	@apply text-md;
+}
+
+.text-2xl-responsive {
+	@apply text-lg;
+}
+
+.text-3xl-responsive {
+	@apply text-xl;
+}
+
+@screen sm {
+	.text-lg-responsive {
+		@apply text-md;
+	}
+	
+	.text-xl-responsive {
+		@apply text-lg;
+	}
+	
+	.text-2xl-responsive {
+		@apply text-xl;
+	}
+	
+	.text-3xl-responsive {
+		@apply text-2xl;
+	}
+}
+
+@screen md {
+	.text-lg-responsive {
+		@apply text-lg;
+	}
+	
+	.text-xl-responsive {
+		@apply text-xl;
+	}
+	
+	.text-2xl-responsive {
+		@apply text-2xl;
+	}
+	
+	.text-3xl-responsive {
+		@apply text-3xl;
+	}
+}
