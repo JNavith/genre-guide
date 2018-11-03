@@ -143,7 +143,7 @@ module.exports = {
 
   fonts: {
     'header': [
-      'Nunito Sans',
+      'Poppins',
       'system-ui',
       'BlinkMacSystemFont',
       '-apple-system',
