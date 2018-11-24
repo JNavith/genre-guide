@@ -29,6 +29,18 @@
  */
 @tailwind preflight;
 
+a {
+	@apply no-underline;
+}
+
+a:hover {
+	@apply underline;
+}
+
+nav a:hover {
+	@apply no-underline;
+}
+
 /**
  * This injects any component classes registered by plugins.
  *
