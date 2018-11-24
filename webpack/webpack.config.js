@@ -23,17 +23,17 @@ module.exports = {
             "postcss-loader",
         ]
       },
-      {
-        test: /\.jpg$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[path]/img/[name].[ext]',
-            }  
-          }
-        ],
-      },
+      // {
+      //   test: /\.jpg$/,
+      //   use: [
+      //     {
+      //       loader: 'file-loader',
+      //       options: {
+      //         name: 'img/[name].[ext]',
+      //       }  
+      //     }
+      //   ],
+      // },
     ],
   },
   plugins: [
