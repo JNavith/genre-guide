@@ -75,7 +75,7 @@ let colors = {
   'green-darker': '#00570E',
   'green-dark': '#009802',
   'green': '#0FBB00'
-}
+};
 
 module.exports = {
 
@@ -933,4 +933,4 @@ module.exports = {
     separator: ':',
   },
 
-}
+};
