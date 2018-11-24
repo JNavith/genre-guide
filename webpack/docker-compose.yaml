@@ -17,32 +17,18 @@
 version: '3.6'
 
 services:
-  purgecss:
+  webpack:
     build:
       args:
-        node_tag: 10.12.0-alpine
-        purgecss_version: 1.1.0
-      context: ..
-      dockerfile: ../Dockerfile/purgecss.Dockerfile
-    container_name: purgecss
-    hostname: purgecss
-    image: purgecss:1.1.0
+        node_tag: 11.1.0-alpine
+      context: .
+      dockerfile: ./webpack.Dockerfile
+#    command: ["npm", "run", "dev"]
+    container_name: webpack
+    image: webpack:2.1.14
     volumes:
-      - "../html:/home/node/html:ro"
-      - "../css:/home/node/css"
-  
-  tailwind:
-    build:
-      args:
-        node_tag: 10.12.0-alpine
-        tailwindcss_version: 0.6.6
-        tailwindcss_transition_version: 1.0.5
-      context: ..
-      dockerfile: ../Dockerfile/tailwind.Dockerfile
-    container_name: tailwind
-    hostname: tailwind
-    image: tailwind:0.6.6
-    volumes:
-      - "../js/tailwind.js:/home/node/tailwind.js:ro"
-      - "../css/tailwind.postcss:/home/node/tailwind.postcss:ro"
-      - "../css/styles.css:/home/node/styles.css"
+      - ../src:/home/node/src:ro
+      - ../dist:/home/node/dist
+      - ./tailwind.js:/home/node/tailwind.js:ro
+      - ./webpack.config.js:/home/node/webpack.config.js:ro
+      - ./postcss.config.js:/home/node/postcss.config.js:ro
