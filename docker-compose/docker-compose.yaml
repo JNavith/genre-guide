@@ -44,5 +44,5 @@ services:
     image: tailwind:0.6.6
     volumes:
       - "../js/tailwind.js:/home/node/tailwind.js:ro"
-      - "../css/input.css:/home/node/input.css:ro"
+      - "../css/tailwind.postcss:/home/node/tailwind.postcss:ro"
       - "../css/styles.css:/home/node/styles.css"
