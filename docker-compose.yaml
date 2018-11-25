@@ -1,4 +1,4 @@
-#    genre.guide - docker-compose file
+#    genre.guide - master docker-compose file
 #    Copyright (C) 2018 Navith
 #
 #    This program is free software: you can redistribute it and/or modify
@@ -17,18 +17,32 @@
 version: '3.6'
 
 services:
+  google-sheets:
+    build:
+      context: ./google-sheets
+      dockerfile: ./google-sheets.Dockerfile
+    container_name: google-sheets
+    environment:
+      # ID for the sheet (instead of relying on its name being correct)
+      SHEET_KEY: 1xZUWWnll7HzDVmNj_W7cBfz9TTkl-fMMqHZ8derG-Dg
+    image: google-sheets:3.0.1
+    volumes:
+      - ./google-sheets/client.secret.json:/app/client.secret.json:ro
+      - ./google-sheets/main.py:/app/main.py:ro
+      - ./src/csv:/app/src/csv
+
   webpack:
     build:
       args:
         node_tag: 11.1.0-alpine
-      context: .
+      context: ./webpack
       dockerfile: ./webpack.Dockerfile
 #    command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
     volumes:
-      - ../src:/home/node/src:ro
-      - ../dist:/home/node/dist
-      - ./tailwind.js:/home/node/tailwind.js:ro
-      - ./webpack.config.js:/home/node/webpack.config.js:ro
-      - ./postcss.config.js:/home/node/postcss.config.js:ro
+      - ./src:/home/node/src:ro
+      - ./dist:/home/node/dist
+      - ./webpack/tailwind.js:/home/node/tailwind.js:ro
+      - ./webpack/webpack.config.js:/home/node/webpack.config.js:ro
+      - ./webpack/postcss.config.js:/home/node/postcss.config.js:ro
