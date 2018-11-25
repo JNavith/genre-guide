@@ -36,6 +36,6 @@ all_tracks = catalog.range(2, 1, catalog.row_count, catalog.col_count)
 
 with open("./src/csv/all_tracks.csv", "w") as csv_file:
 	csv_writer = writer(csv_file, delimiter="\t")
-		
+	
 	for row_number, row in groupby(all_tracks, key=attrgetter("row")):
 		csv_writer.writerow(map(attrgetter("value"), row))
