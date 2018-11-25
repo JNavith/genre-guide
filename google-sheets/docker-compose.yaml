@@ -1,0 +1,16 @@
+version: '3.6'
+
+services:
+  google-sheets:
+    build:
+      context: .
+      dockerfile: ./google-sheets.Dockerfile
+    container_name: google-sheets
+    environment:
+      # ID for the sheet (instead of relying on its name being correct)
+      SHEET_KEY: 1xZUWWnll7HzDVmNj_W7cBfz9TTkl-fMMqHZ8derG-Dg
+    image: google-sheets:3.0.1
+    volumes:
+      - ./client.secret.json:/app/client.secret.json:ro
+      - ./main.py:/app/main.py:ro
+      - ../src/csv:/app/src/csv
