@@ -25,6 +25,7 @@ services:
     environment:
       # ID for the sheet (instead of relying on its name being correct)
       SHEET_KEY: 1xZUWWnll7HzDVmNj_W7cBfz9TTkl-fMMqHZ8derG-Dg
+      CATALOG_SHEET_NAME: "Main"
     image: google-sheets:3.0.1
     volumes:
       - ./google-sheets/client.secret.json:/app/client.secret.json:ro
