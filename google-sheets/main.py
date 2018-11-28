@@ -15,34 +15,33 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from csv import writer
-from itertools import groupby
-from operator import attrgetter
 from os import getenv
 
-from gspread import authorize
+from gspread import Client, Spreadsheet, Worksheet, authorize
 from oauth2client.service_account import ServiceAccountCredentials
 
 
 def main():
-	scope = ["https://www.googleapis.com/auth/drive.readonly"]
-	credentials = ServiceAccountCredentials.from_json_keyfile_name("client.secret.json", scope)
+	scope: list = ["https://www.googleapis.com/auth/drive.readonly"]
+	credentials: ServiceAccountCredentials = ServiceAccountCredentials.from_json_keyfile_name("client.secret.json", scope)
 	
-	client = authorize(credentials)
+	client: Client = authorize(credentials)
 	
-	genre_sheet = client.open_by_key(getenv("SHEET_KEY"))
-	catalog = genre_sheet.worksheet(getenv("CATALOG_SHEET_NAME"))
+	genre_sheet: Spreadsheet = client.open_by_key(getenv("SHEET_KEY"))
+	catalog: Worksheet = genre_sheet.worksheet(getenv("CATALOG_SHEET_NAME"))
 	
 	# Includes the header row because I suspect this will be helpful later on
-	all_tracks_with_header = catalog.range(1, 1, catalog.row_count, catalog.col_count)
+	all_tracks_with_header: list = catalog.get_all_values()
 	
 	with open("./src/csv/all_tracks.csv", "w") as csv_file:
-		csv_writer = writer(csv_file, delimiter="\t")
+		csv_writer: writer = writer(csv_file, delimiter="\t")
 		
 		# For the case that there are no tracks, somehow (a linter thing)
-		row_number = 0
+		row_number: int = 0
 		
-		for row_number, row in groupby(all_tracks_with_header, key=attrgetter("row")):
-			csv_writer.writerow(map(attrgetter("value"), row))
+		row: list
+		for row_number, row in enumerate(all_tracks_with_header, start=1):
+			csv_writer.writerow(row)
 			
 			if row_number == 1:
 				print("wrote out the 1st track")
