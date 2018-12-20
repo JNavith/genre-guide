@@ -30,15 +30,15 @@
 @tailwind preflight;
 
 a {
-	@apply no-underline;
+    @apply no-underline;
 }
 
 a:hover {
-	@apply underline;
+    @apply underline;
 }
 
 nav a:hover {
-	@apply no-underline;
+    @apply no-underline;
 }
 
 /**
@@ -93,65 +93,58 @@ nav a:hover {
  */
 
 ::selection {
-	@apply bg-genre-this text-white;
-}
-
-.selection-normal::selection, .selection-normal *::selection {
-	@apply bg-genre-this text-white !important;
-}
-
-.selection-inverted::selection, .selection-inverted *::selection {
-	@apply bg-white text-genre-this;
+    @apply bg-genre-this
+    text-white;
 }
 
 .text-lg-responsive {
-	@apply text-sm;
+    @apply text-sm;
 }
 
 .text-xl-responsive {
-	@apply text-md;
+    @apply text-md;
 }
 
 .text-2xl-responsive {
-	@apply text-lg;
+    @apply text-lg;
 }
 
 .text-3xl-responsive {
-	@apply text-xl;
+    @apply text-xl;
 }
 
 @screen sm {
-	.text-lg-responsive {
-		@apply text-md;
-	}
-	
-	.text-xl-responsive {
-		@apply text-lg;
-	}
-	
-	.text-2xl-responsive {
-		@apply text-xl;
-	}
-	
-	.text-3xl-responsive {
-		@apply text-2xl;
-	}
+    .text-lg-responsive {
+        @apply text-md;
+    }
+
+    .text-xl-responsive {
+        @apply text-lg;
+    }
+
+    .text-2xl-responsive {
+        @apply text-xl;
+    }
+
+    .text-3xl-responsive {
+        @apply text-2xl;
+    }
 }
 
 @screen md {
-	.text-lg-responsive {
-		@apply text-lg;
-	}
-	
-	.text-xl-responsive {
-		@apply text-xl;
-	}
-	
-	.text-2xl-responsive {
-		@apply text-2xl;
-	}
-	
-	.text-3xl-responsive {
-		@apply text-3xl;
-	}
+    .text-lg-responsive {
+        @apply text-lg;
+    }
+
+    .text-xl-responsive {
+        @apply text-xl;
+    }
+
+    .text-2xl-responsive {
+        @apply text-2xl;
+    }
+
+    .text-3xl-responsive {
+        @apply text-3xl;
+    }
 }
