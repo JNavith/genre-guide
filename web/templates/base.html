@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		{% block head %}
+			<meta charset="utf-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+			<meta name="description" content="Learn about genres by their history, characteristics, and examples">
+			
+			<link rel="stylesheet" href="/css/main.css" type="text/css">
+			<link href="https://fonts.googleapis.com/css?family=Poppins:300,300i,400,400i,500" rel="stylesheet">
+			<link href="https://fonts.googleapis.com/css?family=Heebo:300,400,500,700" rel="stylesheet">
+		{% endblock head %}
+		<title>{% block title %}genre.guide{% endblock %}</title>
+	</head>
+	
+	{% block body %}
+		<body class="{{ body_classes }}">
+			{% block header %}
+				<header class="font-header mb-6">
+					<nav class="flex justify-between items-center py-4">
+						<a href="/"
+						   class="block ml-6 md:ml-10 text-genre-this text-3xl-responsive font-medium text-grey-darker hover:text-grey-darkest transition">genre.guide</a>
+						<div class="flex">
+							{% for dest in ["catalog", "genres", "about"] %}
+								<a href="/{{ dest }}" class="block mr-6 md:mr-10 text-genre-this text-xl-responsive text-grey-darker hover:text-grey-darkest transition">{{ dest }}</a>
+							{% endfor %}
+						</div>
+					</nav>
+				</header>
+			{% endblock header %}
+			
+			{% block content %}
+			{% endblock content %}
+		</body>
+	{% endblock body %}
+</html>

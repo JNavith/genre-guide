@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+<!-- 
+    genre.guide - Genre View
+    Copyright (C) 2018 Navith
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
+{% block head %}
+	{{ super() }}
+	<style>
+		:root {
+			--genre-this-color: #404040;
+		}
+	</style>
+{% endblock head %}
+
+{% block title %}Space Bass - {{ super() }}{% endblock title %}
+
+{% set body_classes = "font-sans border-t-4 border-b-4 border-genre-this min-h-screen overflow-x-auto md:overflow-x-hidden" %}
+
+{% block content %}
+	<div class="mx-6 md:mx-10 lg:mx-16 flex flex-col xxl:flex-row">
+		<main class="container mx-auto">
+			<div>
+				<div class="table border-b-4 border-genre-this ml-1 mb-5">
+					<h1 class="font-black md:font-medium text-4xl sm:text-5xl md:text-6xl text-black font-header -ml-1 mb-1">Space Bass</h1>
+					<h2 class="font-thin text-2xl-responsive italic font-header text-grey-darkest mb-2">Also known as
+						<strong class="font-medium">Midtempo Bass</strong> or
+						<strong class="font-medium">REZZ Bass</strong>
+					</h2>
+				</div>
+				<p class="font-sans text-xl-responsive font-light ml-1 leading-loose text-justify">
+					A genre popularized by REZZ. She makes this genre. Gesaffelstein did it first though. Here is more history. And also how you can tell what makes this genre what it is. REZZ though. REZZity REZZ REZZ. REZZ REZZ REZZ. Listen to REZZ.
+				</p>
+			</div>
+			<div class="flex-1 py-8 container mx-auto">
+				<div class="text-black rounded-md tracking-medium">
+					<table class="w-full">
+						<tr class="h-20">
+							<th class="font-header w-36 sm:w-48 md:w-72 text-left uppercase text-2xl-responsive font-light">
+								First Seen
+							</th>
+							<td>
+								<div class="flex items-center">
+									<div class="w-24 flex-no-shrink">
+										<p class="text-lg font-thin leading-tight">2010</p>
+										<p class="text-md font-thin text-grey-dark">May 13</p>
+									</div>
+									<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+									     class="h-12 w-12 mr-4 shadow-sm">
+									<div>
+										<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+										<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr class="h-20">
+							<th class="font-header w-1/3 text-left uppercase text-2xl-responsive font-light">Last Seen</th>
+							<td>
+								<div class="flex items-center">
+									<div class="w-24 flex-no-shrink">
+										<p class="text-lg-responsive font-thin leading-tight">2018</p>
+										<p class="text-md font-thin text-grey-dark">October 5</p>
+									</div>
+									<img src="/img/polluted-blood.jpg" alt="Polluted Blood"
+									     class="h-12 w-12 mr-4 shadow-sm">
+									<div>
+										<p class="text-lg font-thin leading-tight">Polluted Blood</p>
+										<p class="text-md font-thin text-grey-dark">k?d</p>
+									</div>
+								</div>
+							</td>
+						</tr>
+						<tr class="h-16">
+							<th class="font-header w-36 sm:w-48 md:w-72 text-left uppercase text-2xl-responsive font-light">
+								Originates From
+							</th>
+							<td><a class="text-black text-2xl-responsive font-light"
+							       href="/genre?name=Electronic+Dance+Music">Electronic Dance Music</a>, <a
+									class="text-black text-2xl-responsive font-light" href="/genre?name=Industrial">Industrial</a>
+							</td>
+						</tr>
+						<tr class="h-16">
+							<th class="font-header w-48 sm:w-64 md:w-72 text-left uppercase text-2xl-responsive font-light">
+								Subgenres
+							</th>
+							<td><span class="text-grey text-2xl font-light uppercase">No known subgenres</span></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<!-- Catalog picks -->
+			<div class="text-left p-2 sm:p-4 lg:p-6 pl-1 lg:pl-4 relative">
+				<div class="absolute pin-x pin-y bg-genre-this opacity-5 rounded-md z-neg1"></div>
+				<h1 class="text-black font-header font-thin text-3xl-responsive uppercase">Songs from the
+					catalog</h1>
+			</div>
+			<div>
+				<h2 class="mt-6 text-xl-responsive text-grey font-normal leading-loose font-header">Top Picks</h2>
+				<div>
+					<h3 class="text-xl-responsive text-grey-light font-normal leading-loose font-header">Most
+						conventional</h3>
+					<div>
+						<div class="flex items-center mb-6">
+							<div class="w-24 flex-no-shrink">
+								<p class="text-lg font-thin leading-tight">2010</p>
+								<p class="text-md font-thin text-grey-dark">May 13</p>
+							</div>
+							<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+							     class="h-12 w-12 mr-4 shadow-sm">
+							<div>
+								<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+								<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+							</div>
+						</div>
+						<div class="flex items-center mb-6">
+							<div class="w-24 flex-no-shrink">
+								<p class="text-lg font-thin leading-tight">2010</p>
+								<p class="text-md font-thin text-grey-dark">May 13</p>
+							</div>
+							<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+							     class="h-12 w-12 mr-4 shadow-sm">
+							<div>
+								<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+								<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>
+					<h3 class="text-xl-responsive text-grey-light font-normal leading-loose font-header">Most
+						popular</h3>
+					<div>
+						<div class="flex items-center mb-6">
+							<div class="w-24 flex-no-shrink">
+								<p class="text-lg font-thin leading-tight">2010</p>
+								<p class="text-md font-thin text-grey-dark">May 13</p>
+							</div>
+							<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+							     class="h-12 w-12 mr-4 shadow-sm">
+							<div>
+								<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+								<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+							</div>
+						</div>
+						<div class="flex items-center mb-6">
+							<div class="w-24 flex-no-shrink">
+								<p class="text-lg font-thin leading-tight">2010</p>
+								<p class="text-md font-thin text-grey-dark">May 13</p>
+							</div>
+							<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+							     class="h-12 w-12 mr-4 shadow-sm">
+							<div>
+								<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+								<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div>
+					<h3 class="text-xl-responsive text-grey-light font-normal leading-loose font-header">Most
+						unusual</h3>
+					<div>
+						<div class="flex items-center mb-6">
+							<div class="w-24 flex-no-shrink">
+								<p class="text-lg font-thin leading-tight">2010</p>
+								<p class="text-md font-thin text-grey-dark">May 13</p>
+							</div>
+							<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+							     class="h-12 w-12 mr-4 shadow-sm">
+							<div>
+								<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+								<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div>
+				<h2 class="mt-6 text-xl-responsive text-grey font-normal leading-loose">Latest</h2>
+				<div>
+					<div class="flex items-center mb-6">
+						<div class="w-24 flex-no-shrink">
+							<p class="text-lg font-thin leading-tight">2010</p>
+							<p class="text-md font-thin text-grey-dark">May 13</p>
+						</div>
+						<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+						     class="h-12 w-12 mr-4 shadow-sm">
+						<div>
+							<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+							<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+						</div>
+					</div>
+					<div class="flex items-center mb-6">
+						<div class="w-24 flex-no-shrink">
+							<p class="text-lg font-thin leading-tight">2010</p>
+							<p class="text-md font-thin text-grey-dark">May 13</p>
+						</div>
+						<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+						     class="h-12 w-12 mr-4 shadow-sm">
+						<div>
+							<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+							<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+						</div>
+					</div>
+					<div class="flex items-center mb-6">
+						<div class="w-24 flex-no-shrink">
+							<p class="text-lg font-thin leading-tight">2010</p>
+							<p class="text-md font-thin text-grey-dark">May 13</p>
+						</div>
+						<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+						     class="h-12 w-12 mr-4 shadow-sm">
+						<div>
+							<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+							<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+						</div>
+					</div>
+					<div class="flex items-center mb-6">
+						<div class="w-24 flex-no-shrink">
+							<p class="text-lg font-thin leading-tight">2010</p>
+							<p class="text-md font-thin text-grey-dark">May 13</p>
+						</div>
+						<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+						     class="h-12 w-12 mr-4 shadow-sm">
+						<div>
+							<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+							<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+						</div>
+					</div>
+					<div class="flex items-center mb-6">
+						<div class="w-24 flex-no-shrink">
+							<p class="text-lg font-thin leading-tight">2010</p>
+							<p class="text-md font-thin text-grey-dark">May 13</p>
+						</div>
+						<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
+						     class="h-12 w-12 mr-4 shadow-sm">
+						<div>
+							<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
+							<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+{% endblock content %}
