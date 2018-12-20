@@ -72,6 +72,7 @@ services:
     command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
+    network_mode: "none"
     volumes:
       - ./webpack/tailwind.postcss:/home/node/src/css/tailwind.postcss:ro
       - ./dist:/home/node/dist
