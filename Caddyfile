@@ -1,0 +1,9 @@
+0.0.0.0:80 {
+	root /srv
+	gzip
+	
+	proxy / web:80 {
+		transparent
+		except /css
+	}
+}

@@ -17,6 +17,18 @@
 version: '3.6'
 
 services:
+  caddy:
+    container_name: caddy
+    hostname: caddy
+    image: abiosoft/caddy:0.11.1
+    networks:
+      web:
+    ports:
+      - 6700:80
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile:ro
+      - ./dist:/srv
+
   google-sheets:
     build:
       args:
@@ -32,7 +44,24 @@ services:
     volumes:
       - ./google-sheets/client.secret.json:/app/client.secret.json:ro
       - ./google-sheets/main.py:/app/main.py:ro
-      - ./src/csv:/app/src/csv
+      - ./db:/app/src/csv
+
+  web:
+    build:
+      args:
+        python_tag: 3.7.1-r52
+        starlette_version: 0.9.9
+        uvicorn_version: 0.3.23
+      context: ./web
+      dockerfile: ./starlette-uvicorn.Dockerfile
+    container_name: web
+    hostname: web
+    image: starlette-uvicorn:0.9.9-0.3.23
+    networks:
+      web:
+    volumes:
+      - ./web/main.py:/app/main.py:ro
+      - ./web/templates:/app/templates:ro
 
   webpack:
     build:
@@ -40,12 +69,16 @@ services:
         node_tag: 11.1.0-alpine
       context: ./webpack
       dockerfile: ./webpack.Dockerfile
-#    command: ["npm", "run", "dev"]
+    command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
     volumes:
-      - ./src:/home/node/src:ro
+      - ./webpack/tailwind.postcss:/home/node/src/css/tailwind.postcss:ro
       - ./dist:/home/node/dist
       - ./webpack/tailwind.js:/home/node/tailwind.js:ro
       - ./webpack/webpack.config.js:/home/node/webpack.config.js:ro
       - ./webpack/postcss.config.js:/home/node/postcss.config.js:ro
+
+
+networks:
+  web:
