@@ -873,7 +873,7 @@ module.exports = {
 		maxWidth: ['responsive'],
 		minHeight: ['responsive'],
 		minWidth: ['responsive'],
-		negativeMargin: ['responsive'],
+		negativeMargin: ['responsive', 'hover'],
 		opacity: ['responsive', 'hover'],
 		outline: ['focus'],
 		overflow: ['responsive'],
@@ -947,6 +947,7 @@ module.exports = {
 				"sm": "30rem",
 				"md": "40rem",
 				"lg": "50rem",
+				"xxl": "110rem",
 			}
 		}),
 	],
