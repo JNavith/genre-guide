@@ -76,9 +76,11 @@ let colors = {
 	'grey-lightest': '#f8fafc',
 	'white': '#ffffff',
 	
-	'green-darker': '#00570E',
-	'green-dark': '#009802',
-	'green': '#0FBB00',
+	// 'green-darker': '#00570E',
+	// 'green-dark': '#009802',
+	// 'green': '#0FBB00',
+	
+	"genre-industrial": "#404040",
 };
 
 module.exports = {
@@ -531,6 +533,9 @@ module.exports = {
 	
 	minWidth: {
 		'0': '0',
+		'8': '2rem',
+		'16': '4rem',
+		'32': '8rem',
 		'full': '100%',
 	},
 	
@@ -625,6 +630,7 @@ module.exports = {
 		'0': '0',
 		'1': '0.25rem',
 		'2': '0.5rem',
+		'2.5': '0.625rem',
 		'3': '0.75rem',
 		'4': '1rem',
 		'5': '1.25rem',
@@ -727,7 +733,7 @@ module.exports = {
 	shadows: {
 		default: '0 2px 4px 0 rgba(0,0,0,0.10)',
 		'sm': '0 2px 4px 0 rgba(0,0,0,0.10)',
-		'md': '0 4px 8px 0 rgba(0,0,0,0.12), 0 2px 4px 0 rgba(0,0,0,0.08)',
+		'md': '0 3px 7px 0 rgba(0,0,128,0.10), 0 2px 4px 0 rgba(0,0,0,0.08)',
 		'lg': '0 15px 30px 0 rgba(0,0,0,0.11), 0 5px 15px 0 rgba(0,0,0,0.08)',
 		'inner': 'inset 0 2px 4px 0 rgba(0,0,0,0.06)',
 		'outline': '0 0 0 3px rgba(52,144,220,0.5)',
