@@ -118,7 +118,7 @@ services:
     network_mode: "none"
     volumes:
       - ./webpack/tailwind.postcss:/home/node/src/css/tailwind.postcss:ro
-      - ./dist:/home/node/dist
+      - ./dist/css:/home/node/dist/css
       - ./webpack/tailwind.js:/home/node/tailwind.js:ro
       - ./webpack/webpack.config.js:/home/node/webpack.config.js:ro
       - ./webpack/postcss.config.js:/home/node/postcss.config.js:ro
