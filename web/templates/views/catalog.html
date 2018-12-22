@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% from "components/song-entry.html" import song_entry %}
+
+{% block title %}Catalog - {{ super() }}{% endblock title %}
+
+{% set text_colors = {"inactive": "green", "active": "green-dark"} %}
+{% set body_classes = "flex flex-col items-center font-sans min-h-screen border-t-4 border-b-4 border-green" %}
+
+{% block content %}
+	{# dummy: fix later #}
+	{% set catalog = {
+	                     "2018-12-21": [{"title": "Song 1", "artists": "Those Artists", "genres": ("Space Bass", "~", "Dubstep")},
+	                                        "Song 2", "Song 3"],
+	                     "2018-12-20": ["Song 4", "Song 5", "Song 6", "Song 7", "Song 8"],
+	                 } %}
+	{# end dummy #}
+	
+	{% for date, song_list in catalog.items() %}
+		<div class="h-1 w-full bg-green"></div>
+		{% for song in song_list %}
+			{# dummy #}
+			{% set song = catalog["2018-12-21"][0] %}
+			{# end dummy #}
+			{{ song_entry(title=song.title, artists=song.artists, genres=song.genres, img_url=song.img_url) }}
+		{% endfor %}
+	{% endfor %}
+{% endblock content %}
