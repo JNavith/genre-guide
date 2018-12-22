@@ -76,9 +76,9 @@ let colors = {
 	'grey-lightest': '#f8fafc',
 	'white': '#ffffff',
 	
-	// 'green-darker': '#00570E',
-	// 'green-dark': '#009802',
-	// 'green': '#0FBB00',
+	'green-darker': '#00570E',
+	'green-dark': '#009802',
+	'green': '#0FBB00',
 	
 	"genre-industrial": "#404040",
 };

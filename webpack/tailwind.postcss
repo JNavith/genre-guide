@@ -98,10 +98,22 @@ nav a:hover {
 	}
 }
 
-::selection {
+
+.selection-green::selection {
+	@apply bg-green
+	text-white;
+}
+
+.selection-genre-this::selection, .selection-genre-this *::selection {
 	@apply bg-genre-this
 	text-white;
 }
+
+::selection {
+	@apply bg-green
+	text-white;
+}
+
 
 .text-lg-responsive {
 	@apply text-sm;
