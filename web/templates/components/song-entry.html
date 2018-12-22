@@ -1,0 +1,26 @@
+{% macro song_entry(title, artists, year=None, date=None, genres=None, img_url=None) %}
+	<div class="flex items-center">
+		{% if (year is not none) and (date is not none) %}
+			<div class="w-36 pr-8 flex-no-shrink">
+				<p class="text-lg font-thin leading-tight">{{ year }}</p>
+				<p class="text-md font-thin text-grey-dark">{{ date }}</p>
+			</div>
+		{% endif %}
+		
+		{% if not img_url %}
+			{% set img_src = "/svg/song-missing-art.svg?genre=" + genres[0] %}
+		{% else %}
+			{% set img_src = img_url %}
+		{% endif %}
+		<img src="{{ img_src }}" alt="{{ title }}" class="h-12 w-12 mr-4 shadow-sm">
+		
+		<div>
+			<p class="text-lg font-thin leading-tight">{{ title }}</p>
+			<p class="text-md font-thin text-grey-dark">{{ artists }}</p>
+		</div>
+		
+		{% if genres is not none %}
+			<div>{{ genres }}</div>
+		{% endif %}
+	</div>
+{% endmacro %}

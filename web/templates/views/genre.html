@@ -51,18 +51,8 @@
 									First Seen
 								</th>
 								<td>
-									<div class="flex items-center">
-										<div class="w-24 flex-no-shrink">
-											<p class="text-lg font-thin leading-tight">2010</p>
-											<p class="text-md font-thin text-grey-dark">May 13</p>
-										</div>
-										<img src="/img/wolfspiders.jpg" alt="8 Bit Chinoscillator"
-										     class="h-12 w-12 mr-4 shadow-sm">
-										<div>
-											<p class="text-lg font-thin leading-tight">8 Bit Chinoscillator</p>
-											<p class="text-md font-thin text-grey-dark">Mad Zach & R2 The Spider</p>
-										</div>
-									</div>
+									{% from "components/song-entry.html" import song_entry %}
+									{{ song_entry(title="H E X", artists="REZZ & 1788-L" , year="2018" , date="December 21", img_url="https://is2-ssl.mzstatic.com/image/thumb/Music115/v4/77/9c/a8/779ca8ce-54e9-4894-eed8-7f62a42174c8/883958015377_1.jpg/268x0w.jpg") }}
 								</td>
 							</tr>
 							<tr class="h-20">
