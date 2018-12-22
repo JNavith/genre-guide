@@ -39,19 +39,32 @@ services:
     volumes:
       - ./Caddyfile:/etc/Caddyfile:ro
       - ./dist:/srv
-
-  google-sheets:
+  
+  graphql-server:
     build:
       args:
-        python_tag: 3.7.1-alpine3.8
-      context: ./google-sheets
-      dockerfile: ./google-sheets.Dockerfile
-    container_name: google-sheets
+        graphene_version: 2.1.3
+        starlette_tag: 0.9.9-0.3.23
+      context: ./graphql-server
+    container_name: graphql-server
     environment:
-      # ID for the sheet (instead of relying on its name being correct)
-      SHEET_KEY: 1xZUWWnll7HzDVmNj_W7cBfz9TTkl-fMMqHZ8derG-Dg
-      CATALOG_SHEET_NAME: "Main"
-    image: google-sheets:3.0.1
+      REDIS_PASSWORD: test123
+    image: graphql-server:dev
+    networks:
+      db:
+      web:
+    volumes:
+      - ./graphql-server/main.py:/app/main.py:ro
+  
+  redis:
+    container_name: redis
+    environment:
+      REDIS_PASSWORD: test123
+    image: bitnami/redis:5.0.3-debian-9-r6
+    networks:
+      db:
+    sysctls:
+      net.core.somaxconn: 4096
     volumes:
       - ./google-sheets/client.secret.json:/app/client.secret.json:ro
       - ./google-sheets/main.py:/app/main.py:ro
@@ -78,7 +91,6 @@ services:
       args:
         node_tag: 11.1.0-alpine
       context: ./webpack
-      dockerfile: ./webpack.Dockerfile
     command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
@@ -92,4 +104,5 @@ services:
 
 
 networks:
+  db:
   web:

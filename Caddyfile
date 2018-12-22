@@ -6,4 +6,8 @@
 		transparent
 		except /css
 	}
+	
+	proxy /graphql graphql-server:80 {
+		transparent
+	}
 }
