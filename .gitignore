@@ -1,2 +1,3 @@
-/google-sheets/client.secret.json
+/sheet-to-db/client.secret.json
 /dist/
+/redis/
