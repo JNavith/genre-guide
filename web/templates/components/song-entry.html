@@ -8,7 +8,9 @@
 		{% endif %}
 		
 		{% if not img_url %}
-			{% set img_src = "/svg/song-missing-art.svg?genre=" + genres[0] %}
+			{% set img_src = "/svg/song-missing-art.svg?genre=" %}
+			{# Todo: check for tuples #}
+			{% set img_src = img_src + genres[0] %}
 		{% else %}
 			{% set img_src = img_url %}
 		{% endif %}
