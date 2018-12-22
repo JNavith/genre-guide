@@ -1,0 +1,15 @@
+{% if text_colors is undefined %}
+	{% set text_colors = {"inactive": "grey-darker", "active": "grey-darkest"} %}
+{% endif %}
+
+<header class="block w-full font-header mb-6">
+	<nav class="flex justify-between items-center py-4">
+		<a href="/"
+		   class="block ml-6 md:ml-10 text-genre-this text-3xl-responsive font-medium text-{{ text_colors.inactive }} hover:text-{{ text_colors.active }} transition">genre.guide</a>
+		<div class="flex">
+			{% for dest in ["catalog", "genres", "about"] %}
+				<a href="/{{ dest }}" class="block mr-6 md:mr-10 text-genre-this text-xl-responsive text-{{ text_colors.inactive }} hover:text-{{ text_colors.active }} transition">{{ dest }}</a>
+			{% endfor %}
+		</div>
+	</nav>
+</header>
