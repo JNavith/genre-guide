@@ -17,6 +17,17 @@
 version: '3.6'
 
 services:
+  __starlette-base-image:
+    build:
+      args:
+        python_tag: 3.7.1-debian-9-r53
+        starlette_version: 0.9.9
+        uvicorn_version: 0.3.23
+      context: ./web
+      dockerfile: ./starlette.Dockerfile
+    command: /bin/true
+    image: starlette:0.9.9-0.3.23
+  
   caddy:
     container_name: caddy
     hostname: caddy
@@ -49,20 +60,19 @@ services:
   web:
     build:
       args:
-        python_tag: 3.7.1-r52
-        starlette_version: 0.9.9
-        uvicorn_version: 0.3.23
+        # Horrible bug: remove the quotation marks and this becomes 2.1
+        jinja2_version: "2.10"
+        starlette_tag: 0.9.9-0.3.23
       context: ./web
-      dockerfile: ./starlette-uvicorn.Dockerfile
     container_name: web
     hostname: web
-    image: starlette-uvicorn:0.9.9-0.3.23
+    image: web:dev
     networks:
       web:
     volumes:
       - ./web/main.py:/app/main.py:ro
       - ./web/templates:/app/templates:ro
-
+  
   webpack:
     build:
       args:
