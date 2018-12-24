@@ -25,6 +25,7 @@ services:
         uvicorn_version: 0.3.23
       context: ./web
       dockerfile: ./starlette.Dockerfile
+    # Prevent failing actions if the container is accidentally started
     command: /bin/true
     image: starlette:0.9.9-0.3.23
   
@@ -54,6 +55,7 @@ services:
     networks:
       db:
       web:
+    restart: always
     volumes:
       - ./graphql-server/__main__.py:/app/__main__.py:ro
   
@@ -117,6 +119,7 @@ services:
     image: web:dev
     networks:
       web:
+    restart: always
     volumes:
       - ./web/main.py:/app/main.py:ro
       - ./web/templates:/app/templates:ro
