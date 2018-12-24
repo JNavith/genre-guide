@@ -53,11 +53,11 @@ def parse_genre(genre_text: str) -> Tuple:
 	# Verify that there are only dividers or operators at odd indices
 	for index in range(1, len(joined_words), 2):
 		if not (joined_words[index] in dividers or joined_words[index] in operators):
-			raise ValueError(f"misplaced operator in f{genre_text} (this should not be possible in my mind)")
+			raise ValueError(f"misplaced operator in {genre_text} (this should not be possible in my mind)")
 	
 	# Verify that the last word or symbol in the list is not an operator or divider
 	if joined_words[-1] in dividers | operators:
-		raise ValueError(f"misplaced operator at the end of f{genre_text}")
+		raise ValueError(f"misplaced operator at the end of {genre_text}")
 	
 	# If there are no dividers,
 	if sum(divider_counts.values()) == 0:
@@ -67,8 +67,8 @@ def parse_genre(genre_text: str) -> Tuple:
 				# Then return the result as it is
 				return tuple(joined_words)
 		
-		# Otherwise, there is an ambiguity error
-		raise ValueError("ambiguous grouping of genres from f{genre_text}")
+		# Otherwise, there is an ambiguity error (because there are multiple operators)
+		raise ValueError(f"ambiguous grouping of genres from {genre_text}")
 	
 	groups: List[Union[str, Tuple[str, str, str]]] = []
 	skip_indices: Set[int] = set()

@@ -1,10 +1,13 @@
 from collections import Iterator, defaultdict, namedtuple
 from hashlib import blake2b
+from json import dumps
 from os import getenv
 from typing import Awaitable, DefaultDict, Dict, List, Tuple
 
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
+
+from .genres import parse_genre
 
 
 def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
@@ -13,7 +16,10 @@ def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
 	fields: List[str] = [field.casefold() for field in catalog.row_values(1)]
 	Track = namedtuple("Track", fields)
 	
-	return map(Track._make, catalog.get_all_values())
+	for entry in catalog.get_all_values():
+		track = Track._make(entry)
+		track = track._replace(subgenre=dumps(parse_genre(track.subgenre)))
+		yield track
 
 
 def create_tracks_data_set(tracks: "Iterable[Track]") -> Dict[str, List[tuple]]:
