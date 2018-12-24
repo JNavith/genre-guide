@@ -280,7 +280,7 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 		
 		is_genre: bool = subgenre in genres
 		full_data[subgenre]["is_genre"] = dumps(is_genre)
-		full_data[subgenre]["color"] = genre_to_color[subgenre] if is_genre else dumps(None)
+		full_data[subgenre]["color"] = dumps(genre_to_color[subgenre]) if is_genre else dumps(None)
 	
 	# Now that that loop above has completed, "freeze" all the origins and subgenres into a tuple, and JSON-dump them
 	for subgenre, data in full_data.items():
