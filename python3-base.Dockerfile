@@ -1,4 +1,4 @@
-#    genre.guide - Starlette Dockerfile
+#    genre.guide - Python 3 base image Dockerfile
 #    Copyright (C) 2018 Navith
 #    
 #    This program is free software: you can redistribute it and/or modify
@@ -14,10 +14,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-ARG python3_base_tag
-FROM python3-base:${python3_base_tag} as base
+ARG python_tag
+FROM bitnami/python:${python_tag} as base
 
-ARG starlette_version
-ARG uvicorn_version
-RUN pip install --no-cache starlette==${starlette_version} uvicorn==${uvicorn_version}
+WORKDIR /app
+CMD ["python3", "./main.py"]
 
+RUN pip install --upgrade pip && \
+    pip install --upgrade setuptools || true
