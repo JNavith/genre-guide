@@ -58,12 +58,7 @@ class Subgenre(ObjectType):
 
 
 class Query(ObjectType):
-	hello = String(name=String(default_value="stranger"))
-	
 	all_subgenres = List(Subgenre)
-	
-	async def resolve_hello(self, info, name):
-		return "Hello " + name
 	
 	async def resolve_all_subgenres(self, info):
 		subgenres = []
