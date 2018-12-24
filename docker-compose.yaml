@@ -57,7 +57,7 @@ services:
       web:
     restart: always
     volumes:
-      - ./graphql-server/__main__.py:/app/__main__.py:ro
+      - ./graphql-server/main.py:/app/main.py:ro
   
   redis:
     container_name: redis
