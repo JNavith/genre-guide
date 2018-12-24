@@ -19,7 +19,7 @@ from itertools import chain
 from os import getenv
 from typing import Awaitable, List
 
-from aioredis import Redis, create_redis_pool, ReplyError
+from aioredis import Redis, ReplyError, create_redis_pool
 from gspread import Client, Spreadsheet, authorize
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -56,7 +56,9 @@ async def main(loop: AbstractEventLoop):
 	try:
 		await redis.bgsave()
 	except ReplyError as e:
-		await redis.bgsave()
+		# It'll say something about not being able to save right now because of an AOF re-write.
+		# Whatever.
+		print(e)
 	
 	print("done, waiting to close the Redis connection...", flush=True)
 	await redis.wait_closed()
