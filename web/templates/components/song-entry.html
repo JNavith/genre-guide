@@ -1,5 +1,5 @@
-{% macro song_entry(title, artists, year=None, date=None, genres=None, img_url=None) %}
-	<div class="flex items-center">
+{% macro song_entry(title, artists, year=None, date=None, genres=None, img_url=None, extra_container_classes="") %}
+	<div class="flex items-center {{ extra_container_classes }}">
 		{% if (year is not none) and (date is not none) %}
 			<div class="w-36 pr-8 flex-no-shrink">
 				<p class="text-lg font-thin leading-tight">{{ year }}</p>

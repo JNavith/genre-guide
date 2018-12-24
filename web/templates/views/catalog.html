@@ -10,18 +10,21 @@
 	{# dummy: fix later #}
 	{% set catalog = {
 	                     "2018-12-21": [{"title": "Song 1", "artists": "Those Artists", "genres": ("Space Bass", "~", "Dubstep")},
-	                                        "Song 2", "Song 3"],
+	                                        "Song 2", "Song 3"]*10,
 	                     "2018-12-20": ["Song 4", "Song 5", "Song 6", "Song 7", "Song 8"],
 	                 } %}
 	{# end dummy #}
-	
 	{% for date, song_list in catalog.items() %}
-		<div class="h-1 w-full bg-green"></div>
-		{% for song in song_list %}
-			{# dummy #}
-			{% set song = catalog["2018-12-21"][0] %}
-			{# end dummy #}
-			{{ song_entry(title=song.title, artists=song.artists, genres=song.genres, img_url=song.img_url) }}
-		{% endfor %}
+		<section class="flex flex-row pb-10 mb-4 {{ "border-b-4 border-grey-light" if not loop.last }}">
+			<h2 class="mr-8 w-64 pt-4 -mt-4 font-header font-light text-3xl-responsive text-grey-dark sticky pin-t self-start">{{ date }}</h2>
+			<div class="ml-8 flex flex-col">
+				{% for song in song_list %}
+					{# dummy #}
+					{% set song = catalog["2018-12-21"][0] %}
+					{# end dummy #}
+					{{ song_entry(title=song.title, artists=song.artists, genres=song.genres, img_url=song.img_url, extra_container_classes="mb-4") }}
+				{% endfor %}
+			</div>
+		</section>
 	{% endfor %}
 {% endblock content %}
