@@ -58,6 +58,7 @@ async def song_missing_art(request: Request):
 	# background_color, fill_color = lookup.get(request.query_params["genre"], (None, None))
 	
 	# todo: add get_accessible_primary_color graphql query
+	# and add it to the Color object type (as the text_color field)
 	fill_color = "#ffffff"
 	background_color = data["data"]["subgenre"]["color"]["hex"]
 	
