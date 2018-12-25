@@ -7,7 +7,7 @@ from typing import Awaitable, DefaultDict, Dict, List, Tuple
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
 
-from .genres import parse_genre
+from .parse_genre import parse_genre
 
 
 def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":

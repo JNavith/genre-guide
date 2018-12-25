@@ -96,8 +96,8 @@ services:
         oauth2client_version: 4.1.3
       context: ./sheet-to-db
     # Uncomment to run tests
+    # todo: move tests to api
     #    command: ["sh", "./run-tests.sh"]
-    #    command: ["python3", "./gspread_notes.py"]
     command: ["python3", "-m", "app"]
     container_name: sheet-to-db
     env_file:
@@ -119,7 +119,9 @@ services:
     #    tty: true
     volumes:
       # The Dockerfile will be included along with this. But whatever.
-      - ./sheet-to-db:/app:ro
+      - ./sheet-to-db:/app]
+      # todo: make this only accessible over a GraphQL query?
+      - ./api/parse_genre.py:/app/parse_genre.py:ro
     working_dir: /
   
   web:
