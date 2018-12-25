@@ -1,3 +1,4 @@
 /sheet-to-db/client.secret.json
 /dist/
 /redis/
+/redis-password.env
