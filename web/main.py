@@ -1,9 +1,15 @@
+from json import loads
+from sys import stderr
+
+from aiohttp import ClientSession
 from jinja2 import Template
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, Response
 from uvicorn import run
+from uvicorn.loops.uvloop import uvloop_setup
 
+loop = uvloop_setup()
 app = Starlette(template_directory="templates")
 
 
@@ -25,17 +31,40 @@ async def view_genre(request: Request):
 
 @app.route("/svg/song-missing-art.svg")
 async def song_missing_art(request: Request):
-	# todo: proper solution (probably over graphql)
-	lookup = {
-		"Space Bass": ("#404040", "#ffffff")
-	}
+	genre_name: str = request.query_params["genre"]
+	
+	query = """
+		query get_subgenre_color($name: String!) {
+			subgenre(name: $name) {
+				color {
+					hex
+				}
+			}
+		}
+	"""
+	
+	async with ClientSession() as session:
+		async with session.post("http://graphql-server/graphql", json={
+			"query": query,
+			"variables": {"name": genre_name}
+		}, headers={
+			"Content-Type": "application/json",
+			"Accept": "application/json",
+		}) as response:
+			data = loads(await response.text())
+	
+	print(data, file=stderr, flush=True)
+	
+	# background_color, fill_color = lookup.get(request.query_params["genre"], (None, None))
+	
+	# todo: add get_accessible_primary_color graphql query
+	fill_color = "#ffffff"
+	background_color = data["data"]["subgenre"]["color"]["hex"]
 	
 	template: Template = app.get_template("components/song-missing-art.svg")
-	
-	background_color, fill_color = lookup.get(request.query_params["genre"], (None, None))
 	
 	return Response(template.render(request=request, background_color=background_color, fill_color=fill_color), media_type="image/svg+xml")
 
 
 if __name__ == '__main__':
-	run(app, host='0.0.0.0', port=80)
+	run(app, host='0.0.0.0', port=80, loop=loop)

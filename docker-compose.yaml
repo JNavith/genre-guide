@@ -123,6 +123,7 @@ services:
   web:
     build:
       args:
+        aiohttp_version: "3.5.1"
         # Horrible bug: remove the quotation marks and this becomes 2.1
         jinja2_version: "2.10"
         starlette_tag: 0.9.9-0.3.23
