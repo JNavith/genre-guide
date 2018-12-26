@@ -119,7 +119,7 @@ services:
     #    tty: true
     volumes:
       # The Dockerfile will be included along with this. But whatever.
-      - ./sheet-to-db:/app]
+      - ./sheet-to-db:/app
       # todo: make this only accessible over a GraphQL query?
       - ./api/parse_genre.py:/app/parse_genre.py:ro
     working_dir: /

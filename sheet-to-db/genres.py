@@ -7,7 +7,7 @@ from typing import Any, Awaitable, DefaultDict, Dict, Generator, Iterator, List,
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
 from gspread.utils import rowcol_to_a1
-from gspread_formatting import CellFormat
+from gspread_formatting import CellFormat, CellFormatComponent
 
 
 def get_effective_formats(worksheet: Worksheet, row_start: int, col_start: int, row_end: int, col_end: int) -> Generator[List[CellFormat], None, None]:
@@ -39,14 +39,16 @@ def get_effective_formats(worksheet: Worksheet, row_start: int, col_start: int, 
 		yield this_rows_formats
 
 
-def get_genre_colors(genre_sheet: Spreadsheet) -> Dict[str, str]:
+def get_genre_colors(genre_sheet: Spreadsheet) -> Dict[str, Tuple[str, str]]:
 	"""Maps the name of a genre to its hex color"""
 	
 	genre_info_tab: Worksheet = genre_sheet.worksheet(getenv("GENRE_INFO_SHEET_NAME"))
 	
-	genre_to_color: Dict[str, str] = {}
+	genre_to_color: Dict[str, Tuple[str, str]] = {}
 	
 	all_records: List[Dict] = genre_info_tab.get_all_records()
+	all_formats: List[List[CellFormat]] = list(get_effective_formats(genre_info_tab, row_start=2, col_start=1, col_end=genre_info_tab.col_count, row_end=genre_info_tab.row_count))
+	
 	for (row_num, record) in enumerate(all_records):
 		name: str = record["Genre"]
 		
@@ -58,15 +60,20 @@ def get_genre_colors(genre_sheet: Spreadsheet) -> Dict[str, str]:
 		# E.x. Ambient and Atmospheric, Pop and Disco
 		# Or it just works right away for unmerged cells
 		for i in count(start=0):
-			hex_color: str = all_records[row_num - i]["Color (#Hex)"]
+			background_hex_color: str = all_records[row_num - i]["Color (#Hex)"].lower()
 			
-			if hex_color:
+			if background_hex_color:
+				foreground: CellFormatComponent = all_formats[row_num - i][0].textFormat.foregroundColor
+				
+				fr, fg, fb = [round((getattr(foreground, color_component) or 0) * 255) for color_component in ["red", "green", "blue"]]
+				foreground_hex_color: str = f"#{fr:02x}{fg:02x}{fb:02x}"
+				
 				break
 		else:
 			# Manually intervene to see what the problem is
 			breakpoint()
 		
-		genre_to_color[name] = hex_color
+		genre_to_color[name] = (background_hex_color, foreground_hex_color)
 	
 	return genre_to_color
 

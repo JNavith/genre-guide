@@ -51,14 +51,14 @@ async def main(loop: AbstractEventLoop):
 		# Wait for all tasks to finish before exiting
 		for future in as_completed(chain.from_iterable(futures), loop=loop):
 			await future
-	
-	print("done, creating a backup")
-	try:
-		await redis.bgsave()
-	except ReplyError as e:
-		# It'll say something about not being able to save right now because of an AOF re-write.
-		# Whatever.
-		print(e)
+		
+		print("done, creating a backup")
+		try:
+			await redis.bgsave()
+		except ReplyError as e:
+			# It'll say something about not being able to save right now because of an AOF re-write.
+			# Whatever.
+			print(e)
 	
 	print("done, waiting to close the Redis connection...", flush=True)
 	await redis.wait_closed()
