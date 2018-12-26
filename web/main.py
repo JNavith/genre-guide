@@ -28,14 +28,13 @@ async def view_genre(request: Request):
 
 @app.route("/svg/song-missing-art.svg")
 async def song_missing_art(request: Request):
-	genre_name: str = request.query_params["genre"]
-	
 	query = """
 		query get_subgenre_color($name: String!) {
 			subgenre(name: $name) {
 				color {
-					foreground(representation: "hex")
-					background(representation: "hex")
+					# Ask for the hex representation because we're rendering an SVG file without CSS
+					foreground(representation: HEX)
+					background(representation: HEX)
 				}
 			}
 		}
@@ -44,7 +43,7 @@ async def song_missing_art(request: Request):
 	async with ClientSession() as session:
 		async with session.post("http://graphql-server/graphql", json={
 			"query": query,
-			"variables": {"name": genre_name}
+			"variables": {"name": request.query_params["genre"]}
 		}, headers={
 			"Content-Type": "application/json",
 			"Accept": "application/json",
