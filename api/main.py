@@ -19,7 +19,7 @@ from os import getenv
 from typing import List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
-from graphene import Boolean, Field, List, ObjectType, Schema, String
+from graphene import Boolean, Enum, Field, List, ObjectType, Schema, String
 from graphql import GraphQLError
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from starlette.applications import Starlette
@@ -31,12 +31,24 @@ app = Starlette()
 loop = uvloop_setup()
 
 
+class ColorRepresentation(Enum):
+	HEX = 0
+	TAILWIND = 1
+	
+	@property
+	def description(self):
+		if self == ColorRepresentation.HEX:
+			return 'The color as a hex code in a string, such as "#ec00db"'
+		elif self == ColorRepresentation.TAILWIND:
+			return 'The color as a TailwindCSS color name (as found in a class name), such as "genre-ambient"'
+
+
 class Color(ObjectType):
 	"""A color for genres and subgenres. Includes information about the name (which genre it's tied to) and a hex representation."""
 	
 	from_genre = String(required=True, description="The name of the genre that this color comes from")
-	foreground = Field(String, representation=String(name="representation"))
-	background = Field(String, representation=String(name="representation"))
+	foreground = Field(String, representation=ColorRepresentation(name="representation"))
+	background = Field(String, representation=ColorRepresentation(name="representation"))
 	
 	@staticmethod
 	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
@@ -54,10 +66,10 @@ class Color(ObjectType):
 			
 			return result
 	
-	async def resolve_foreground(self, info, representation="hex"):
-		if representation == "hex":
+	async def resolve_foreground(self, info, representation=ColorRepresentation.HEX):
+		if representation == ColorRepresentation.HEX:
 			return (await self._get_or_cache_colors())[1]
-		elif representation == "tailwind":
+		elif representation == ColorRepresentation.TAILWIND:
 			foreground = (await self._get_or_cache_colors())[1].lower()
 			
 			# These are the only colors we use, so why bother with anything else?
@@ -70,10 +82,10 @@ class Color(ObjectType):
 		
 		raise GraphQLError(f"unknown representation {representation!r} for foreground color")
 	
-	async def resolve_background(self, info, representation="hex"):
-		if representation == "hex":
+	async def resolve_background(self, info, representation=ColorRepresentation.HEX):
+		if representation == ColorRepresentation.HEX:
 			return (await self._get_or_cache_colors())[0]
-		elif representation == "tailwind":
+		elif representation == ColorRepresentation.TAILWIND:
 			words: typing_List[str] = (cast(str, self.from_genre)).lower().split()
 			words_alpha_only = ["".join([letter for letter in word if letter.isalpha()]) for word in words]
 			return f"genre-{'-'.join(words_alpha_only)}"
