@@ -18,10 +18,11 @@ from contextlib import closing
 from json import loads
 from os import getenv
 from sys import stderr
-from typing import Optional
+from typing import List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
 from graphene import Boolean, Field, List, ObjectType, Schema, String
+from graphql import GraphQLError
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
@@ -35,16 +36,51 @@ loop = uvloop_setup()
 class Color(ObjectType):
 	"""A color for genres and subgenres. Includes information about the name (which genre it's tied to) and a hex representation."""
 	
-	name = String(required=True)
-	hex = String(required=True)
+	from_genre = String(required=True, description="The name of the genre that this color comes from")
+	foreground = Field(String, representation=String(name="representation"))
+	background = Field(String, representation=String(name="representation"))
 	
 	@staticmethod
-	async def _get_hex_color(genre_name: str) -> Optional[str]:
-		"""Returns None for subgenres, and a hex code like "#00aaff" for genres"""
+	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
+		"""Returns None for subgenres, and a list of hex codes like ["#ec00db", "#ffffff"] for genres"""
 		return loads((await do_redis("hget", Subgenre._get_redis_key(genre_name), "color")).decode("utf8"))
 	
-	async def resolve_hex(self, info):
-		return await Color._get_hex_color(self.name)
+	async def _get_or_cache_colors(self):
+		try:
+			return self._cached_colors
+		except AttributeError:
+			self._cached_colors = result = await Color._get_hex_colors(self.from_genre)
+			
+			if result is None:
+				raise GraphQLError("no color -- not sure how")
+			
+			return result
+	
+	async def resolve_foreground(self, info, representation="hex"):
+		if representation == "hex":
+			return (await self._get_or_cache_colors())[1]
+		elif representation == "tailwind":
+			foreground = (await self._get_or_cache_colors())[1].lower()
+			
+			# These are the only colors we use, so why bother with anything else?
+			if foreground == "#ffffff":
+				return "white"
+			elif foreground == "#000000":
+				return "black"
+			
+			raise GraphQLError("internal error: the foreground color represented by hex {foreground} is neither white nor black")
+		
+		raise GraphQLError(f"unknown representation {representation!r} for foreground color")
+	
+	async def resolve_background(self, info, representation="hex"):
+		if representation == "hex":
+			return (await self._get_or_cache_colors())[0]
+		elif representation == "tailwind":
+			words: typing_List[str] = (cast(str, self.from_genre)).lower().split()
+			words_alpha_only = ["".join([letter for letter in word if letter.isalpha()]) for word in words]
+			return f"genre-{'-'.join(words_alpha_only)}"
+		
+		raise GraphQLError(f"unknown representation {representation!r} for background color")
 
 
 class Subgenre(ObjectType):
@@ -67,18 +103,14 @@ class Subgenre(ObjectType):
 	
 	async def resolve_is_genre(self, info):
 		result: Optional[str] = await do_redis("hget", self._redis_key, "is_genre")
-		
-		# Implied returning None for None (though that shouldn't happen?)
-		if result is not None:
-			return loads(result)
+		return loads(result)
 	
 	async def resolve_genre(self, info):
 		return Subgenre(name=(await do_redis("hget", self._redis_key, "genre")).decode("utf8"))
 	
 	async def resolve_color(self, info):
 		genre = await self.resolve_genre(info)
-		name = genre.name
-		return Color(name=name)
+		return Color(from_genre=genre.name)
 	
 	async def resolve_origins(self, info):
 		return [Subgenre(name=name) for name in loads(await do_redis("hget", self._redis_key, "origins"))]
@@ -92,13 +124,12 @@ class Query(ObjectType):
 	subgenre = Field(Subgenre(), name=String(), description="Retrieve a particular subgenre from the database")
 	
 	async def resolve_all_subgenres(self, info):
-		subgenres = []
-		for subgenre in await do_redis("smembers", "subgenres"):
-			subgenres.append(Subgenre(name=subgenre.decode("utf8")))
-		
-		return subgenres
+		return [Subgenre(name=subgenre.decode("utf8")) for subgenre in await do_redis("smembers", "subgenres")]
 	
 	async def resolve_subgenre(self, info, name):
+		if not (await do_redis("sismember", "subgenres", name)):
+			raise GraphQLError(f"{name} is not a valid subgenre!")
+		
 		return Subgenre(name=name)
 
 
@@ -138,7 +169,6 @@ async def supervise_redis_transactions():
 app.add_route('/graphql', GraphQLApp(schema=Schema(query=Query, auto_camelcase=False), executor=AsyncioExecutor(loop=loop)))
 
 if __name__ == '__main__':
-	# Yes, we are really using a global Redis connection for all queries, without authentication or rate-limiting
 	redis: Redis = loop.run_until_complete(create_redis_pool("redis://redis", password=getenv("REDIS_PASSWORD")))
 	redis_transaction = redis.multi_exec()
 	actions = 0

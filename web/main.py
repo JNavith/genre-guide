@@ -1,6 +1,3 @@
-from json import loads
-from sys import stderr
-
 from aiohttp import ClientSession
 from jinja2 import Template
 from starlette.applications import Starlette
@@ -37,7 +34,8 @@ async def song_missing_art(request: Request):
 		query get_subgenre_color($name: String!) {
 			subgenre(name: $name) {
 				color {
-					hex
+					foreground(representation: "hex")
+					background(representation: "hex")
 				}
 			}
 		}
@@ -51,20 +49,14 @@ async def song_missing_art(request: Request):
 			"Content-Type": "application/json",
 			"Accept": "application/json",
 		}) as response:
-			data = loads(await response.text())
+			data = await response.json()
 	
-	print(data, file=stderr, flush=True)
-	
-	# background_color, fill_color = lookup.get(request.query_params["genre"], (None, None))
-	
-	# todo: add get_accessible_primary_color graphql query
-	# and add it to the Color object type (as the text_color field)
-	fill_color = "#ffffff"
-	background_color = data["data"]["subgenre"]["color"]["hex"]
+	color_info = data["data"]["subgenre"]["color"]
+	background_color, foreground_color = color_info["background"], color_info["foreground"]
 	
 	template: Template = app.get_template("components/song-missing-art.svg")
 	
-	return Response(template.render(request=request, background_color=background_color, fill_color=fill_color), media_type="image/svg+xml")
+	return Response(template.render(request=request, background_color=background_color, fill_color=foreground_color), media_type="image/svg+xml")
 
 
 if __name__ == '__main__':
