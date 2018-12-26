@@ -13,11 +13,9 @@
 #    
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
-from asyncio import sleep
 from contextlib import closing
 from json import loads
 from os import getenv
-from sys import stderr
 from typing import List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
@@ -121,7 +119,7 @@ class Subgenre(ObjectType):
 
 class Query(ObjectType):
 	all_subgenres = List(Subgenre, description="Retrieve all subgenres from the database")
-	subgenre = Field(Subgenre(), name=String(), description="Retrieve a particular subgenre from the database")
+	subgenre = Field(Subgenre, name=String(), description="Retrieve a particular subgenre from the database")
 	
 	async def resolve_all_subgenres(self, info):
 		return [Subgenre(name=subgenre.decode("utf8")) for subgenre in await do_redis("smembers", "subgenres")]
@@ -134,44 +132,12 @@ class Query(ObjectType):
 
 
 async def do_redis(command_name: str, *args, **kwds):
-	global actions
-	actions += 1
-	
-	return await getattr(redis_transaction, command_name)(*args, **kwds)
-
-
-async def supervise_redis_transactions():
-	global actions
-	global redis_transaction
-	
-	DIVISIONS_PER_GROUP: int = 4
-	SECONDS_PER_GROUP: float = 1 / 4
-	ACTIONS_THRESHOLD: int = 10
-	
-	while True:
-		for _ in range(DIVISIONS_PER_GROUP):
-			if actions >= ACTIONS_THRESHOLD:
-				print(f"{actions} actions exceeds threshold {ACTIONS_THRESHOLD}, executing right now", flush=True, file=stderr)
-				await redis_transaction.execute()
-				redis_transaction = redis.multi_exec()
-				actions = 0
-				break
-			
-			await sleep(SECONDS_PER_GROUP / DIVISIONS_PER_GROUP)
-		else:
-			if actions > 0:
-				print(f"only {actions} actions is not enough to meet {ACTIONS_THRESHOLD}, executing soon", flush=True, file=stderr)
-				loop.create_task(redis_transaction.execute())
-				redis_transaction = redis.multi_exec()
-				actions = 0
+	return await getattr(redis, command_name)(*args, **kwds)
 
 
 app.add_route('/graphql', GraphQLApp(schema=Schema(query=Query, auto_camelcase=False), executor=AsyncioExecutor(loop=loop)))
 
 if __name__ == '__main__':
 	redis: Redis = loop.run_until_complete(create_redis_pool("redis://redis", password=getenv("REDIS_PASSWORD")))
-	redis_transaction = redis.multi_exec()
-	actions = 0
-	loop.create_task(supervise_redis_transactions())
 	with closing(redis):
 		run(app, host='0.0.0.0', port=80, loop=loop)
