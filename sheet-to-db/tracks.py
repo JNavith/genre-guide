@@ -27,7 +27,6 @@ def create_tracks_data_set(tracks: "Iterable[Track]") -> Dict[str, List[tuple]]:
 	
 	actions: DefaultDict[str, List[Tuple]] = defaultdict(list)
 	
-	# noinspection PyUnresolvedReferences
 	for num, track in enumerate(tracks, start=1):
 		# Probably the best traits to form a unique ID from
 		song_id: str = "\n".join([track.artist, track.track, track.release])
@@ -38,6 +37,9 @@ def create_tracks_data_set(tracks: "Iterable[Track]") -> Dict[str, List[tuple]]:
 		
 		# Add the track to the date set
 		actions["dates_tracks"].append((f"date:{track.release}", f"track:{hashed}"))
+		
+		# Add the date to the dates set
+		actions["dates_set"].append(("dates", f"{track.release}"))
 	
 	return actions
 
@@ -62,14 +64,18 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	
 	# Continue where the last one left off (in terms of grouping by transaction)
 	for index, (date, track_id) in enumerate(tracks_data_set["dates_tracks"], start=index + 1):
-		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
-		# (there must be a better way)
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
 			awaitables.append(transaction.execute())
-			# Create a new transaction
 			transaction: MultiExec = redis.multi_exec()
 		
 		transaction.sadd(date, track_id)
+	
+	for index, (date_set_name, date) in enumerate(tracks_data_set["dates_set"], start=index + 1):
+		if (index % actions_per_transaction) == (actions_per_transaction - 1):
+			awaitables.append(transaction.execute())
+			transaction: MultiExec = redis.multi_exec()
+		
+		transaction.sadd(date_set_name, date)
 	
 	# Add leftovers (that didn't make it into a group)
 	awaitables.append(transaction.execute())
