@@ -1,3 +1,9 @@
+from datetime import datetime
+from itertools import groupby
+from json import loads
+from operator import itemgetter
+from typing import Iterator, List
+
 from aiohttp import ClientSession
 from jinja2 import Template
 from starlette.applications import Starlette
@@ -13,8 +19,39 @@ app = Starlette(template_directory="templates")
 @app.route("/catalog")
 @app.route("/")
 async def view_catalog(request: Request):
+	query = """
+		query get_limited_number_of_tracks_from_before_tomorrow($limit: Int) {
+			tracks(limit: $limit) {
+				name
+				artist
+				record_label
+				subgenres_with_colors_json: subgenres_flat_json(and_colors: TAILWIND)
+				date
+			}
+		}
+	"""
+	
+	async with ClientSession() as session:
+		async with session.post("http://graphql-server/graphql", json={
+			"query": query,
+			"variables": {"limit": 100}
+		}, headers={
+			"Content-Type": "application/json",
+			"Accept": "application/json",
+		}) as response:
+			track_data = await response.json()
+	
+	tracks_by_date: Iterator[str, Iterator] = groupby(track_data["data"]["tracks"], itemgetter("date"))
+	tracks_by_date: List[str, List] = [(date_, list(tracks)) for (date_, tracks) in tracks_by_date]
+	
+	for (date_, tracks) in tracks_by_date:
+		for track in tracks:
+			track["subgenres_with_colors"] = loads(track["subgenres_with_colors_json"])
+	
 	template: Template = app.get_template("views/catalog.html")
-	return HTMLResponse(template.render(request=request))
+	
+	# todo: make year and date information in the human readable format available over the GraphQL api instead
+	return HTMLResponse(template.render(request=request, tracks_by_date=tracks_by_date, datetime=datetime))
 
 
 @app.route("/genre")
@@ -50,8 +87,11 @@ async def song_missing_art(request: Request):
 		}) as response:
 			data = await response.json()
 	
-	color_info = data["data"]["subgenre"]["color"]
-	background_color, foreground_color = color_info["background"], color_info["foreground"]
+	if data["errors"] is None:
+		color_info = data["data"]["subgenre"]["color"]
+		background_color, foreground_color = color_info["background"], color_info["foreground"]
+	else:
+		background_color, foreground_color = "#000000", "#ffffff"
 	
 	template: Template = app.get_template("components/song-missing-art.svg")
 	

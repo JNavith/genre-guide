@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "components/song-entry.html" import song_entry %}
+{% from "components/song-entry.html" import song_entry_tabulated with context %}
 
 {% block title %}Catalog - {{ super() }}{% endblock title %}
 
@@ -7,24 +7,35 @@
 {% set body_classes = "flex flex-col items-center font-sans min-h-screen border-t-4 border-b-4 border-green" %}
 
 {% block content %}
-	{# dummy: fix later #}
-	{% set catalog = {
-	                     "2018-12-21": [{"title": "Song 1", "artists": "Those Artists", "genres": ("Soul", "~", "Melodic Dubstep")},
-	                                        "Song 2", "Song 3"]*10,
-	                     "2018-12-20": ["Song 4", "Song 5", "Song 6", "Song 7", "Song 8"],
-	                 } %}
-	{# end dummy #}
-	{% for date, song_list in catalog.items() %}
-		<section class="flex flex-row pb-10 mb-4 {{ "border-b-4 border-grey-light" if not loop.last }}">
-			<h2 class="mr-8 w-64 pt-4 -mt-4 font-header font-light text-3xl-responsive text-grey-dark sticky pin-t self-start">{{ date }}</h2>
-			<div class="ml-8 flex flex-col">
-				{% for song in song_list %}
-					{# dummy #}
-					{% set song = catalog["2018-12-21"][0] %}
-					{# end dummy #}
-					{{ song_entry(title=song.title, artists=song.artists, genres=song.genres, img_url=song.img_url, extra_container_classes="mb-4") }}
-				{% endfor %}
-			</div>
-		</section>
-	{% endfor %}
+	<main class="mt-8 px-8">
+		<table class="w-full" style="border-collapse: separate; border-spacing: 0.5rem">
+			<thead class="text-left font-header text-lg text-grey-dark">
+				<tr>
+					<th class="font-light">Release Date</th>
+					<th class="font-light"></th>
+					<th class="font-light">Song and Artist</th>
+					<th class="font-light">Record Label</th>
+					<th class="font-light">Subgenres</th>
+				</tr>
+			</thead>
+			{% for date, track_list in tracks_by_date %}
+				<tbody>
+					{# Hack to imitate padding / margin #}
+					{% if not loop.first %}
+						<tr class="h-8"></tr>
+					{% endif %}
+					<tr class="h-1 bg-grey-light">
+						<td colspan="5"></td>
+					</tr>
+					<tr class="h-3"></tr>
+					{# End hack #}
+					
+					{% for track in track_list %}
+						{{ song_entry_tabulated(title=track.name, artists=track.artist, subgenres_with_colors=track.subgenres_with_colors, record_label=track.record_label,
+						              img_url=track.img_url, date=date if loop.first else none) }}
+					{% endfor %}
+				</tbody>
+			{% endfor %}
+		</table>
+	</main>
 {% endblock content %}
