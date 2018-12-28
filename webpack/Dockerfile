@@ -7,4 +7,6 @@ COPY ./package.json .
 
 RUN npm install
 
+RUN npm install 
+
 CMD ["npm", "run", "prod"]

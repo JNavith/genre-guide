@@ -1,5 +1,4 @@
 from collections import Iterator, defaultdict, namedtuple
-from hashlib import blake2b
 from json import dumps
 from os import getenv
 from typing import Awaitable, DefaultDict, Dict, List, Tuple
@@ -7,7 +6,8 @@ from typing import Awaitable, DefaultDict, Dict, List, Tuple
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
 
-from .parse_genre import parse_genre
+from .genre_utils import parse_genre
+from .track_utils import id_for_track
 
 
 def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
@@ -28,15 +28,13 @@ def create_tracks_data_set(tracks: "Iterable[Track]") -> Dict[str, List[tuple]]:
 	actions: DefaultDict[str, List[Tuple]] = defaultdict(list)
 	
 	for num, track in enumerate(tracks, start=1):
-		# Probably the best traits to form a unique ID from
-		song_id: str = "\n".join([track.artist, track.track, track.release])
-		hashed: str = blake2b(song_id.encode("utf8")).hexdigest()
+		track_id = id_for_track(track.artist, track.track, track.release)
 		
 		# Add the track by its hash (ID) to the database
-		actions["track_by_hash"].append((f"track:{hashed}", track._asdict()))
+		actions["track_by_hash"].append((f"track:{track_id}", track._asdict()))
 		
 		# Add the track to the date set
-		actions["dates_tracks"].append((f"date:{track.release}", f"track:{hashed}"))
+		actions["dates_tracks"].append((f"date:{track.release}", f"{track_id}"))
 		
 		# Add the date to the dates set
 		actions["dates_set"].append(("dates", f"{track.release}"))
@@ -68,7 +66,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
 		
-		transaction.sadd(date, track_id)
+		transaction.rpush(date, track_id)
 	
 	for index, (date_set_name, date) in enumerate(tracks_data_set["dates_set"], start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):

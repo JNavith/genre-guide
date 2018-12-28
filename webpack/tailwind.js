@@ -44,6 +44,35 @@ View the full documentation at https://tailwindcss.com.
 
 // let defaultConfig = require('tailwindcss/defaultConfig')()
 
+// Yes, we are really blocking the main thread. I have a good reason.
+let request = require('sync-request');
+
+// Query the GraphQL server for all the genre colors
+let result = request('POST', 'http://graphql-server/graphql', {
+	headers: {
+		'Content-Type': 'application/json',
+		'Accept': 'application/json',
+	},
+	json: {
+		query: `{
+			all_genres {
+				color {
+					tw: background(representation: TAILWIND)
+					hex: background(representation: HEX)
+				}
+			}
+		}`
+	}
+});
+
+let genreColors = {};
+
+// Parse out the colors and update the genreColors object from them
+JSON.parse(result.getBody('utf8')).data.all_genres.forEach(obj => {
+	genreColors[obj.color.tw] = obj.color.hex
+});
+
+console.log(genreColors);
 
 /*
 |-------------------------------------------------------------------------------
@@ -61,12 +90,11 @@ View the full documentation at https://tailwindcss.com.
 |
 */
 
-let colors = {
-	'genre-this': 'var(--genre-this-color)',
-	
+let original_colors = {
 	'transparent': 'transparent',
 	
-	'black': '#22292f',
+	'black': '#000000',
+	'black-light': '#22292f',
 	'grey-darkest': '#3d4852',
 	'grey-darker': '#606f7b',
 	'grey-dark': '#8795a1',
@@ -80,8 +108,10 @@ let colors = {
 	'green-dark': '#009802',
 	'green': '#0FBB00',
 	
-	"genre-industrial": "#404040",
+	'genre-this': 'var(--genre-this-color)',
 };
+
+let colors = Object.assign(original_colors, genreColors);
 
 module.exports = {
 	
