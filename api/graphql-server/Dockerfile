@@ -19,4 +19,5 @@ FROM starlette:${starlette_tag} as base
 
 ARG graphene_version
 ARG aioredis_version
-RUN pip install --no-cache graphene==${graphene_version} aioredis==${aioredis_version}
+ARG async_lru_version
+RUN pip install --no-cache graphene==${graphene_version} aioredis==${aioredis_version} async_lru==${async_lru_version}

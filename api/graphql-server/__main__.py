@@ -16,13 +16,16 @@
 
 from contextlib import closing
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 from itertools import count
 from json import dumps, loads
 from os import getenv
 from re import sub
+from sys import stderr
 from typing import Generator, List as typing_List, Optional, Tuple, cast
 
 from aioredis import Redis, create_redis_pool
+from async_lru import alru_cache
 from graphene import Argument, Boolean, Date, Enum, Field, ID, Int, List, ObjectType, Schema, String
 from graphql import GraphQLError, GraphQLObjectType
 from graphql.execution.executors.asyncio import AsyncioExecutor
@@ -59,26 +62,16 @@ class Color(ObjectType):
 	background = Field(String, representation=ColorRepresentation(name="representation", description="The format for the color, such as HEX"), description="The background color for the genre on the Genre Sheet")
 	
 	@staticmethod
+	@alru_cache()
 	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
 		"""Returns None for subgenres, and a list of hex codes like ["#ec00db", "#ffffff"] for genres"""
 		return loads((await do_redis("hget", Subgenre._get_redis_key(genre_name), "color")).decode("utf8"))
 	
-	async def _get_or_cache_colors(self):
-		try:
-			return self._cached_colors
-		except AttributeError:
-			self._cached_colors = result = await Color._get_hex_colors(cast(str, self.from_genre))
-			
-			if result is None:
-				raise GraphQLError("no color -- not sure how")
-			
-			return result
-	
-	async def resolve_foreground(self, info, representation=ColorRepresentation.HEX):
+	async def resolve_foreground(self, info, representation: ColorRepresentation = ColorRepresentation.HEX):
 		if representation == ColorRepresentation.HEX:
-			return (await self._get_or_cache_colors())[1]
+			return (await Color._get_hex_colors(cast(str, self.from_genre)))[1]
 		elif representation == ColorRepresentation.TAILWIND:
-			foreground = (await self._get_or_cache_colors())[1].lower()
+			foreground = (await Color._get_hex_colors(cast(str, self.from_genre)))[1].lower()
 			
 			# These are the only colors we use, so why bother with anything else?
 			if foreground == "#ffffff":
@@ -86,20 +79,24 @@ class Color(ObjectType):
 			elif foreground == "#000000":
 				return "black"
 			
-			raise GraphQLError("internal error: the foreground color represented by hex {foreground} is neither white nor black")
+			raise GraphQLError(f"internal error: the foreground color represented by hex {foreground} is neither white nor black")
 		
 		raise GraphQLError(f"unknown representation {representation!r} for foreground color")
 	
-	async def resolve_background(self, info, representation=ColorRepresentation.HEX):
+	@staticmethod
+	@lru_cache(maxsize=64)
+	def _create_class_name_for_genre(genre_name: str) -> str:
+		words: typing_List[str] = (cast(str, genre_name)).lower().split()
+		words_alpha_only: typing_List[str] = ["".join([letter for letter in word if letter.isalpha()]) for word in words]
+		words_hyphenated: str = '-'.join(words_alpha_only)
+		reduced_hyphens: str = sub(r"-+", "-", words_hyphenated)
+		return f"genre-{reduced_hyphens}"
+	
+	async def resolve_background(self, info, representation: ColorRepresentation = ColorRepresentation.HEX):
 		if representation == ColorRepresentation.HEX:
-			return (await self._get_or_cache_colors())[0]
+			return (await Color._get_hex_colors(cast(str, self.from_genre)))[0]
 		elif representation == ColorRepresentation.TAILWIND:
-			words: typing_List[str] = (cast(str, self.from_genre)).lower().split()
-			words_alpha_only: typing_List[str] = ["".join([letter for letter in word if letter.isalpha()]) for word in words]
-			words_hyphenated: str = '-'.join(words_alpha_only)
-			reduced_hyphens: str = sub(r"-+", "-", words_hyphenated)
-			
-			return f"genre-{reduced_hyphens}"
+			return Color._create_class_name_for_genre(cast(str, self.from_genre))
 		
 		raise GraphQLError(f"unknown representation {representation!r} for background color")
 
@@ -115,6 +112,7 @@ class Subgenre(ObjectType):
 	subgenres = List(lambda: Subgenre, required=True, description='The list of subgenres who originate directly from this subgenre, e.x. {Deathstep, Drumstep} for Dubstep, {} for Footwork, {Electro Swing, Jazzstep} for Nu-Jazz')
 	
 	@staticmethod
+	@lru_cache(maxsize=1024)
 	def _get_redis_key(subgenre_name: str) -> str:
 		return f"subgenre:{subgenre_name}"
 	
@@ -278,7 +276,9 @@ class Query(ObjectType):
 		return Track(id=id)
 
 
+@alru_cache(maxsize=8192)
 async def do_redis(command_name: str, *args, **kwds):
+	print(f"DEBUG: do_redis: cache miss: {command_name}, {args}, {kwds}", file=stderr, flush=True)
 	return await getattr(redis, command_name)(*args, **kwds)
 
 
