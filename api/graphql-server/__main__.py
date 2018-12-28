@@ -16,19 +16,22 @@
 
 from contextlib import closing
 from datetime import date, datetime, timedelta
-from json import loads
+from itertools import count
+from json import dumps, loads
 from os import getenv
 from re import sub
-from typing import Generator, List as typing_List, Optional, cast
+from typing import Generator, List as typing_List, Optional, Tuple, cast
 
 from aioredis import Redis, create_redis_pool
-from graphene import Boolean, Date, Enum, Field, ID, List, ObjectType, Schema, String
+from graphene import Argument, Boolean, Date, Enum, Field, ID, Int, List, ObjectType, Schema, String
 from graphql import GraphQLError, GraphQLObjectType
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
 from uvicorn import run
 from uvicorn.loops.uvloop import uvloop_setup
+
+from .genre_utils import flatten_subgenres
 
 app = Starlette()
 loop = uvloop_setup()
@@ -147,6 +150,8 @@ class Track(ObjectType):
 	date = Field(Date, description="The release date of the track")
 	
 	subgenres_json = String(name="subgenres_json", description="The parsed list of subgenres that make up this song as a JSON string (really low level and provisional)")
+	subgenres_flat_json = String(name="subgenres_flat_json", and_colors=Argument(ColorRepresentation, required=False, description="Include a list of colors in sync with the list of subgenres with this specified representation (see ColorRepresentation for valid options)"),
+	                             description="The subgenres that make up this song, as a flat list (contained in a JSON string). Note that this introduces ambiguity with subgenre grouping")
 	
 	@staticmethod
 	def _get_redis_key(track_id: str) -> str:
@@ -170,20 +175,53 @@ class Track(ObjectType):
 	
 	async def resolve_subgenres_json(self, info):
 		return (await do_redis("hget", self._redis_key, "subgenre")).decode("utf8")
+	
+	async def resolve_subgenres_flat_json(self, info, and_colors: Optional[ColorRepresentation] = None):
+		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
+		
+		if and_colors is None:
+			return dumps(flat_list)
+		
+		colors: typing_List[Optional[Tuple[str, str]]] = []
+		for subgenre in flat_list:
+			if subgenre in {"|", ">", "~"}:
+				colors.append(None)
+			else:
+				if await do_redis("sismember", "subgenres", subgenre):
+					color_info = await Subgenre(name=subgenre).resolve_color(info)
+					colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
+				else:
+					# The subgenre does not exist
+					colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
+		
+		return dumps([flat_list, colors])
 
 
-def all_dates_between(start: date, end: date) -> Generator[date, None, None]:
-	for i in range((end - start).days + 1):
+def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
+	range_ = range((end - start).days + 1)
+	if reverse:
+		range_ = reversed(range_)
+	
+	for i in range_:
 		yield start + timedelta(days=i)
+
+
+def all_dates_before(end: date) -> Generator[date, None, None]:
+	for i in count(0):
+		yield end - timedelta(days=i)
 
 
 class Query(ObjectType):
 	all_subgenres = List(Subgenre, description="Retrieve all subgenres from the database")
 	subgenre = Field(Subgenre, name=String(description='The name of the subgenre to retrieve, e.x. "Vaporwave"'), description="Retrieve a particular subgenre from the database")
 	
+	all_genres = List(Subgenre, description="Retrieve all genres (subgenres with their own color and category) from the database")
+	
 	tracks = List(Track,
-	              before=Date(description="The newest date of songs to retrieve (inclusive)"),
-	              after=Date(description="The oldest date of songs to retrieve (inclusive)", required=True),
+	              before=Date(description="The newest date of songs to retrieve (inclusive)", required=False),
+	              after=Date(description="The oldest date of songs to retrieve (inclusive)", required=False),
+	              newest_first=Boolean(description="Whether to sort the returned tracks from newest to oldest, or oldest to newest", required=False),
+	              limit=Int(description="The maximum number of songs to return", required=False),
 	              description="Retrieve a range of tracks from the Genre Sheet")
 	
 	track = Field(Track, id=ID(description="The ID of the track to retrieve"), description="Retrieve a particular track from the database")
@@ -197,19 +235,40 @@ class Query(ObjectType):
 		
 		return Subgenre(name=name)
 	
-	async def resolve_tracks(self, info, after, before=None):
+	async def resolve_all_genres(self, info):
+		return [Subgenre(name=genre.decode("utf8")) for genre in await do_redis("smembers", "genres")]
+	
+	async def resolve_tracks(self, info, after=None, before=None, limit: Optional[int] = None, newest_first: bool = True):
 		if before is None:
-			# Tomorrow
-			before = date.today() + timedelta(days=1)
+			# Two days from now
+			before = date.today() + timedelta(days=2)
+		
+		if limit is None:
+			limit = 100
+		
+		limit: int = min(limit, 1000)
 		
 		tracks: typing_List[Track] = []
 		
-		for date_ in all_dates_between(after, before):
-			if await do_redis("sismember", "dates", date_.strftime("%Y-%m-%d")):
-				for track_id in await do_redis("smembers", f"date:{date_}"):
-					# Chop off the "track:" prefix that accompanies the label
-					tracks.append(Track(id=track_id.decode("utf8")[len("track:"):]))
+		if after is not None:
+			for date_ in all_dates_between(after, before, reverse=newest_first):
+				for track_id in await do_redis("lrange", f"date:{date_.strftime('%Y-%m-%d')}", 0, -1):
+					tracks.append(Track(id=track_id.decode("utf8")))
+					
+					if len(tracks) >= limit:
+						return tracks
+		else:
+			if not newest_first:
+				raise GraphQLError("`newest_first` must be true when `after` is not specified")
+			
+			for date_ in all_dates_before(before):
+				for track_id in await do_redis("lrange", f"date:{date_.strftime('%Y-%m-%d')}", 0, -1):
+					tracks.append(Track(id=track_id.decode("utf8")))
+					
+					if len(tracks) >= limit:
+						return tracks
 		
+		# If the limit is not reached (for either of the cases from above), just return the list like this
 		return tracks
 	
 	async def resolve_track(self, info, id):

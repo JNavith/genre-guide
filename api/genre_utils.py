@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Set, Tuple, Union, List, DefaultDict, Dict
+from typing import DefaultDict, Dict, List, Set, Tuple, Union
 
 
 def parse_genre(genre_text: str) -> Tuple:
@@ -85,3 +85,16 @@ def parse_genre(genre_text: str) -> Tuple:
 			groups.append(joined_words[index + 1][0])
 	
 	return tuple(groups)
+
+
+def flatten_subgenres(subgenres: Tuple) -> List[str]:
+	flat_list: List[str] = []
+	
+	for subgenre_or_group_or_symbol in subgenres:
+		if not isinstance(subgenre_or_group_or_symbol, str):
+			flat_list.extend(flatten_subgenres(subgenre_or_group_or_symbol))
+			continue
+		
+		flat_list.append(subgenre_or_group_or_symbol)
+	
+	return flat_list

@@ -1,4 +1,4 @@
-#    genre.guide - GraphQL server graphql-server.Dockerfile
+#    genre.guide - GraphQL server Dockerfile
 #    Copyright (C) 2018 Navith
 #    
 #    This program is free software: you can redistribute it and/or modify

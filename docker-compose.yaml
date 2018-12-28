@@ -46,7 +46,7 @@ services:
     hostname: caddy
     image: abiosoft/caddy:0.11.1
     networks:
-      web:
+      web-public:
     ports:
       - 6700:80
     restart: always
@@ -60,18 +60,21 @@ services:
         aioredis_version: 1.2.0
         graphene_version: 2.1.3
         starlette_tag: 0.9.9-0.3.23
-      context: ./api
-      dockerfile: ./graphql-server.Dockerfile
+      context: ./api/graphql-server
+    command: ["python3", "-m", "graphql-server"]
     container_name: graphql-server
     env_file:
       - ./redis-password.env
     image: graphql-server:dev
     networks:
       db:
-      web:
+      web-public:
+      web-private:
     restart: always
     volumes:
-      - ./api/main.py:/app/main.py:ro
+      - ./api/graphql-server/__main__.py:/app/graphql-server/__main__.py:ro
+      - ./api/graphql-server/__init__.py:/app/graphql-server/__init__.py:ro
+      - ./api/genre_utils.py:/app/graphql-server/genre_utils.py:ro
   
   redis:
     container_name: redis
@@ -118,10 +121,13 @@ services:
     #    stdin_open: true
     #    tty: true
     volumes:
-      # The Dockerfile will be included along with this. But whatever.
-      - ./sheet-to-db:/app
-      # todo: make this only accessible over a GraphQL query?
-      - ./api/parse_genre.py:/app/parse_genre.py:ro
+      - ./sheet-to-db/__init__.py:/app/__init__.py:ro
+      - ./sheet-to-db/__main__.py:/app/__main__.py:ro
+      - ./sheet-to-db/genres.py:/app/genres.py:ro
+      - ./sheet-to-db/tracks.py:/app/tracks.py:ro
+      - ./sheet-to-db/client.secret.json:/app/client.secret.json:ro
+      - ./api/genre_utils.py:/app/genre_utils.py:ro
+      - ./api/track_utils.py:/app/track_utils.py:ro
     working_dir: /
   
   web:
@@ -136,11 +142,12 @@ services:
     hostname: web
     image: web:dev
     networks:
-      web:
+      web-public:
     restart: always
     volumes:
       - ./web/main.py:/app/main.py:ro
       - ./web/templates:/app/templates:ro
+      - ./api/genre_utils.py:/app/genre_utils.py:ro
   
   webpack:
     build:
@@ -150,7 +157,8 @@ services:
     command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
-    network_mode: "none"
+    networks:
+      web-private:
     volumes:
       - ./webpack/tailwind.postcss:/home/node/src/css/tailwind.postcss:ro
       - ./dist/css:/home/node/dist/css
@@ -161,4 +169,5 @@ services:
 
 networks:
   db:
-  web:
+  web-public:
+  web-private:
