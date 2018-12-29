@@ -158,17 +158,18 @@ services:
       args:
         node_tag: 11.1.0-alpine
       context: ./webpack
-#    command: ["npm", "run", "dev"]
+    #    command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
     networks:
       web-private:
     volumes:
       - ./webpack/tailwind.postcss:/home/node/src/css/tailwind.postcss:ro
-      - ./dist/css:/home/node/dist/css
       - ./webpack/tailwind.js:/home/node/tailwind.js:ro
       - ./webpack/webpack.config.js:/home/node/webpack.config.js:ro
       - ./webpack/postcss.config.js:/home/node/postcss.config.js:ro
+      - ./web/templates:/home/node/src/html:ro
+      - ./dist/css:/home/node/dist/css
 
 
 networks:

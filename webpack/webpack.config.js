@@ -46,7 +46,7 @@ module.exports = {
 			extractors: [
 				{
 					extractor: TailwindExtractor,
-					extensions: ['html']
+					extensions: ['html', 'svg']
 				}
 			]
 		}),
