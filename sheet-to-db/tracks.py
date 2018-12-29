@@ -1,7 +1,7 @@
 from collections import Iterator, defaultdict, namedtuple
 from json import dumps
 from os import getenv
-from typing import Awaitable, DefaultDict, Dict, List, Tuple
+from typing import Awaitable, DefaultDict, Dict, List, Tuple, cast
 
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
@@ -18,7 +18,26 @@ def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
 	
 	for entry in catalog.get_all_values():
 		track = Track._make(entry)
+		
+		if track.genre == "Trap":
+			track = track._replace(genre="Trap (EDM)")
+		
+		# If the first subgenre in the list is unknown,
+		if track.subgenre.startswith("?"):
+			# And there is a genre specified,
+			if track.genre != "?":
+				# Replace the bare ? with ? (Genre)
+				track = track._replace(subgenre=cast(str, track.subgenre).replace("?", f"? ({track.genre})", 1))
+		# Ambiguity for Trap as well
+		elif track.subgenre.startswith("Trap"):
+			if track.genre == "Hip Hop":
+				track = track._replace(subgenre=cast(str, track.subgenre).replace("Trap", "Trap (Hip Hop)", 1))
+			elif track.genre == "Trap":
+				track = track._replace(subgenre=cast(str, track.subgenre).replace("Trap", "Trap (EDM)", 1))
+		
+		# Replace the textual subgenre with the parsed one
 		track = track._replace(subgenre=dumps(parse_genre(track.subgenre)))
+		
 		yield track
 
 

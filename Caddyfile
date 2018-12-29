@@ -1,4 +1,8 @@
-0.0.0.0:80 {
+0.0.0.0 {
+	*.genre.guide
+	
+	header / Strict-Transport-Security "max-age=31536000;"
+	
 	root /srv
 	gzip
 	
@@ -9,5 +13,9 @@
 	
 	proxy /graphql graphql-server:80 {
 		transparent
+	}
+	
+	tls {
+		dns digitalocean
 	}
 }
