@@ -48,31 +48,36 @@ View the full documentation at https://tailwindcss.com.
 let request = require('sync-request');
 
 // Query the GraphQL server for all the genre colors
-let result = request('POST', 'http://graphql-server/graphql', {
-	headers: {
-		'Content-Type': 'application/json',
-		'Accept': 'application/json',
-	},
-	json: {
-		query: `{
-			all_genres {
-				color {
-					tw: background(representation: TAILWIND)
-					hex: background(representation: HEX)
+let genreColors = (() => {
+	let result = request('POST', 'http://graphql-server/graphql', {
+		headers: {
+			'Content-Type': 'application/json',
+			'Accept': 'application/json',
+		},
+		json: {
+			query: `{
+				all_genres {
+					color {
+						tw: background(representation: TAILWIND)
+						hex: background(representation: HEX)
+					}
 				}
-			}
-		}`
-	}
-});
+			}`
+		}
+	});
+	
+	let genreColors = {};
+	
+	// Parse out the colors and update the genreColors object from them
+	JSON.parse(result.getBody('utf8')).data.all_genres.forEach(obj => {
+		genreColors[obj.color.tw] = obj.color.hex
+	});
+	
+	console.log(genreColors);
+	
+	return genreColors
+})();
 
-let genreColors = {};
-
-// Parse out the colors and update the genreColors object from them
-JSON.parse(result.getBody('utf8')).data.all_genres.forEach(obj => {
-	genreColors[obj.color.tw] = obj.color.hex
-});
-
-console.log(genreColors);
 
 /*
 |-------------------------------------------------------------------------------
