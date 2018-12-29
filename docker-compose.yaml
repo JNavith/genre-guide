@@ -158,7 +158,7 @@ services:
       args:
         node_tag: 11.1.0-alpine
       context: ./webpack
-    command: ["npm", "run", "dev"]
+#    command: ["npm", "run", "dev"]
     container_name: webpack
     image: webpack:2.1.14
     networks:
