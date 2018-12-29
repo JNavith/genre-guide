@@ -48,7 +48,8 @@ services:
     networks:
       web-public:
     ports:
-      - 6700:80
+      - 80:80
+      - 443:443
     restart: always
     volumes:
       - ./Caddyfile:/etc/Caddyfile:ro
