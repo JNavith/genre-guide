@@ -1,5 +1,5 @@
 {% macro genre_pill_button(subgenre_name, background_color, foreground_color) %}
-	<a href="/genre?name={{ subgenre_name | urlencode }}" class="block rounded-full bg-{{ background_color }} font-sans font-medium text-center text-{{ foreground_color }} text-md min-w-32 px-4 py-2.5 leading-none select-none no-underline hover:no-underline shadow-sm hover:shadow-md transition hover:-translate-y-1">{{ subgenre_name }}</a>
+	<a href="/genre?name={{ subgenre_name | urlencode }}" class="block rounded-full bg-{{ background_color }} font-sans font-medium text-center text-{{ foreground_color }} text-md min-w-32 px-4 py-2 leading-none select-none no-underline hover:no-underline shadow-sm hover:shadow-md transition hover:-translate-y-1">{{ subgenre_name }}</a>
 {% endmacro %}
 
 {{ genre_pill_button(subgenre_name=subgenre_name, background_color=background_color, foreground_color=foreground_color) }}
