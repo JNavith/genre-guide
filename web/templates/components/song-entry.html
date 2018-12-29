@@ -81,7 +81,7 @@
 		</td>
 		{# Subgenres #}
 		<td>
-			<div class="flex flex-row">
+			<div class="flex flex-row items-center">
 				{% for subgenre in subgenres_with_colors[0] %}
 					{% set color_info = subgenres_with_colors[1][loop.index-1] %}
 					{% if color_info is not none %}
@@ -89,11 +89,11 @@
 						{{ genre_pill_button(subgenre_name=subgenre, background_color=background, foreground_color=foreground) }}
 					{% else %}
 						{# Otherwise, it's an operator (probably) #}
-						<div class="flex items-center mx-2">
+						<div>
 							{% if subgenre == "|" %}
-								{{ icon_plus(fill_color_class="grey-dark") }}
+								<div class="mx-1">{{ icon_plus(fill_color_class="grey-dark", size=8) }}</div>
 							{% elif subgenre == ">" %}
-								{{ icon_arrow_right(fill_color_class="grey-dark") }}
+								<div class="mx-2">{{ icon_arrow_right(fill_color_class="grey-dark", size=6) }}</div>
 							{% elif subgenre == "~" %}
 								{# todo #}
 								<p class="text-grey-dark text-xl">~</p>
