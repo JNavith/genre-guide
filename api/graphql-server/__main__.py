@@ -278,7 +278,7 @@ class Query(ObjectType):
 
 @alru_cache(maxsize=8192)
 async def do_redis(command_name: str, *args, **kwds):
-	print(f"DEBUG: do_redis: cache miss: {command_name}, {args}, {kwds}", file=stderr, flush=True)
+	print(f"DEBUG: do_redis: cache miss: {command_name}, {args}, {kwds}", file=stderr)
 	return await getattr(redis, command_name)(*args, **kwds)
 
 
