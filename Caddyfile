@@ -1,6 +1,4 @@
-import _ "github.com/caddyserver/dnsproviders/digitalocean"
-
-genre.guide, *.genre.guide {
+https://genre.guide {
 	header / Strict-Transport-Security "max-age=31536000;"
 	
 	root /srv
@@ -15,7 +13,5 @@ genre.guide, *.genre.guide {
 		transparent
 	}
 	
-	tls {$TLS_EMAIL} {
-		dns digitalocean
-	}
+	tls {$TLS_EMAIL}
 }
