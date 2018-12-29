@@ -1,15 +1,15 @@
 from collections import defaultdict
 from typing import DefaultDict, Dict, List, Set, Tuple, Union
 
+OPERATORS: Set[str] = {"|", ">", "~"}
+DIVIDERS: Set[str] = {"||", ">>", "~~"}
+
 
 def parse_genre(genre_text: str) -> Tuple:
 	words_or_symbols: List[str] = genre_text.split()
 	
-	operators: Set[str] = {"|", ">", "~"}
-	dividers: Set[str] = {"||", ">>", "~~"}
-	
-	operator_counts: Dict[str, int] = {operator: words_or_symbols.count(operator) for operator in operators}
-	divider_counts: Dict[str, int] = {divider: words_or_symbols.count(divider) for divider in dividers}
+	operator_counts: Dict[str, int] = {operator: words_or_symbols.count(operator) for operator in OPERATORS}
+	divider_counts: Dict[str, int] = {divider: words_or_symbols.count(divider) for divider in DIVIDERS}
 	
 	# If there are no operators or dividers, just return the text as the only element in a tuple, right away
 	if sum(operator_counts.values()) == sum(divider_counts.values()) == 0:
@@ -39,16 +39,16 @@ def parse_genre(genre_text: str) -> Tuple:
 	
 	# Verify that there are only genre names at even indices
 	for index in range(0, len(joined_words), 2):
-		if joined_words[index] in dividers or joined_words[index] in operators:
+		if joined_words[index] in DIVIDERS or joined_words[index] in OPERATORS:
 			raise ValueError(f"misplaced operator in f{genre_text}")
 	
 	# Verify that there are only dividers or operators at odd indices
 	for index in range(1, len(joined_words), 2):
-		if not (joined_words[index] in dividers or joined_words[index] in operators):
+		if not (joined_words[index] in DIVIDERS or joined_words[index] in OPERATORS):
 			raise ValueError(f"misplaced operator in {genre_text} (this should not be possible in my mind)")
 	
 	# Verify that the last word or symbol in the list is not an operator or divider
-	if joined_words[-1] in dividers | operators:
+	if joined_words[-1] in DIVIDERS | OPERATORS:
 		raise ValueError(f"misplaced operator at the end of {genre_text}")
 	
 	# If there are no dividers,
@@ -75,12 +75,12 @@ def parse_genre(genre_text: str) -> Tuple:
 			groups.append(joined_words[index + 1])
 			break
 		
-		if joined_words[index + 1] in operators:
+		if joined_words[index + 1] in OPERATORS:
 			groups.append((joined_words[index], joined_words[index + 1][0], joined_words[index + 2]))
 			
 			skip_indices.add(index + 1)
 			skip_indices.add(index + 2)
-		elif joined_words[index + 1] in dividers:
+		elif joined_words[index + 1] in DIVIDERS:
 			groups.append(word_or_symbol)
 			groups.append(joined_words[index + 1][0])
 	
