@@ -229,7 +229,17 @@ class Query(ObjectType):
 	
 	async def resolve_subgenre(self, info, name):
 		if not (await do_redis("sismember", "subgenres", name)):
-			raise GraphQLError(f"{name} is not a valid subgenre!")
+			if not name.startswith("?"):
+				raise GraphQLError(f"{name} is not a valid subgenre!")
+			
+			# ? (Pop) -> Pop
+			# Yes, I realize it's silly to reduce an unknown subgenre of a genre to that genre itself,
+			# But call me when it really is a problem
+			*_, genre_with_parenthesis = name.partition("(")
+			name = genre_with_parenthesis[:-1]
+			
+			if not (await do_redis("sismember", "subgenres", name)):
+				raise GraphQLError(f"{name} is not a valid subgenre!")
 		
 		return Subgenre(name=name)
 	
