@@ -116,6 +116,15 @@ class Subgenre(ObjectType):
 	def _get_redis_key(subgenre_name: str) -> str:
 		return f"subgenre:{subgenre_name}"
 	
+	@staticmethod
+	@lru_cache(maxsize=64)
+	def _transform_unknown_subgenre(unknown_subgenre_text: str) -> str:
+		# ? (Pop) -> Pop
+		# Yes, I realize it's silly to reduce an unknown subgenre of a genre to that genre itself,
+		# But call me when it really is a problem
+		*_, genre_with_parenthesis = unknown_subgenre_text.partition("(")
+		return genre_with_parenthesis[:-1]
+	
 	@property
 	def _redis_key(self):
 		return Subgenre._get_redis_key(cast(str, self.name))
@@ -189,8 +198,17 @@ class Track(ObjectType):
 					color_info = await Subgenre(name=subgenre).resolve_color(info)
 					colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
 				else:
-					# The subgenre does not exist
-					colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
+					if not subgenre.startswith("?"):
+						# The subgenre does not exist
+						colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
+					else:
+						subgenre = Subgenre._transform_unknown_subgenre(subgenre)
+						if await do_redis("sismember", "subgenres", subgenre):
+							color_info = await Subgenre(name=subgenre).resolve_color(info)
+							colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
+						else:
+							# The genre this is an unknown subgenre of does not exist
+							colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
 		
 		return dumps([flat_list, colors])
 
@@ -229,7 +247,13 @@ class Query(ObjectType):
 	
 	async def resolve_subgenre(self, info, name):
 		if not (await do_redis("sismember", "subgenres", name)):
-			raise GraphQLError(f"{name} is not a valid subgenre!")
+			if not name.startswith("?"):
+				raise GraphQLError(f"{name} is not a valid subgenre!")
+			
+			name = Subgenre._transform_unknown_subgenre(name)
+			
+			if not (await do_redis("sismember", "subgenres", name)):
+				raise GraphQLError(f"{name} is not a valid subgenre!")
 		
 		return Subgenre(name=name)
 	
