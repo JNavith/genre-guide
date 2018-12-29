@@ -43,9 +43,8 @@ services:
   
   caddy:
     container_name: caddy
-    environment:
-      TLS_EMAIL: ${GG_CADDY_TLS_EMAIL}
-      DO_AUTH_TOKEN: ${GG_CADDY_DO_AUTH_TOKEN}
+    env_file:
+      - ./caddy.env
     hostname: caddy
     image: abiosoft/caddy:0.11.1
     networks:

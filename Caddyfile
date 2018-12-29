@@ -1,4 +1,4 @@
-https://genre.guide {
+https://{$DOMAIN_NAME} {
 	header / Strict-Transport-Security "max-age=31536000;"
 	
 	root /srv
