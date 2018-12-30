@@ -1,5 +1,5 @@
 # genre.guide
-The code that powers genre.guide (not up yet and probably won't be for a long time)
+The code that powers [genre.guide](https://genre.guide) (currently in a "hidden" alpha -- please do not expect a pleasant or stable experience using the website for now)
 
 
 How to use:
