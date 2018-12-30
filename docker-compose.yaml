@@ -55,7 +55,8 @@ services:
     restart: always
     volumes:
       - ./Caddyfile:/etc/Caddyfile:ro
-      - ./dist:/srv
+      - ./dist/css:/srv/css:ro
+      - ./branding:/srv/img:ro
   
   graphql-server:
     build:

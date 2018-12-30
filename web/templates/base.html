@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="ltr" prefix="og: http://ogp.me/ns#">
 	<head>
 		{% block head %}
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 			
+			<title>{% block title %}genre.guide{% endblock %}</title>
+			<meta property="og:title" content="{{ self.title() }}">
+			
 			<meta name="description" content="{% block description %}Learn about genres by their history, characteristics, and examples{% endblock description %}">
-			<meta name="twitter:description" content="{{ self.description() }}">
 			<meta property="og:description" content="{{ self.description() }}">
+			
+			<meta property="og:image" content="/img/1x1-logo.png">
+			
+			<meta property="og:url" content="{{ request.url }}">
 			
 			<link rel="stylesheet" href="/css/main.css" type="text/css">
 			<link href="https://fonts.googleapis.com/css?family=Poppins:300,300i,400,400i,500" rel="stylesheet">
 			<link href="https://fonts.googleapis.com/css?family=Heebo:300,400,500,700" rel="stylesheet">
-			
-			<title>{% block title %}genre.guide{% endblock %}</title>
-			<meta property="og:title" content="{{ self.title() }}">
-			<meta property="twitter:title" content="{{ self.title() }}">
 		{% endblock head %}
 	</head>
 	
