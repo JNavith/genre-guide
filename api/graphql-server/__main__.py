@@ -147,6 +147,31 @@ class Subgenre(ObjectType):
 		return [Subgenre(name=name) for name in loads(await do_redis("hget", self._redis_key, "subgenres"))]
 
 
+class ReleaseDate(ObjectType):
+	datetime = Field(Date, name="datetime", description="(internal) datetime object used to determine the other fields")
+	
+	iso8601 = Field(Date, name="iso8601", description='The date as an ISO 8601 formatted string, like 2018-04-20')
+	year = Field(Int, name="year", description="The year the track released")
+	month_name = Field(String, name="month_name", description='The month the track released, as text ("December")')
+	month_int = Field(Int, name="month_int", description='The month the track released, as an integer (12)')
+	day = Field(Int, name="day", description="The day of the month the track released")
+	
+	def resolve_iso8601(self, info):
+		return cast(datetime, self.datetime).strftime("%Y-%m-%d")
+	
+	def resolve_year(self, info):
+		return cast(datetime, self.datetime).year
+	
+	def resolve_month_name(self, info):
+		return cast(datetime, self.datetime).strftime("%B")
+	
+	def resolve_month_int(self, info):
+		return cast(datetime, self.datetime).month
+	
+	def resolve_day(self, info):
+		return cast(datetime, self.datetime).day
+
+
 class Track(ObjectType):
 	id = Field(ID, name="id", description="The unique ID describing this track")
 	
@@ -154,7 +179,7 @@ class Track(ObjectType):
 	
 	artist = Field(String, name="artist", description="The artist(s) of the track")
 	record_label = Field(String, name="record_label", description="The record label(s) who released and/or own the rights to the track")
-	date = Field(Date, description="The release date of the track")
+	date = Field(ReleaseDate, description="The release date of the track")
 	
 	subgenres_json = String(name="subgenres_json", description="The parsed list of subgenres that make up this song as a JSON string (really low level and provisional)")
 	subgenres_flat_json = String(name="subgenres_flat_json", and_colors=Argument(ColorRepresentation, required=False, description="Include a list of colors in sync with the list of subgenres with this specified representation (see ColorRepresentation for valid options)"),
@@ -178,7 +203,8 @@ class Track(ObjectType):
 		return (await do_redis("hget", self._redis_key, "label")).decode("utf8")
 	
 	async def resolve_date(self, info):
-		return datetime.strptime((await do_redis("hget", self._redis_key, "release")).decode("utf8"), "%Y-%m-%d")
+		underlying_datetime: datetime = datetime.strptime((await do_redis("hget", self._redis_key, "release")).decode("utf8"), "%Y-%m-%d")
+		return ReleaseDate(datetime=underlying_datetime)
 	
 	async def resolve_subgenres_json(self, info):
 		return (await do_redis("hget", self._redis_key, "subgenre")).decode("utf8")

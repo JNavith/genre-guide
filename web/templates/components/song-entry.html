@@ -50,12 +50,10 @@
 		{% if date is none %}
 			<td></td>
 		{% else %}
-			{# todo: make this GraphQL accessible #}
-			{% set as_datetime = datetime.strptime(date, "%Y-%m-%d") %}
 			<td class="align-top font-header font-light bg-white sticky pin-t">
 				<div class="pt-2 pr-6">
-					<p class="text-2xl-responsive text-grey-dark leading-none">{{ as_datetime.strftime("%Y") }}</p>
-					<p class="text-xl-responsive text-grey">{{ as_datetime.strftime("%B %-d") }}</p>
+					<p class="text-2xl-responsive text-grey-dark leading-none">{{ date.year }}</p>
+					<p class="text-xl-responsive text-grey">{{ date.month_name }}{{ " " }}{{ date.day }}</p>
 				</div>
 			</td>
 		{% endif %}
@@ -82,8 +80,7 @@
 		{# Subgenres #}
 		<td>
 			<div class="flex flex-row items-center">
-				{% for subgenre in subgenres_with_colors[0] %}
-					{% set color_info = subgenres_with_colors[1][loop.index-1] %}
+				{% for subgenre, color_info in zip(subgenres_with_colors[0], subgenres_with_colors[1]) %}
 					{% if color_info is not none %}
 						{% set background, foreground = color_info %}
 						{{ genre_pill_button(subgenre_name=subgenre, background_color=background, foreground_color=foreground) }}

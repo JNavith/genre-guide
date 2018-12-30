@@ -1,4 +1,3 @@
-from datetime import datetime
 from itertools import groupby
 from json import loads
 from operator import itemgetter
@@ -26,7 +25,11 @@ async def view_catalog(request: Request):
 				artist
 				record_label
 				subgenres_with_colors_json: subgenres_flat_json(and_colors: TAILWIND)
-				date
+				date {
+					year
+					month_name
+					day
+				}
 			}
 		}
 	"""
@@ -49,9 +52,7 @@ async def view_catalog(request: Request):
 			track["subgenres_with_colors"] = loads(track["subgenres_with_colors_json"])
 	
 	template: Template = app.get_template("views/catalog.html")
-	
-	# todo: make year and date information in the human readable format available over the GraphQL api instead
-	return HTMLResponse(template.render(request=request, tracks_by_date=tracks_by_date, datetime=datetime))
+	return HTMLResponse(template.render(request=request, tracks_by_date=tracks_by_date, zip=zip))
 
 
 @app.route("/genre")
