@@ -6,7 +6,7 @@ https://{$DOMAIN_NAME} {
 	
 	proxy / web:80 {
 		transparent
-		except /css
+		except /css /img
 	}
 	
 	proxy /graphql graphql-server:80 {
