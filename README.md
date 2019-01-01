@@ -3,7 +3,7 @@ The code that powers [genre.guide](https://genre.guide) (currently in a "hidden"
 
 
 How to use:
-1. Configure (todo: add more information on this)
+1. Configure
     * Update `redis-password.env` with whatever Redis password you want to use
     * Create a project in the Google API console and make a service account that has access to the Sheets API. Download its `client_secret.json` file and rename it to `client.secret.json` and place it in the `sheet-to-db` directory. A decent overview of how to do that can be found [here](https://www.youtube.com/watch?v=vISRn5qFrkM)
     * Update `caddy.env` with your domain name and email address
