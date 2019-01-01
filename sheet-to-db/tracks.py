@@ -80,7 +80,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	await redis.flushall()
 	# END DEBUG
 	
-	tracks_already_in_database: Set[str] = await redis.smembers("tracks")
+	tracks_already_in_database: Set[str] = set(await redis.smembers("tracks"))
 	tracks_being_added: Set[str] = set()
 	
 	index: int = -1
