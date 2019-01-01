@@ -29,7 +29,7 @@ from .tracks import create_tracks_data_set, get_all_tracks, seed_redis_with_trac
 
 def open_genre_sheet() -> Spreadsheet:
 	scope: List[str] = ["https://www.googleapis.com/auth/drive.readonly"]
-	credentials: ServiceAccountCredentials = ServiceAccountCredentials.from_json_keyfile_name("./app/client.secret.json", scope)
+	credentials: ServiceAccountCredentials = ServiceAccountCredentials.from_json_keyfile_name("./app/client_secret.json", scope)
 	client: Client = authorize(credentials)
 	
 	return client.open_by_key(getenv("SHEET_KEY"))
