@@ -1,7 +1,7 @@
 from collections import Iterator, defaultdict, namedtuple
 from json import dumps
 from os import getenv
-from typing import Awaitable, DefaultDict, Dict, List, Tuple, cast
+from typing import Awaitable, DefaultDict, Dict, List, Set, Tuple, cast
 
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
@@ -49,8 +49,11 @@ def create_tracks_data_set(tracks: "Iterable[Track]") -> Dict[str, List[tuple]]:
 	for num, track in enumerate(tracks, start=1):
 		track_id = id_for_track(track.artist, track.track, track.release)
 		
-		# Add the track by its hash (ID) to the database
-		actions["track_by_hash"].append((f"track:{track_id}", track._asdict()))
+		# Add the track to the set of all tracks
+		actions["track_hash_in_set"].append(("tracks", f"{track_id}"))
+		
+		# Add the track by its hash (ID) to the database (as an independent key)
+		actions["track_by_hash_as_key"].append((f"track:{track_id}", track._asdict()))
 		
 		# Add the track to the date set
 		actions["dates_tracks"].append((f"date:{track.release}", f"{track_id}"))
@@ -69,7 +72,27 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	# Initial transaction object (will be overwritten every `actions_per_transaction` loops)
 	transaction: MultiExec = redis.multi_exec()
 	
-	for index, (track_id, dictionary) in enumerate(tracks_data_set["track_by_hash"]):
+	# DEBUG
+	await redis.flushall()
+	# END DEBUG
+	
+	tracks_already_in_database: Set[str] = await redis.smembers("tracks")
+	tracks_being_added: Set[str] = set()
+	
+	index: int = -1
+	
+	for index, (track_id, dictionary) in enumerate(tracks_data_set["track_hash_in_set"], start=index + 1):
+		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
+		# (there must be a better way)
+		if (index % actions_per_transaction) == (actions_per_transaction - 1):
+			awaitables.append(transaction.execute())
+			# Create a new transaction
+			transaction: MultiExec = redis.multi_exec()
+		
+		tracks_being_added.add(track_id)
+		transaction.hmset_dict(track_id, dictionary)
+	
+	for index, (track_id, dictionary) in enumerate(tracks_data_set["track_by_hash_as_key"], start=index + 1):
 		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
 		# (there must be a better way)
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
@@ -85,7 +108,9 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
 		
-		transaction.rpush(date, track_id)
+		# Only add the track to the tracks by a certain date list if the track isn't already in the database
+		if track_id not in tracks_already_in_database:
+			transaction.rpush(date, track_id)
 	
 	for index, (date_set_name, date) in enumerate(tracks_data_set["dates_set"], start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
@@ -93,6 +118,15 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			transaction: MultiExec = redis.multi_exec()
 		
 		transaction.sadd(date_set_name, date)
+	
+	# Remove songs that were removed from the sheet
+	for index, track_id in enumerate(tracks_already_in_database - tracks_being_added, start=index + 1):
+		if (index % actions_per_transaction) == (actions_per_transaction - 1):
+			awaitables.append(transaction.execute())
+			transaction: MultiExec = redis.multi_exec()
+		
+		transaction.srem("tracks", f"{track_id}")
+		transaction.unlink(f"track:{track_id}")
 	
 	# Add leftovers (that didn't make it into a group)
 	awaitables.append(transaction.execute())

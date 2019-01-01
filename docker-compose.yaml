@@ -82,12 +82,15 @@ services:
       - ./api/genre_utils.py:/app/graphql-server/genre_utils.py:ro
   
   redis:
+    # Uncomment this line if you are not using the provided Redis container
+    # command: /bin/true
     container_name: redis
     env_file:
       - ./config-and-secrets/redis.env
     image: bitnami/redis:5.0.3-debian-9-r6
     networks:
       db:
+    # Comment this line if you are not using the provided Redis container
     restart: always
     sysctls:
       net.core.somaxconn: 4096
@@ -105,13 +108,12 @@ services:
       context: ./sheet-to-db
     # Uncomment to run tests
     # todo: move tests to api
-    #    command: ["sh", "./run-tests.sh"]
+    # command: ["sh", "./run-tests.sh"]
     command: ["python3", "-m", "app"]
     container_name: sheet-to-db
     env_file:
       - ./config-and-secrets/redis.env
       - ./config-and-secrets/google-sheets.env
-    
     environment:
       # For running tests
       pytest_version: 4.0.2
@@ -119,8 +121,8 @@ services:
     networks:
       db:
     # Uncomment to intervene on malformed data
-    #    stdin_open: true
-    #    tty: true
+    # stdin_open: true
+    # tty: true
     volumes:
       - ./sheet-to-db/__init__.py:/app/__init__.py:ro
       - ./sheet-to-db/__main__.py:/app/__main__.py:ro
