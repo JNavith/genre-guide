@@ -1,6 +1,8 @@
 # genre.guide
 The code that powers [genre.guide](https://genre.guide) (currently in a "hidden" alpha -- please do not expect a pleasant or stable experience using the website for now)
 
+![](https://img.shields.io/discord/272098238511841280.svg)
+
 
 How to use:
 1. Configure
