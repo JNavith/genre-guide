@@ -85,7 +85,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	
 	index: int = -1
 	
-	for index, (track_id, dictionary) in enumerate(tracks_data_set["track_hash_in_set"], start=index + 1):
+	for index, (track_set_name, track_id) in enumerate(tracks_data_set["track_hash_in_set"], start=index + 1):
 		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
 		# (there must be a better way)
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
@@ -94,7 +94,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			transaction: MultiExec = redis.multi_exec()
 		
 		tracks_being_added.add(track_id)
-		transaction.hmset_dict(track_id, dictionary)
+		transaction.sadd(track_set_name, track_id)
 	
 	for index, (track_id, dictionary) in enumerate(tracks_data_set["track_by_hash_as_key"], start=index + 1):
 		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
