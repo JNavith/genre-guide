@@ -37,7 +37,7 @@ def open_genre_sheet() -> Spreadsheet:
 
 async def main(loop: AbstractEventLoop):
 	redis: Redis
-	with closing(await create_redis_pool("redis://redis", password=getenv("REDIS_PASSWORD"))) as redis:
+	with closing(await create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"))) as redis:
 		genre_sheet: Spreadsheet = open_genre_sheet()
 		
 		print("preparing to seed the Redis database", flush=True)
