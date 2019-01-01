@@ -37,15 +37,15 @@ def open_genre_sheet() -> Spreadsheet:
 
 async def main(loop: AbstractEventLoop):
 	redis: Redis
-	with closing(await create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"))) as redis:
+	with closing(await create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True"))) as redis:
 		genre_sheet: Spreadsheet = open_genre_sheet()
 		
 		print("preparing to seed the Redis database", flush=True)
-		futures: List[List[Awaitable]] = []
-		
-		futures.append(await seed_redis_with_track_data(redis, create_tracks_data_set(get_all_tracks(genre_sheet))))
-		
-		futures.append(await seed_redis_with_subgenre_data(redis, create_subgenres_data_set(build_up_subgenre_information(genre_sheet))))
+		futures: List[List[Awaitable]] = [
+			await seed_redis_with_track_data(redis, create_tracks_data_set(get_all_tracks(genre_sheet))),
+			
+			await seed_redis_with_subgenre_data(redis, create_subgenres_data_set(build_up_subgenre_information(genre_sheet)))
+		]
 		
 		print(f"going to wait for {sum(map(len, futures))} futures to finish before exiting", flush=True)
 		# Wait for all tasks to finish before exiting
