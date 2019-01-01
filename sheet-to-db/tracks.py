@@ -76,10 +76,6 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	# Initial transaction object (will be overwritten every `actions_per_transaction` loops)
 	transaction: MultiExec = redis.multi_exec()
 	
-	# DEBUG
-	await redis.flushall()
-	# END DEBUG
-	
 	tracks_already_in_database: Set[str] = set(await redis.smembers("tracks"))
 	tracks_being_added: Set[str] = set()
 	
