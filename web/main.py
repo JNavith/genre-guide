@@ -16,6 +16,7 @@ app = Starlette(template_directory="templates")
 
 
 @app.route("/catalog")
+@app.route("//")  # Discord
 @app.route("/")
 async def view_catalog(request: Request):
 	query = """
