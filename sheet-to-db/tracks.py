@@ -1,15 +1,18 @@
 from collections import Iterator, defaultdict, namedtuple
 from json import dumps
 from os import getenv
-from typing import Awaitable, DefaultDict, Dict, List, Set, Tuple, cast
+from typing import Awaitable, DefaultDict, Dict, Iterable, List, Set, Tuple, cast
 
 from aioredis.commands import MultiExec, Redis
 from gspread import Spreadsheet, Worksheet
 
+# noinspection PyUnresolvedReferences
 from .genre_utils import parse_genre
+# noinspection PyUnresolvedReferences
 from .track_utils import id_for_track
 
 
+# noinspection PyUnresolvedReferences
 def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
 	catalog: Worksheet = genre_sheet.worksheet(getenv("CATALOG_SHEET_NAME"))
 	
@@ -41,8 +44,9 @@ def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
 		yield track
 
 
+# noinspection PyUnresolvedReferences
 def create_tracks_data_set(tracks: "Iterable[Track]") -> Dict[str, List[tuple]]:
-	"Create a mapping (basically just a list with some names) in preparation for Redis actions"
+	"""Create a mapping (basically just a list with some names) in preparation for Redis actions"""
 	
 	actions: DefaultDict[str, List[Tuple]] = defaultdict(list)
 	
