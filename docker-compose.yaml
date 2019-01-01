@@ -111,7 +111,8 @@ services:
     env_file:
       - ./config-and-secrets/redis.env
       - ./config-and-secrets/google-sheets.env
-      
+    
+    environment:
       # For running tests
       pytest_version: 4.0.2
     image: sheet-to-db:3.0.1
