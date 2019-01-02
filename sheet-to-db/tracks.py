@@ -135,7 +135,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		# Remove the key
 		transaction.unlink(f"track:{track_id}")
 		# Remove the track from its release date's list of tracks
-		transaction.lrem(f"date:{release_date}", f"{track_id}")
+		transaction.lrem(f"date:{release_date}", 1, f"{track_id}")
 		# Remove the date from the set of dates if there are no releases on it
 		# (We have to query the Redis object directly or else it'll hang indefinitely)
 		if not await redis.llen(f"date:{release_date}"):
