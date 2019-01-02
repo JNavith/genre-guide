@@ -329,7 +329,7 @@ async def do_redis(command_name: str, *args, **kwds):
 	return await getattr(redis, command_name)(*args, **kwds)
 
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 app.add_route('/graphql', GraphQLApp(schema=Schema(query=cast(GraphQLObjectType, Query), auto_camelcase=False), executor=AsyncioExecutor(loop=loop)))
 
 if __name__ == '__main__':
