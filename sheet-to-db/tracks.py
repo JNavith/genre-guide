@@ -78,9 +78,6 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	transaction: MultiExec = redis.multi_exec()
 	
 	tracks_already_in_database: Set[str] = {track_id.decode("utf8") for track_id in await redis.smembers("tracks")}
-	# DEBUG
-	print(len(tracks_already_in_database), file=stderr, flush=True)
-	# END DEBUG
 	tracks_being_added: Set[str] = set()
 	
 	index: int = -1
@@ -115,10 +112,6 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		# Only add the track to the tracks by a certain date list if the track isn't already in the database
 		if track_id not in tracks_already_in_database:
 			transaction.rpush(date, track_id)
-		else:
-			# DEBUG
-			print("prevented duplicate track", file=stderr, flush=True)
-			# END DEBUG
 	
 	for index, (date_set_name, date) in enumerate(tracks_data_set["dates_set"], start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
@@ -127,9 +120,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		
 		transaction.sadd(date_set_name, date)
 	
-	# DEBUG
-	print("tracks to remove:", tracks_already_in_database - tracks_being_added, flush=True, file=stderr)
-	# END DEBUG
+	print("Removing tracks", tracks_already_in_database - tracks_being_added, flush=True, file=stderr)
 	
 	# Remove songs that were removed from the sheet
 	for index, track_id in enumerate(tracks_already_in_database - tracks_being_added, start=index + 1):
@@ -137,8 +128,18 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
 		
+		release_date = await transaction.hget(f"track:{track_id}", "release")
+		
+		# Remove from the tracks set
 		transaction.srem("tracks", f"{track_id}")
+		# Remove the key
 		transaction.unlink(f"track:{track_id}")
+		# Remove the track from its release date's list of tracks
+		transaction.lrem(f"date:{release_date}", f"{track_id}")
+		# Remove the date from the set of dates if there are no releases on it
+		# (We have to query the Redis object directly or else it'll hang indefinitely)
+		if not await redis.llen(f"date:{release_date}"):
+			transaction.srem("dates", f"{release_date}")
 	
 	# Add leftovers (that didn't make it into a group)
 	awaitables.append(transaction.execute())
