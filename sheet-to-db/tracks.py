@@ -128,7 +128,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
 		
-		release_date = await transaction.hget(f"track:{track_id}", "release")
+		release_date = await redis.hget(f"track:{track_id}", "release")
 		
 		# Remove from the tracks set
 		transaction.srem("tracks", f"{track_id}")
