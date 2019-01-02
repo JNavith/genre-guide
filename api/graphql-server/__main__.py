@@ -25,7 +25,6 @@ from sys import stderr
 from typing import Generator, List as typing_List, Optional, Tuple, cast
 
 from aioredis import Redis, create_redis_pool
-from async_lru import alru_cache
 from graphene import Argument, Boolean, Date, Enum, Field, ID, Int, List, ObjectType, Schema, String
 from graphql import GraphQLError, GraphQLObjectType
 from graphql.execution.executors.asyncio import AsyncioExecutor
@@ -34,6 +33,7 @@ from starlette.graphql import GraphQLApp
 from uvicorn import run
 from uvicorn.loops.uvloop import uvloop_setup
 
+# noinspection PyUnresolvedReferences
 from .genre_utils import flatten_subgenres
 
 app = Starlette()
@@ -62,7 +62,6 @@ class Color(ObjectType):
 	background = Field(String, representation=ColorRepresentation(name="representation", description="The format for the color, such as HEX"), description="The background color for the genre on the Genre Sheet")
 	
 	@staticmethod
-	@alru_cache()
 	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
 		"""Returns None for subgenres, and a list of hex codes like ["#ec00db", "#ffffff"] for genres"""
 		return loads((await do_redis("hget", Subgenre._get_redis_key(genre_name), "color")).decode("utf8"))
@@ -326,7 +325,6 @@ class Query(ObjectType):
 		return Track(id=id)
 
 
-@alru_cache(maxsize=8192)
 async def do_redis(command_name: str, *args, **kwds):
 	print(f"DEBUG: do_redis: cache miss: {command_name}, {args}, {kwds}", file=stderr)
 	return await getattr(redis, command_name)(*args, **kwds)
