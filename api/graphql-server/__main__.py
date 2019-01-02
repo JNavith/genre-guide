@@ -21,7 +21,6 @@ from itertools import count
 from json import dumps, loads
 from os import getenv
 from re import sub
-from sys import stderr
 from typing import Generator, List as typing_List, Optional, Tuple, cast
 
 from aioredis import Redis, create_redis_pool
@@ -30,6 +29,7 @@ from graphql import GraphQLError, GraphQLObjectType
 from graphql.execution.executors.asyncio import AsyncioExecutor
 from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
+from starlette.middleware.cors import CORSMiddleware
 from uvicorn import run
 from uvicorn.loops.uvloop import uvloop_setup
 
@@ -326,10 +326,10 @@ class Query(ObjectType):
 
 
 async def do_redis(command_name: str, *args, **kwds):
-	print(f"DEBUG: do_redis: cache miss: {command_name}, {args}, {kwds}", file=stderr)
 	return await getattr(redis, command_name)(*args, **kwds)
 
 
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 app.add_route('/graphql', GraphQLApp(schema=Schema(query=cast(GraphQLObjectType, Query), auto_camelcase=False), executor=AsyncioExecutor(loop=loop)))
 
 if __name__ == '__main__':
