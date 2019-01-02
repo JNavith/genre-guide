@@ -77,7 +77,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	# Initial transaction object (will be overwritten every `actions_per_transaction` loops)
 	transaction: MultiExec = redis.multi_exec()
 	
-	tracks_already_in_database: Set[str] = set(await redis.smembers("tracks"))
+	tracks_already_in_database: Set[str] = {track_id.decode("utf8") for track_id in await redis.smembers("tracks")}
 	# DEBUG
 	print(len(tracks_already_in_database), file=stderr, flush=True)
 	# END DEBUG
