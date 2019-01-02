@@ -1,6 +1,7 @@
 from collections import Iterator, defaultdict, namedtuple
 from json import dumps
 from os import getenv
+from sys import stderr
 from typing import Awaitable, DefaultDict, Dict, Iterable, List, Set, Tuple, cast
 
 from aioredis.commands import MultiExec, Redis
@@ -77,6 +78,9 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	transaction: MultiExec = redis.multi_exec()
 	
 	tracks_already_in_database: Set[str] = set(await redis.smembers("tracks"))
+	# DEBUG
+	print(len(tracks_already_in_database), file=stderr, flush=True)
+	# END DEBUG
 	tracks_being_added: Set[str] = set()
 	
 	index: int = -1
@@ -111,6 +115,10 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		# Only add the track to the tracks by a certain date list if the track isn't already in the database
 		if track_id not in tracks_already_in_database:
 			transaction.rpush(date, track_id)
+		else:
+			# DEBUG
+			print("prevented duplicate track", file=stderr, flush=True)
+			# END DEBUG
 	
 	for index, (date_set_name, date) in enumerate(tracks_data_set["dates_set"], start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
@@ -118,6 +126,10 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			transaction: MultiExec = redis.multi_exec()
 		
 		transaction.sadd(date_set_name, date)
+	
+	# DEBUG
+	print("tracks to remove:", tracks_already_in_database - tracks_being_added, flush=True, file=stderr)
+	# END DEBUG
 	
 	# Remove songs that were removed from the sheet
 	for index, track_id in enumerate(tracks_already_in_database - tracks_being_added, start=index + 1):
