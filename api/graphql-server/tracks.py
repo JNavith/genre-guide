@@ -1,7 +1,7 @@
-from datetime import date, datetime, timedelta
-from itertools import count
+from datetime import datetime
 from json import dumps, loads
-from typing import Generator, List as typing_List, Optional, Tuple, cast
+from typing import List as typing_List, Optional, Tuple, cast
+from urllib.parse import quote
 
 from graphene import Argument, Date, Field, ID, Int, ObjectType, String
 
@@ -46,6 +46,8 @@ class Track(ObjectType):
 	subgenres_json = String(name="subgenres_json", description="The parsed list of subgenres that make up this song as a JSON string (really low level and provisional)")
 	subgenres_flat_json = String(name="subgenres_flat_json", and_colors=Argument(ColorRepresentation, required=False, description="Include a list of colors in sync with the list of subgenres with this specified representation (see ColorRepresentation for valid options)"),
 	                             description="The subgenres that make up this song, as a flat list (contained in a JSON string). Note that this introduces ambiguity with subgenre grouping")
+	
+	image = String(name="image", description="The link to the cover artwork for the track, or a placeholder")
 	
 	@staticmethod
 	def _get_redis_key(track_id: str) -> str:
@@ -111,17 +113,10 @@ class Track(ObjectType):
 							colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
 		
 		return dumps([flat_list, colors])
-
-
-def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
-	range_ = range((end - start).days + 1)
-	if reverse:
-		range_ = reversed(range_)
 	
-	for i in range_:
-		yield start + timedelta(days=i)
-
-
-def all_dates_before(end: date) -> Generator[date, None, None]:
-	for i in count(0):
-		yield end - timedelta(days=i)
+	async def resolve_image(self, info):
+		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
+		
+		# Todo: querying an external API (but whose?) before giving a placeholder
+		
+		return f"/img/song-missing-art.svg?name={quote(flat_list[0][0])}"

@@ -16,8 +16,9 @@
 
 from contextlib import closing
 from datetime import date, timedelta
+from itertools import count
 from os import getenv
-from typing import List as typing_List, Optional, cast
+from typing import Generator, List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
 from graphene import Boolean, Date, Field, ID, Int, List, ObjectType, Schema, String
@@ -30,10 +31,24 @@ from uvicorn import run
 from uvicorn.loops.uvloop import uvloop_setup
 
 from .subgenres import Subgenre
-from .tracks import Track, all_dates_before, all_dates_between
+from .tracks import Track
 
 app = Starlette()
 loop = uvloop_setup()
+
+
+def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
+	range_ = range((end - start).days + 1)
+	if reverse:
+		range_ = reversed(range_)
+	
+	for i in range_:
+		yield start + timedelta(days=i)
+
+
+def all_dates_before(end: date) -> Generator[date, None, None]:
+	for i in count(0):
+		yield end - timedelta(days=i)
 
 
 class Query(ObjectType):
