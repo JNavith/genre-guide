@@ -56,8 +56,8 @@ async def view_catalog(request: Request):
 	return HTMLResponse(template.render(request=request, tracks_by_date=tracks_by_date, zip=zip))
 
 
-@app.route("/genre")
-async def view_genre(request: Request):
+@app.route("/subgenre")
+async def view_subgenre(request: Request):
 	if request.query_params["name"] == "Space Bass":
 		template: Template = app.get_template("views/genre.html")
 		return HTMLResponse(template.render(request=request))
@@ -82,7 +82,7 @@ async def song_missing_art(request: Request):
 	async with ClientSession() as session:
 		async with session.post("http://graphql-server/graphql", json={
 			"query": query,
-			"variables": {"name": request.query_params["genre"]}
+			"variables": {"name": request.query_params["subgenre"]}
 		}, headers={
 			"Content-Type": "application/json",
 			"Accept": "application/json",

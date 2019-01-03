@@ -245,7 +245,7 @@ class Track(ObjectType):
 		
 		# Todo: querying an external API (but whose?) before giving a placeholder
 		
-		return f"/svg/song-missing-art.svg?name={quote(flat_list[0][0])}"
+		return f"/svg/song-missing-art.svg?subgenre={quote(flat_list[0][0])}"
 
 
 def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
