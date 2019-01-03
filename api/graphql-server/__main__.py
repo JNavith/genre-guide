@@ -18,6 +18,7 @@ from contextlib import closing
 from datetime import date, timedelta
 from itertools import count
 from os import getenv
+from sys import stderr
 from typing import Generator, List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
@@ -135,6 +136,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 app.add_route('/graphql', GraphQLApp(schema=Schema(query=cast(GraphQLObjectType, Query), auto_camelcase=False), executor=AsyncioExecutor(loop=loop)))
 
 if __name__ == '__main__':
+	print("you are running me as __main__", file=stderr, flush=True)
 	redis: Redis = loop.run_until_complete(create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True")))
 	with closing(redis):
 		run(app, host='0.0.0.0', port=80, loop=loop)
