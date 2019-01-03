@@ -18,6 +18,7 @@ from contextlib import closing
 from datetime import date, timedelta
 from itertools import count
 from os import getenv
+from sys import stderr
 from typing import Generator, List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
@@ -34,7 +35,9 @@ from .subgenres import Subgenre
 from .tracks import Track
 
 app = Starlette()
+print("running uvloop setup", file=stderr, flush=True)
 loop = uvloop_setup()
+print("finished uvloop setup", file=stderr, flush=True)
 
 
 def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
