@@ -35,9 +35,15 @@ from .subgenres import Subgenre
 from .tracks import Track
 
 app = Starlette()
-print("running uvloop setup", file=stderr, flush=True)
-loop = uvloop_setup()
-print("finished uvloop setup", file=stderr, flush=True)
+while True:
+	try:
+		print("running uvloop setup", file=stderr, flush=True)
+		loop = uvloop_setup()
+	except RuntimeError:
+		continue
+	else:
+		print("finished uvloop setup", file=stderr, flush=True)
+		break
 
 
 def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
