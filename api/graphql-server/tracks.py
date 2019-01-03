@@ -119,4 +119,4 @@ class Track(ObjectType):
 		
 		# Todo: querying an external API (but whose?) before giving a placeholder
 		
-		return f"/img/song-missing-art.svg?name={quote(flat_list[0][0])}"
+		return f"/svg/song-missing-art.svg?name={quote(flat_list[0][0])}"
