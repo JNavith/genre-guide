@@ -137,6 +137,13 @@ app.add_route('/graphql', GraphQLApp(schema=Schema(query=cast(GraphQLObjectType,
 
 if __name__ == '__main__':
 	print("you are running me as __main__", file=stderr, flush=True)
-	redis: Redis = loop.run_until_complete(create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True")))
+	try:
+		redis: Redis = loop.run_until_complete(create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True")))
+	except Exception as e:
+		print(e, file=stderr, flush=True)
+		from sys import exc_info
+		
+		print(exc_info(), flush=True, file=stderr)
+	
 	with closing(redis):
 		run(app, host='0.0.0.0', port=80, loop=loop)
