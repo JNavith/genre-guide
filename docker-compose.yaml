@@ -65,7 +65,7 @@ services:
         graphene_version: 2.1.3
         starlette_tag: 0.9.9-0.3.23
       context: ./api/graphql-server
-    command: ["python3", "-m", "app.graphql-server"]
+    command: ["python3", "-m", "graphql-server"]
     container_name: graphql-server
     env_file:
       - ./config-and-secrets/redis.env
@@ -76,7 +76,9 @@ services:
       web-private:
     restart: always
     volumes:
-      - ./api:/app:ro
+      - ./api/graphql-server/__main__.py:/app/graphql-server/__main__.py:ro
+      - ./api/graphql-server/__init__.py:/app/graphql-server/__init__.py:ro
+      - ./api/genre_utils.py:/app/graphql-server/genre_utils.py:ro
   
   redis:
     # Uncomment this line if you are not using the provided Redis container

@@ -13,7 +13,7 @@
 #    
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
-from asyncio import get_event_loop, set_event_loop_policy
+
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from functools import lru_cache
@@ -21,7 +21,6 @@ from itertools import count
 from json import dumps, loads
 from os import getenv
 from re import sub
-from sys import stderr
 from typing import Generator, List as typing_List, Optional, Tuple, cast
 from urllib.parse import quote
 
@@ -33,140 +32,13 @@ from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
 from starlette.middleware.cors import CORSMiddleware
 from uvicorn import run
-from uvloop import EventLoopPolicy
+from uvicorn.loops.uvloop import uvloop_setup
 
-from ..genre_utils import flatten_subgenres
+# noinspection PyUnresolvedReferences
+from .genre_utils import flatten_subgenres
 
 app = Starlette()
-set_event_loop_policy(EventLoopPolicy())
-loop = get_event_loop()
-
-
-class ReleaseDate(ObjectType):
-	datetime = Field(Date, name="datetime", description="(internal) datetime object used to determine the other fields")
-	
-	iso8601 = Field(Date, name="iso8601", description='The date as an ISO 8601 formatted string, like 2018-04-20')
-	year = Field(Int, name="year", description="The year the track released")
-	month_name = Field(String, name="month_name", description='The month the track released, as text ("December")')
-	month_int = Field(Int, name="month_int", description='The month the track released, as an integer (12)')
-	day = Field(Int, name="day", description="The day of the month the track released")
-	
-	def resolve_iso8601(self, info):
-		return cast(datetime, self.datetime).strftime("%Y-%m-%d")
-	
-	def resolve_year(self, info):
-		return cast(datetime, self.datetime).year
-	
-	def resolve_month_name(self, info):
-		return cast(datetime, self.datetime).strftime("%B")
-	
-	def resolve_month_int(self, info):
-		return cast(datetime, self.datetime).month
-	
-	def resolve_day(self, info):
-		return cast(datetime, self.datetime).day
-
-
-class Track(ObjectType):
-	id = Field(ID, name="id", description="The unique ID describing this track")
-	
-	name = Field(String, name="name", description="The name of the track")
-	
-	artist = Field(String, name="artist", description="The artist(s) of the track")
-	record_label = Field(String, name="record_label", description="The record label(s) who released and/or own the rights to the track")
-	date = Field(ReleaseDate, description="The release date of the track")
-	
-	subgenres_json = String(name="subgenres_json", description="The parsed list of subgenres that make up this song as a JSON string (really low level and provisional)")
-	subgenres_flat_json = String(name="subgenres_flat_json", and_colors=Argument(ColorRepresentation, required=False, description="Include a list of colors in sync with the list of subgenres with this specified representation (see ColorRepresentation for valid options)"),
-	                             description="The subgenres that make up this song, as a flat list (contained in a JSON string). Note that this introduces ambiguity with subgenre grouping")
-	
-	image = String(name="image", description="The link to the cover artwork for the track, or a placeholder")
-	
-	@staticmethod
-	def _get_redis_key(track_id: str) -> str:
-		return f"track:{track_id}"
-	
-	@property
-	def _redis_key(self):
-		return Track._get_redis_key(cast(str, self.id))
-	
-	async def resolve_name(self, info):
-		from .__main__ import do_redis
-		
-		return (await do_redis("hget", self._redis_key, "track")).decode("utf8")
-	
-	async def resolve_artist(self, info):
-		from .__main__ import do_redis
-		
-		return (await do_redis("hget", self._redis_key, "artist")).decode("utf8")
-	
-	async def resolve_record_label(self, info):
-		from .__main__ import do_redis
-		
-		return (await do_redis("hget", self._redis_key, "label")).decode("utf8")
-	
-	async def resolve_date(self, info):
-		from .__main__ import do_redis
-		
-		underlying_datetime: datetime = datetime.strptime((await do_redis("hget", self._redis_key, "release")).decode("utf8"), "%Y-%m-%d")
-		return ReleaseDate(datetime=underlying_datetime)
-	
-	async def resolve_subgenres_json(self, info):
-		from .__main__ import do_redis
-		
-		return (await do_redis("hget", self._redis_key, "subgenre")).decode("utf8")
-	
-	async def resolve_subgenres_flat_json(self, info, and_colors: Optional[ColorRepresentation] = None):
-		from .__main__ import do_redis
-		
-		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
-		
-		if and_colors is None:
-			return dumps(flat_list)
-		
-		colors: typing_List[Optional[Tuple[str, str]]] = []
-		for subgenre in flat_list:
-			if subgenre in {"|", ">", "~"}:
-				colors.append(None)
-			else:
-				if await do_redis("sismember", "subgenres", subgenre):
-					color_info = await Subgenre(name=subgenre).resolve_color(info)
-					colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
-				else:
-					if not subgenre.startswith("?"):
-						# The subgenre does not exist
-						colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
-					else:
-						subgenre = Subgenre._transform_unknown_subgenre(subgenre)
-						if await do_redis("sismember", "subgenres", subgenre):
-							color_info = await Subgenre(name=subgenre).resolve_color(info)
-							colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
-						else:
-							# The genre this is an unknown subgenre of does not exist
-							colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
-		
-		return dumps([flat_list, colors])
-	
-	async def resolve_image(self, info):
-		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
-		
-		# Todo: querying an external API (but whose?) before giving a placeholder
-		
-		return f"/svg/song-missing-art.svg?name={quote(flat_list[0][0])}"
-
-
-def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
-	range_ = range((end - start).days + 1)
-	if reverse:
-		range_ = reversed(range_)
-	
-	for i in range_:
-		yield start + timedelta(days=i)
-
-
-def all_dates_before(end: date) -> Generator[date, None, None]:
-	for i in count(0):
-		yield end - timedelta(days=i)
+loop = uvloop_setup()
 
 
 class ColorRepresentation(Enum):
@@ -193,8 +65,6 @@ class Color(ObjectType):
 	@staticmethod
 	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
 		"""Returns None for subgenres, and a list of hex codes like ["#ec00db", "#ffffff"] for genres"""
-		from .__main__ import do_redis
-		
 		return loads((await do_redis("hget", Subgenre._get_redis_key(genre_name), "color")).decode("utf8"))
 	
 	async def resolve_foreground(self, info, representation: ColorRepresentation = ColorRepresentation.HEX):
@@ -260,14 +130,10 @@ class Subgenre(ObjectType):
 		return Subgenre._get_redis_key(cast(str, self.name))
 	
 	async def resolve_is_genre(self, info):
-		from .__main__ import do_redis
-		
 		result: Optional[str] = await do_redis("hget", self._redis_key, "is_genre")
 		return loads(result)
 	
 	async def resolve_genre(self, info):
-		from .__main__ import do_redis
-		
 		return Subgenre(name=(await do_redis("hget", self._redis_key, "genre")).decode("utf8"))
 	
 	async def resolve_color(self, info):
@@ -275,14 +141,125 @@ class Subgenre(ObjectType):
 		return Color(from_genre=genre.name)
 	
 	async def resolve_origins(self, info):
-		from .__main__ import do_redis
-		
 		return [Subgenre(name=name) for name in loads(await do_redis("hget", self._redis_key, "origins"))]
 	
 	async def resolve_subgenres(self, info):
-		from .__main__ import do_redis
-		
 		return [Subgenre(name=name) for name in loads(await do_redis("hget", self._redis_key, "subgenres"))]
+
+
+class ReleaseDate(ObjectType):
+	datetime = Field(Date, name="datetime", description="(internal) datetime object used to determine the other fields")
+	
+	iso8601 = Field(Date, name="iso8601", description='The date as an ISO 8601 formatted string, like 2018-04-20')
+	year = Field(Int, name="year", description="The year the track released")
+	month_name = Field(String, name="month_name", description='The month the track released, as text ("December")')
+	month_int = Field(Int, name="month_int", description='The month the track released, as an integer (12)')
+	day = Field(Int, name="day", description="The day of the month the track released")
+	
+	def resolve_iso8601(self, info):
+		return cast(datetime, self.datetime).strftime("%Y-%m-%d")
+	
+	def resolve_year(self, info):
+		return cast(datetime, self.datetime).year
+	
+	def resolve_month_name(self, info):
+		return cast(datetime, self.datetime).strftime("%B")
+	
+	def resolve_month_int(self, info):
+		return cast(datetime, self.datetime).month
+	
+	def resolve_day(self, info):
+		return cast(datetime, self.datetime).day
+
+
+class Track(ObjectType):
+	id = Field(ID, name="id", description="The unique ID describing this track")
+	
+	name = Field(String, name="name", description="The name of the track")
+	
+	artist = Field(String, name="artist", description="The artist(s) of the track")
+	record_label = Field(String, name="record_label", description="The record label(s) who released and/or own the rights to the track")
+	date = Field(ReleaseDate, description="The release date of the track")
+	
+	subgenres_json = String(name="subgenres_json", description="The parsed list of subgenres that make up this song as a JSON string (really low level and provisional)")
+	subgenres_flat_json = String(name="subgenres_flat_json", and_colors=Argument(ColorRepresentation, required=False, description="Include a list of colors in sync with the list of subgenres with this specified representation (see ColorRepresentation for valid options)"),
+	                             description="The subgenres that make up this song, as a flat list (contained in a JSON string). Note that this introduces ambiguity with subgenre grouping")
+	
+	image = String(name="image", description="The link to the cover artwork for the track, or a placeholder")
+	
+	@staticmethod
+	def _get_redis_key(track_id: str) -> str:
+		return f"track:{track_id}"
+	
+	@property
+	def _redis_key(self):
+		return Track._get_redis_key(cast(str, self.id))
+	
+	async def resolve_name(self, info):
+		return (await do_redis("hget", self._redis_key, "track")).decode("utf8")
+	
+	async def resolve_artist(self, info):
+		return (await do_redis("hget", self._redis_key, "artist")).decode("utf8")
+	
+	async def resolve_record_label(self, info):
+		return (await do_redis("hget", self._redis_key, "label")).decode("utf8")
+	
+	async def resolve_date(self, info):
+		underlying_datetime: datetime = datetime.strptime((await do_redis("hget", self._redis_key, "release")).decode("utf8"), "%Y-%m-%d")
+		return ReleaseDate(datetime=underlying_datetime)
+	
+	async def resolve_subgenres_json(self, info):
+		return (await do_redis("hget", self._redis_key, "subgenre")).decode("utf8")
+	
+	async def resolve_subgenres_flat_json(self, info, and_colors: Optional[ColorRepresentation] = None):
+		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
+		
+		if and_colors is None:
+			return dumps(flat_list)
+		
+		colors: typing_List[Optional[Tuple[str, str]]] = []
+		for subgenre in flat_list:
+			if subgenre in {"|", ">", "~"}:
+				colors.append(None)
+			else:
+				if await do_redis("sismember", "subgenres", subgenre):
+					color_info = await Subgenre(name=subgenre).resolve_color(info)
+					colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
+				else:
+					if not subgenre.startswith("?"):
+						# The subgenre does not exist
+						colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
+					else:
+						subgenre = Subgenre._transform_unknown_subgenre(subgenre)
+						if await do_redis("sismember", "subgenres", subgenre):
+							color_info = await Subgenre(name=subgenre).resolve_color(info)
+							colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
+						else:
+							# The genre this is an unknown subgenre of does not exist
+							colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
+		
+		return dumps([flat_list, colors])
+	
+	async def resolve_image(self, info):
+		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
+		
+		# Todo: querying an external API (but whose?) before giving a placeholder
+		
+		return f"/svg/song-missing-art.svg?name={quote(flat_list[0][0])}"
+
+
+def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
+	range_ = range((end - start).days + 1)
+	if reverse:
+		range_ = reversed(range_)
+	
+	for i in range_:
+		yield start + timedelta(days=i)
+
+
+def all_dates_before(end: date) -> Generator[date, None, None]:
+	for i in count(0):
+		yield end - timedelta(days=i)
 
 
 class Query(ObjectType):
@@ -362,22 +339,10 @@ async def do_redis(command_name: str, *args, **kwds):
 	return await getattr(redis, command_name)(*args, **kwds)
 
 
-# TODO: Remove (probably a security problem)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
-
 app.add_route('/graphql', GraphQLApp(schema=Schema(query=cast(GraphQLObjectType, Query), auto_camelcase=False), executor=AsyncioExecutor(loop=loop)))
 
 if __name__ == '__main__':
-	print("you are running me as __main__", file=stderr, flush=True)
-	try:
-		redis: Redis = loop.run_until_complete(create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True")))
-	except Exception as e:
-		print(e, file=stderr, flush=True)
-		from sys import exc_info
-		
-		print(exc_info(), flush=True, file=stderr)
-	else:
-		print()
-	
+	redis: Redis = loop.run_until_complete(create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True")))
 	with closing(redis):
 		run(app, host='0.0.0.0', port=80, loop=loop)
