@@ -5,9 +5,8 @@ from typing import Generator, List as typing_List, Optional, Tuple, cast
 
 from graphene import Argument, Date, Field, ID, Int, ObjectType, String
 
-from api.genre_utils import flatten_subgenres
-from .__main__ import do_redis
 from .subgenres import ColorRepresentation, Subgenre
+from ..genre_utils import flatten_subgenres
 
 
 class ReleaseDate(ObjectType):
@@ -57,22 +56,34 @@ class Track(ObjectType):
 		return Track._get_redis_key(cast(str, self.id))
 	
 	async def resolve_name(self, info):
+		from .__main__ import do_redis
+		
 		return (await do_redis("hget", self._redis_key, "track")).decode("utf8")
 	
 	async def resolve_artist(self, info):
+		from .__main__ import do_redis
+		
 		return (await do_redis("hget", self._redis_key, "artist")).decode("utf8")
 	
 	async def resolve_record_label(self, info):
+		from .__main__ import do_redis
+		
 		return (await do_redis("hget", self._redis_key, "label")).decode("utf8")
 	
 	async def resolve_date(self, info):
+		from .__main__ import do_redis
+		
 		underlying_datetime: datetime = datetime.strptime((await do_redis("hget", self._redis_key, "release")).decode("utf8"), "%Y-%m-%d")
 		return ReleaseDate(datetime=underlying_datetime)
 	
 	async def resolve_subgenres_json(self, info):
+		from .__main__ import do_redis
+		
 		return (await do_redis("hget", self._redis_key, "subgenre")).decode("utf8")
 	
 	async def resolve_subgenres_flat_json(self, info, and_colors: Optional[ColorRepresentation] = None):
+		from .__main__ import do_redis
+		
 		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
 		
 		if and_colors is None:

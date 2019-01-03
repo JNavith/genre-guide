@@ -6,8 +6,6 @@ from typing import List as typing_List, Optional, cast
 from graphene import Boolean, Enum, Field, List, ObjectType, String
 from graphql import GraphQLError
 
-from .__main__ import do_redis
-
 
 class ColorRepresentation(Enum):
 	"""A format that a color can come in, such as HEX"""
@@ -33,6 +31,8 @@ class Color(ObjectType):
 	@staticmethod
 	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
 		"""Returns None for subgenres, and a list of hex codes like ["#ec00db", "#ffffff"] for genres"""
+		from .__main__ import do_redis
+		
 		return loads((await do_redis("hget", Subgenre._get_redis_key(genre_name), "color")).decode("utf8"))
 	
 	async def resolve_foreground(self, info, representation: ColorRepresentation = ColorRepresentation.HEX):
@@ -98,10 +98,14 @@ class Subgenre(ObjectType):
 		return Subgenre._get_redis_key(cast(str, self.name))
 	
 	async def resolve_is_genre(self, info):
+		from .__main__ import do_redis
+		
 		result: Optional[str] = await do_redis("hget", self._redis_key, "is_genre")
 		return loads(result)
 	
 	async def resolve_genre(self, info):
+		from .__main__ import do_redis
+		
 		return Subgenre(name=(await do_redis("hget", self._redis_key, "genre")).decode("utf8"))
 	
 	async def resolve_color(self, info):
@@ -109,7 +113,11 @@ class Subgenre(ObjectType):
 		return Color(from_genre=genre.name)
 	
 	async def resolve_origins(self, info):
+		from .__main__ import do_redis
+		
 		return [Subgenre(name=name) for name in loads(await do_redis("hget", self._redis_key, "origins"))]
 	
 	async def resolve_subgenres(self, info):
+		from .__main__ import do_redis
+		
 		return [Subgenre(name=name) for name in loads(await do_redis("hget", self._redis_key, "subgenres"))]

@@ -120,10 +120,11 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		
 		transaction.sadd(date_set_name, date)
 	
-	print("Removing tracks", tracks_already_in_database - tracks_being_added, flush=True, file=stderr)
+	tracks_to_remove = tracks_already_in_database - tracks_being_added
+	print("Removing tracks", tracks_to_remove, flush=True, file=stderr)
 	
 	# Remove songs that were removed from the sheet
-	for index, track_id in enumerate(tracks_already_in_database - tracks_being_added, start=index + 1):
+	for index, track_id in enumerate(tracks_to_remove, start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
