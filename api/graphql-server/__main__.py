@@ -13,12 +13,11 @@
 #    
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+from asyncio import get_event_loop, set_event_loop_policy
 from contextlib import closing
 from datetime import date, timedelta
 from itertools import count
 from os import getenv
-from sys import stderr
 from typing import Generator, List as typing_List, Optional, cast
 
 from aioredis import Redis, create_redis_pool
@@ -29,21 +28,14 @@ from starlette.applications import Starlette
 from starlette.graphql import GraphQLApp
 from starlette.middleware.cors import CORSMiddleware
 from uvicorn import run
-from uvicorn.loops.uvloop import uvloop_setup
+from uvloop import EventLoopPolicy
 
 from .subgenres import Subgenre
 from .tracks import Track
 
 app = Starlette()
-while True:
-	try:
-		print("running uvloop setup", file=stderr, flush=True)
-		loop = uvloop_setup()
-	except RuntimeError:
-		continue
-	else:
-		print("finished uvloop setup", file=stderr, flush=True)
-		break
+set_event_loop_policy(EventLoopPolicy())
+loop = get_event_loop()
 
 
 def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
