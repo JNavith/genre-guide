@@ -1,0 +1,31 @@
+<template>
+	<!-- Attribution: Heroicons UI (by Steve Schoger) -- MIT license -->
+	<!-- https://github.com/sschoger/heroicons-ui -->
+	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"
+	     :class="['h-' + size, 'w-' + size]">
+		<path class="heroicon-ui fill-current" :class="'text-' + colorFill"
+		      d="M17 11a1 1 0 0 1 0 2h-4v4a1 1 0 0 1-2 0v-4H7a1 1 0 0 1 0-2h4V7a1 1 0 0 1 2 0v4h4z" />
+	</svg>
+</template>
+
+<script lang="js">
+	import Vue from 'vue';
+	
+	export default Vue.extend({
+		name: "IconPlus",
+		props: {
+			colorFill: {
+				type: String,
+				required: true
+			},
+			size: {
+				type: Number,
+				required: true
+			}
+		}
+	})
+</script>
+
+<style scoped>
+
+</style>

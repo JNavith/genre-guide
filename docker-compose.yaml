@@ -58,6 +58,14 @@ services:
       - ./dist/css:/srv/css:ro
       - ./branding:/srv/img:ro
   
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    image: frontend:dev
+    volumes:
+      - ./frontend/dist:/home/node/dist
+  
   graphql-server:
     build:
       args:

@@ -1,0 +1,23 @@
+{
+  "name": "genre.guide-vue",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build"
+  },
+  "dependencies": {
+    "graphql-request": "^1.8.2",
+    "vue": "^2.5.21",
+    "vue-loaders": "^2.0.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.2.0",
+    "@vue/cli-plugin-typescript": "^3.2.2",
+    "@vue/cli-service": "^3.2.0",
+    "typescript": "^3.0.0",
+    "vue-loader": "^15.4.2",
+    "vue-template-compiler": "^2.5.21",
+    "webpack-dev-server": "^3.1.14"
+  }
+}
