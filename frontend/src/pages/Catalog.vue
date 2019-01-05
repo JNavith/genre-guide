@@ -67,9 +67,15 @@
 			}).catch(error => {
 				if (error instanceof TypeError && error.message.startsWith("NetworkError")) {
 					this.errorMessage = "There was a network error trying to load the catalog"
+				} else if (error.hasOwnProperty("response") && error.response!.errors.length > 0) {
+					this.errorMessage = "There was an error in the catalog response itself, which is probably out of your control"
 				} else {
-					this.errorMessage = "An unknown error occurred loading the catalog"
+					this.errorMessage = "An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console"
 				}
+				
+				window.catalogError! = error
+				console.log("The error encountered can be inspected here by referring to it as catalogError (a property of the window object):")
+				console.log(error.message)
 			})
 		},
 		data(): Object {
