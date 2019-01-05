@@ -23,7 +23,7 @@ services:
     build:
       args:
         python_tag: ${GG_PYTHON3_BASE_IMAGE}
-      context: .
+      context: ./api
       dockerfile: ./python3-base.Dockerfile
     # Prevent failing actions if the container is accidentally started
     command: /bin/true
@@ -35,7 +35,7 @@ services:
         python3_base_tag: ${GG_PYTHON3_BASE_IMAGE}
         starlette_version: 0.9.9
         uvicorn_version: 0.3.23
-      context: ./web
+      context: ./api/graphql-server
       dockerfile: ./starlette.Dockerfile
     # Prevent failing actions if the container is accidentally started
     command: /bin/true
@@ -131,25 +131,6 @@ services:
       - ./api/genre_utils.py:/app/genre_utils.py:ro
       - ./api/track_utils.py:/app/track_utils.py:ro
     working_dir: /
-  
-  web:
-    build:
-      args:
-        aiohttp_version: "3.5.1"
-        # Horrible bug: remove the quotation marks and this becomes 2.1
-        jinja2_version: "2.10"
-        starlette_tag: 0.9.9-0.3.23
-      context: ./web
-    container_name: web
-    hostname: web
-    image: web:dev
-    networks:
-      web-public:
-    restart: always
-    volumes:
-      - ./web/main.py:/app/main.py:ro
-      - ./web/templates:/app/templates:ro
-      - ./api/genre_utils.py:/app/genre_utils.py:ro
   
   webpack:
     build:

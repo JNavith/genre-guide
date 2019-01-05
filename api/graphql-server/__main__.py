@@ -22,7 +22,6 @@ from json import dumps, loads
 from os import getenv
 from re import sub
 from typing import Generator, List as typing_List, Optional, Tuple, cast
-from urllib.parse import quote
 
 from aioredis import Redis, create_redis_pool
 from graphene import Argument, Boolean, Date, Enum, Field, ID, Int, List, ObjectType, Schema, String
@@ -235,17 +234,14 @@ class Track(ObjectType):
 							color_info = await Subgenre(name=subgenre).resolve_color(info)
 							colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
 						else:
-							# The genre this is an unknown subgenre of does not exist
+							# This is an unknown subgenre of a genre that does not exist
 							colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
 		
 		return dumps([flat_list, colors])
 	
 	async def resolve_image(self, info):
-		flat_list: typing_List[str] = flatten_subgenres(loads(await self.resolve_subgenres_json(info)))
-		
-		# Todo: querying an external API (but whose?) before giving a placeholder
-		
-		return f"/svg/song-missing-art.svg?subgenre={quote(flat_list[0][0])}"
+		# Todo: querying an external API (but whose?) before giving a no-answer
+		return None
 
 
 def all_dates_between(start: date, end: date, reverse: bool = False) -> Generator[date, None, None]:
