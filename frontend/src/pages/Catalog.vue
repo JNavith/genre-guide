@@ -1,17 +1,19 @@
 <template>
-	<div id="app" class="font-sans min-h-screen flex flex-col relative">
+	<div class="font-sans min-h-screen flex flex-col relative">
 		<div class="h-1 bg-green"></div>
 		<the-header :link-inactive="'green'" :link-active="'green-dark'"></the-header>
 		<main class="flex flex-1 justify-center">
-			<transition name="fade-slow">
-				<track-catalog :tracks="tracks" v-if="tracks !== undefined && tracks.length > 0"></track-catalog>
-				<div class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh" v-else>
-					<div class="flex flex-1 w-full justify-center items-center">
-						<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
+			<div class="mt-8 px-8">
+				<transition name="fade-slow">
+					<track-catalog :tracks="tracks" v-if="tracks !== undefined && tracks.length > 0"></track-catalog>
+					<div class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh" v-else>
+						<div class="flex flex-1 w-full justify-center items-center">
+							<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
+						</div>
+						<p class="mt-6 text-2xl-responsive">The catalog is loading</p>
 					</div>
-					<p class="mt-6 text-2xl-responsive">The catalog is loading</p>
-				</div>
-			</transition>
+				</transition>
+			</div>
 		</main>
 		<div class="h-1 bg-green"></div>
 	</div>
