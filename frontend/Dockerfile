@@ -3,8 +3,11 @@ FROM node:${node_tag}
 
 WORKDIR /home/node
 
-COPY . .
+COPY ./package.json .
+COPY ./package-lock.json .
 
 RUN npm install
+
+COPY . .
 
 CMD ["npm", "run", "build"]
