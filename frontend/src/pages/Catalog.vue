@@ -5,12 +5,19 @@
 		<main class="flex flex-1 justify-center">
 			<div class="mt-8 px-8">
 				<transition name="fade-slow">
-					<track-catalog :tracks="tracks" v-if="tracks !== undefined && tracks.length > 0"></track-catalog>
-					<div class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh" v-else>
-						<div class="flex flex-1 w-full justify-center items-center">
+					<track-catalog v-if="tracks !== undefined && tracks.length > 0" :tracks="tracks"></track-catalog>
+					<div v-else class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh">
+						<div v-if="errorMessage === ''" class="flex flex-1 w-full justify-center items-center">
 							<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
 						</div>
-						<p class="mt-6 text-2xl-responsive">The catalog is loading</p>
+						<p class="mt-6 text-2xl-responsive">
+							<template v-if="errorMessage === ''">
+								The catalog is loading
+							</template>
+							<template v-else>
+								{{ errorMessage }}
+							</template>
+						</p>
 					</div>
 				</transition>
 			</div>
@@ -57,11 +64,18 @@
 				const thisAny = this as any;
 				thisAny.tracks = (data as any).tracks as Object[];
 				thisAny.lastTrack = thisAny.tracks[thisAny.tracks.length - 1]
+			}).catch(error => {
+				if (error instanceof TypeError && error.message.startsWith("NetworkError")) {
+					this.errorMessage = "There was a network error trying to load the catalog"
+				} else {
+					this.errorMessage = "An unknown error occurred loading the catalog"
+				}
 			})
 		},
 		data(): Object {
 			return {
-				tracks: [] as string[]
+				tracks: [] as string[],
+				errorMessage: ""
 			}
 		}
 	})
