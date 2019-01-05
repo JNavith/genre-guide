@@ -20,7 +20,7 @@
 			<tr class="h-3"></tr>
 			
 			<template v-for="(track, index) in trackList">
-				<TrackEntry :key="track.id" :track="track" :index="getTrackNumberInList(trackList, index)" />
+				<TrackEntry :key="track.id" v-bind="track" :index="getTrackNumberInList(trackList, index)" />
 			</template>
 		</template>
 	</table>

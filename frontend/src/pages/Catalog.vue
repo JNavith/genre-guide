@@ -35,21 +35,22 @@
 			TheHeader,
 			TrackCatalog,
 		},
-		created() {
+		created(): void {
 			request("https://genre.guide/graphql", `
 				{
 					tracks {
 						date {
 							year
-							month_name
+							monthName: month_name
 							day
 						}
 						id
 						name
 						artist
-						record_label
+						recordLabel: record_label
 						image
-						subgenres_with_colors_json: subgenres_flat_json(and_colors: TAILWIND)
+						subgenresWithTailwindColorsJSON: subgenres_flat_json(and_colors: TAILWIND)
+						subgenresWithHexColorsJSON: subgenres_flat_json(and_colors: HEX)
 					}
 				}
 			`).then((data: Object): void => {
