@@ -55,8 +55,31 @@ services:
     restart: always
     volumes:
       - ./Caddyfile:/etc/Caddyfile:ro
-      - ./dist/css:/srv/css:ro
-      - ./branding:/srv/img:ro
+      - ./frontend/dist:/srv:ro
+  
+  frontend:
+    build:
+      args:
+        node_tag: "11.6.0-alpine"
+      context: ./frontend
+    # dev only
+    command: ["npm", "run", "serve"]
+    container_name: frontend
+    image: frontend:dev
+    networks:
+      web-private:
+      web-public:
+    # dev only
+    ports:
+      - 9983:8080
+    volumes:
+      - ./frontend/dist:/home/node/dist
+      # dev only (preferably) -- allows for live reload (all those miscellaneous files in the frontend folder are not
+      # included because it's a better idea to rebuild the container when editing those for them to take effect
+      # (just to be certain)
+      # I.E. the image needs to be re-built after MOST file changes 
+      - ./frontend/public:/home/node/public:ro
+      - ./frontend/src:/home/node/src:ro
   
   frontend:
     build:
