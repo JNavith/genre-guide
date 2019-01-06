@@ -55,8 +55,7 @@ services:
     restart: always
     volumes:
       - ./Caddyfile:/etc/Caddyfile:ro
-      - ./dist/css:/srv/css:ro
-      - ./branding:/srv/img:ro
+      - ./frontend/dist:/srv:ro
   
   frontend:
     build:

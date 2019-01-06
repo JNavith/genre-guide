@@ -4,9 +4,9 @@ https://{$DOMAIN_NAME} {
 	root /srv
 	gzip
 	
-	proxy / web:80 {
-		transparent
-		except /css /img
+	rewrite {
+		if {path} is /catalog
+		to /catalog.html
 	}
 	
 	proxy /graphql graphql-server:80 {
