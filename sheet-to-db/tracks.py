@@ -1,7 +1,6 @@
 from collections import Iterator, defaultdict, namedtuple
 from json import dumps
 from os import getenv
-from sys import stderr
 from typing import Awaitable, DefaultDict, Dict, Iterable, List, Set, Tuple, cast
 
 from aioredis.commands import MultiExec, Redis
@@ -120,8 +119,11 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		
 		transaction.sadd(date_set_name, date)
 	
-	tracks_to_remove = tracks_already_in_database - tracks_being_added
-	print("Removing tracks", tracks_to_remove, flush=True, file=stderr)
+	tracks_new_to_db: Set[str] = tracks_being_added - tracks_already_in_database
+	print("Just added", tracks_new_to_db)
+	
+	tracks_to_remove: Set[str] = tracks_already_in_database - tracks_being_added
+	print("Removing tracks", tracks_to_remove)
 	
 	# Remove songs that were removed from the sheet
 	for index, track_id in enumerate(tracks_to_remove, start=index + 1):
@@ -129,7 +131,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
 		
-		release_date = await redis.hget(f"track:{track_id}", "release")
+		release_date = (await redis.hget(f"track:{track_id}", "release")).decode("utf8")
 		
 		# Remove from the tracks set
 		transaction.srem("tracks", f"{track_id}")

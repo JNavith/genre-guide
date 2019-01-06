@@ -1,0 +1,25 @@
+{
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --no-clean"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "=3.2.2",
+    "@vue/cli-plugin-typescript": "=3.2.2",
+    "@vue/cli-service": "=3.2.2",
+    "cssnano": "=4.1.8",
+    "glob": "=7.1.3",
+    "graphql-request": "=1.8.2",
+    "purgecss-webpack-plugin": "=1.4.0",
+    "sync-request": "=6.0.0",
+    "tailwindcss": "=0.7.3",
+    "tailwindcss-transition": "=1.0.5",
+    "typescript": "=3.2.2",
+    "vue": "=2.5.21",
+    "vue-loader": "=15.4.2",
+    "vue-loaders": "=2.0.0",
+    "vue-template-compiler": "=2.5.21",
+    "webpack-dev-server": "=3.1.14"
+  }
+}

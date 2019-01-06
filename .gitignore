@@ -1,3 +1,4 @@
 config-and-secrets/
 dist/
 redis/
+frontend/node_modules/

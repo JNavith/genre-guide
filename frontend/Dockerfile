@@ -7,6 +7,6 @@ COPY ./package.json .
 
 RUN npm install
 
-RUN npm install 
+COPY . .
 
-CMD ["npm", "run", "prod"]
+CMD ["npm", "run", "build"]
