@@ -61,19 +61,18 @@
 					}
 				}
 			`).then((data: Object): void => {
-				const thisAny = this as any;
-				thisAny.tracks = (data as any).tracks as Object[];
-				thisAny.lastTrack = thisAny.tracks[thisAny.tracks.length - 1]
+				(this as any).tracks = (data as any).tracks as Object[];
+				(this as any).lastTrack = (this as any).tracks[(this as any).tracks.length - 1]
 			}).catch(error => {
 				if (error instanceof TypeError && error.message.startsWith("NetworkError")) {
-					this.errorMessage = "There was a network error trying to load the catalog"
+					(this as any).errorMessage = "There was a network error trying to load the catalog"
 				} else if (error.hasOwnProperty("response") && error.response!.errors.length > 0) {
-					this.errorMessage = "There was an error in the catalog response itself, which is probably out of your control"
+					(this as any).errorMessage = "There was an error in the catalog response itself, which is probably out of your control"
 				} else {
-					this.errorMessage = "An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console"
+					(this as any).errorMessage = "An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console"
 				}
 				
-				window.catalogError! = error
+				(window as any).catalogError = error
 				console.log("The error encountered can be inspected here by referring to it as catalogError (a property of the window object):")
 				console.log(error.message)
 			})

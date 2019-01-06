@@ -67,6 +67,9 @@ services:
     command: ["npm", "run", "serve"]
     container_name: frontend
     image: frontend:dev
+    networks:
+      web-private:
+      web-public:
     # dev only
     ports:
       - 9983:8080
