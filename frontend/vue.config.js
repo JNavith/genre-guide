@@ -1,8 +1,5 @@
-const path = require('path');
 const glob = require('glob');
 
-const VueLoaderPlugin = require('vue-loader/lib/plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
 
 class TailwindExtractor {
@@ -22,61 +19,21 @@ module.exports = {
 		catalog: index,
 	},
 	configureWebpack: {
-		entry: {
-			// tailwind: './tailwind.postcss',
-			catalogTs: './src/pages/catalog.ts',
-			catalogVue: './src/pages/Catalog.vue',
-		},
-		mode: process.env.NODE_ENV,
-		module: {
-			rules: [
-				{
-					test: /\.ts$/,
-					loader: 'ts-loader',
-				},
-				{
-					test: /\.vue$/,
-					loader: 'vue-loader',
-				},
-				{
-					test: /\.postcss$/,
-					use: [
-						// 'css-hot-loader',
-						// MiniCssExtractPlugin.loader,
-						// "css-loader",
-						'vue-style-loader',
-						"postcss-loader",
-					],
-				},
-			],
-		},
 		plugins: [
-			new VueLoaderPlugin(),
-			
-			// new MiniCssExtractPlugin({
-			// 	filename: 'css/[name].css',
-			// 	chunkFilename: "[id].css"
-			// }),
-			
 			new PurgecssPlugin({
-				paths: glob.sync(`./src/**/*.vue`, {nodir: true}),
+				paths: [
+					...glob.sync(`./src/**/*.vue`, {nodir: true}),
+					...glob.sync(`./src/**/*.html`, {nodir: true}),
+					...glob.sync(`./public/index.html`, {nodir: true}),
+				],
 				extractors: [
 					{
 						extractor: TailwindExtractor,
-						extensions: ['vue']
+						extensions: ['vue', 'html']
 					},
 				],
 			}),
 		],
-		resolve: {
-			alias: {
-				vue$: 'vue/dist/vue.common.js',
-			},
-			extensions: [".ts", ".tsx", ".js", ".vue"],
-		},
-		output: {
-			filename: "[name].js"
-		}
 	}
 };
 
@@ -84,6 +41,7 @@ module.exports = {
 if (process.env.NODE_ENV !== "production") {
 	console.log("hello what I assume is a development build from vue config!")
 	// Exclude purgecss from dev builds
+	console.log("skipping purgecss in development mode")
 	module.exports.configureWebpack.plugins.pop();
 } else {
 	console.log("hello production build from vue config!")

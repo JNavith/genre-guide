@@ -28,13 +28,15 @@
 
 <script lang="ts">
 	import Vue from "vue"
-	import request from "graphql-request";
-	import TheHeader from "../components/TheHeader.vue";
-	import TrackCatalog from '../components/TrackCatalog.vue';
+	import request from "graphql-request"
+	import TheHeader from "../components/TheHeader.vue"
+	import TrackCatalog from '../components/TrackCatalog.vue'
 	
-	import 'vue-loaders/dist/vue-loaders.css';
+	import 'vue-loaders/dist/vue-loaders.css'
 	// @ts-ignore
 	import {LineScalePulseOutRapidLoader} from 'vue-loaders';
+	
+	import "../../tailwind.postcss"
 	
 	export default Vue.extend({
 		components: {

@@ -14,7 +14,7 @@ module.exports = {
 
 if (process.env.NODE_ENV !== "production") {
 	console.log("hello, presumably, development build from postcss config!")
-	module.exports.plugins.pop();
+	console.log("skipping cssnano in development mode")
 	module.exports.plugins.pop();
 } else {
 	console.log("hello production build from postcss config!")
