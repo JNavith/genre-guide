@@ -78,6 +78,7 @@ services:
       # dev only (preferably) -- allows for live reload (all those miscellaneous files in the frontend folder are not
       # included because it's a better idea to rebuild the container when editing those for them to take effect
       # (just to be certain)
+      # I.E. the image needs to be re-built after MOST file changes 
       - ./frontend/public:/home/node/public:ro
       - ./frontend/src:/home/node/src:ro
   
@@ -154,24 +155,6 @@ services:
       - ./api/genre_utils.py:/app/genre_utils.py:ro
       - ./api/track_utils.py:/app/track_utils.py:ro
     working_dir: /
-  
-  webpack:
-    build:
-      args:
-        node_tag: 11.1.0-alpine
-      context: ./webpack
-    #    command: ["npm", "run", "dev"]
-    container_name: webpack
-    image: webpack:2.1.14
-    networks:
-      web-private:
-    volumes:
-      - ./webpack/tailwind.postcss:/home/node/src/css/tailwind.postcss:ro
-      - ./webpack/tailwind.js:/home/node/tailwind.js:ro
-      - ./webpack/webpack.config.js:/home/node/webpack.config.js:ro
-      - ./webpack/postcss.config.js:/home/node/postcss.config.js:ro
-      - ./web/templates:/home/node/src/html:ro
-      - ./dist/css:/home/node/dist/css
 
 
 networks:

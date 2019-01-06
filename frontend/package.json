@@ -1,34 +1,24 @@
 {
-  "name": "genre.guide-vue",
-  "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --no-clean"
   },
-  "dependencies": {
-    "css-hot-loader": "=1.4.3",
-    "css-loader": "=2.1.0",
-    "cssnano": "=4.1.8",
-    "glob": "=7.1.3",
-    "graphql-request": "=1.8.2",
-    "mini-css-extract-plugin": "=0.5.0",
-    "postcss": "=7.0.7",
-    "postcss-loader": "=3.0.0",
-    "purgecss-webpack-plugin": "=1.4.0",
-    "style-loader": "=0.23.1",
-    "sync-request": "=6.0.0",
-    "tailwindcss": "=0.7.3",
-    "tailwindcss-transition": "=1.0.5",
-    "vue": "=2.5.21",
-    "vue-loaders": "=2.0.0"
-  },
   "devDependencies": {
     "@vue/cli-plugin-babel": "=3.2.2",
     "@vue/cli-plugin-typescript": "=3.2.2",
     "@vue/cli-service": "=3.2.2",
+    "cssnano": "=4.1.8",
+    "glob": "=7.1.3",
+    "graphql-request": "=1.8.2",
+    "purgecss-webpack-plugin": "=1.4.0",
+    "sync-request": "=6.0.0",
+    "tailwindcss": "=0.7.3",
+    "tailwindcss-transition": "=1.0.5",
     "typescript": "=3.2.2",
+    "vue": "=2.5.21",
     "vue-loader": "=15.4.2",
+    "vue-loaders": "=2.0.0",
     "vue-template-compiler": "=2.5.21",
     "webpack-dev-server": "=3.1.14"
   }
