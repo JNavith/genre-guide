@@ -269,6 +269,7 @@ class Query(ObjectType):
 	              after=Date(description="The oldest date of songs to retrieve (inclusive)", required=False),
 	              newest_first=Boolean(description="Whether to sort the returned tracks from newest to oldest, or oldest to newest", required=False),
 	              limit=Int(description="The maximum number of songs to return", required=False),
+	              before_id=ID(description="The newest song to retrieve (exclusive) by its ID. Do not set any other parameter than `limit` when using this", required=False),
 	              description="Retrieve a range of tracks from the Genre Sheet")
 	
 	track = Field(Track, id=ID(description="The ID of the track to retrieve"), description="Retrieve a particular track from the database")
@@ -291,7 +292,7 @@ class Query(ObjectType):
 	async def resolve_all_genres(self, info):
 		return [Subgenre(name=genre.decode("utf8")) for genre in await do_redis("smembers", "genres")]
 	
-	async def resolve_tracks(self, info, after=None, before=None, limit: Optional[int] = None, newest_first: bool = True):
+	async def resolve_tracks(self, info, after=None, before=None, limit: Optional[int] = None, newest_first: bool = True, before_id=None):
 		if before is None:
 			# Two days from now
 			before = date.today() + timedelta(days=2)
@@ -299,7 +300,7 @@ class Query(ObjectType):
 		if limit is None:
 			limit = 100
 		
-		limit: int = min(limit, 1000)
+		limit: int = max(0, min(limit, 1000))
 		
 		tracks: typing_List[Track] = []
 		
@@ -308,24 +309,50 @@ class Query(ObjectType):
 				for track_id in await do_redis("lrange", f"date:{date_.strftime('%Y-%m-%d')}", 0, -1):
 					tracks.append(Track(id=track_id.decode("utf8")))
 					
-					if len(tracks) >= limit:
+					limit -= 1
+					if limit == 0:
 						return tracks
 		else:
 			if not newest_first:
 				raise GraphQLError("`newest_first` must be true when `after` is not specified")
 			
+			if before_id is not None:
+				# Validate that the track exists
+				if not await do_redis("sismember", "tracks", before_id):
+					raise GraphQLError(f"There is no track with id {before_id!r}!")
+				
+				track_release_date: str = (await do_redis("hget", Track._get_redis_key(before_id), "release")).decode("utf8")
+				position_in_date_list: int
+				
+				for index, other_track_id in enumerate(await do_redis("lrange", f"date:{track_release_date}", 0, -1)):
+					if other_track_id.decode("utf8") == before_id:
+						position_in_date_list = index
+						break
+				
+				# Found the track's position. Yield the songs after it.
+				for track_id in await do_redis("lrange", f"date:{track_release_date}", position_in_date_list + 1, -1):
+					tracks.append(Track(id=track_id.decode("utf8")))
+					
+					limit -= 1
+					if limit == 0:
+						return tracks
+				
+				# If we reach this point, allow the "tracks before" mode to take over what's left
+				before = datetime.strptime(track_release_date, "%Y-%m-%d") - timedelta(days=1)
+			
 			for date_ in all_dates_before(before):
 				for track_id in await do_redis("lrange", f"date:{date_.strftime('%Y-%m-%d')}", 0, -1):
 					tracks.append(Track(id=track_id.decode("utf8")))
 					
-					if len(tracks) >= limit:
+					limit -= 1
+					if limit == 0:
 						return tracks
 		
-		# If the limit is not reached (for either of the cases from above), just return the list like this
+		# If the limit is not reached (for any of the cases from above), just return the list like this
 		return tracks
 	
 	async def resolve_track(self, info, id):
-		if not (await do_redis("exists", Track._get_redis_key(id))):
+		if not await do_redis("sismember", "tracks", id):
 			raise GraphQLError(f"There is no track with id {id!r}!")
 		
 		return Track(id=id)
