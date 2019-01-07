@@ -8,16 +8,42 @@ class TailwindExtractor {
 	}
 }
 
-let index = {
-	entry: 'src/pages/catalog.ts',
-	fileName: 'catalog.html'
+const siteName = "genre.guide"
+
+let pages = {
+	index: {
+		entry: "src/pages/catalog.ts",
+		fileName: "catalog.html",
+		title: `Catalog - ${siteName}`,
+		meta: {
+			description: "Learn about genres by their history, characteristics, and examples",
+			author: "Navith",
+			"og:image": "img/1x1-logo.png",
+			"twitter:card": "summary_large_image",
+			"twitter:site": siteName,
+			"twitter:image:alt": siteName
+		},
+	},
 };
 
+pages.catalog = {
+	...pages.index,
+	meta: {
+		...pages.index.meta,
+		description: "Browse the catalog of songs with identified subgenres",
+	}
+}
+
+for (let page in Object.values(pages)) {
+	page.meta["og:title"] = page.title
+	page.meta["og:description"] = page.meta.description
+	page.meta["twitter:title"] = page.title
+	page.meta["twitter:description"] = page.meta.description
+	page.meta["twitter:creator"] = page.meta.author
+	page.meta["twitter:image"] = page.meta["og:image"]
+}
+
 module.exports = {
-	pages: {
-		index,
-		catalog: index,
-	},
 	configureWebpack: {
 		plugins: [
 			new PurgecssPlugin({
@@ -34,7 +60,9 @@ module.exports = {
 				],
 			}),
 		],
-	}
+	},
+	integrity: process.env.NODE_ENV === "production",
+	pages: pages
 };
 
 

@@ -5,7 +5,10 @@
 		<main class="flex flex-1 justify-center">
 			<div class="mt-8 px-8">
 				<transition name="fade-slow">
-					<track-catalog v-if="tracks !== undefined && tracks.length > 0" :tracks="tracks"></track-catalog>
+					<div v-if="tracks !== undefined && tracks.length > 0">
+						<track-catalog :tracks="tracks"></track-catalog>
+						<button type="button" @click="loadMoreTracks">Click me</button>
+					</div>
 					<div v-else class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh">
 						<div v-if="errorMessage === ''" class="flex flex-1 w-full justify-center items-center">
 							<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
@@ -83,6 +86,11 @@
 			return {
 				tracks: [] as string[],
 				errorMessage: ""
+			}
+		},
+		methods: {
+			loadMoreTracks(): void {
+				console.log("ok fine")
 			}
 		}
 	})

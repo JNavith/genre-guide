@@ -11,7 +11,7 @@
 		
 		<!-- Artwork -->
 		<td>
-			<img v-if="image !== undefined" :src="image" :alt="name" class="h-12 w-12 shadow-sm" />
+			<img v-if="image !== null" :src="image" :alt="name" class="h-12 w-12 shadow-sm" />
 			<track-art-missing v-else class="h-12 w-12 shadow-sm" :color-background="hexColors[0][0]" :color-foreground="hexColors[0][1]"></track-art-missing>
 		</td>
 		<!-- End artwork -->
@@ -91,7 +91,7 @@
 			image: {
 				type: String,
 				required: false,
-				default: undefined,
+				default: null,
 			},
 			
 			name: {
