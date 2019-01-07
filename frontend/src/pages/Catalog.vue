@@ -7,7 +7,7 @@
 				<transition name="fade-slow">
 					<div v-if="tracks !== undefined && tracks.length > 0">
 						<track-catalog :tracks="tracks"></track-catalog>
-						<button type="button" @click="loadMoreTracks">Click me</button>
+						<button type="button" @click="loadMoreTracks" class="border-green text-green border-2 rounded-full p-3 mb-8 active:text-green-dark">Click me</button>
 					</div>
 					<div v-else class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh">
 						<div v-if="errorMessage === ''" class="flex flex-1 w-full justify-center items-center">
@@ -91,6 +91,7 @@
 		methods: {
 			loadMoreTracks(): void {
 				console.log("ok fine")
+				console.log(this.lastTrack.id)
 			}
 		}
 	})
