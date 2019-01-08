@@ -2,7 +2,7 @@
 	<div class="font-sans min-h-screen flex flex-col relative">
 		<div class="h-1 bg-green"></div>
 		<the-header :link-inactive="'green'" :link-active="'green-dark'"></the-header>
-		<main class="flex mx-auto">
+		<main class="flex flex-1 mx-auto">
 			<div class="mt-8 px-1 sm:px-4 md:px-8">
 				<transition name="fade-slow">
 					<div v-if="tracks !== undefined && tracks.length > 0">
