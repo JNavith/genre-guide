@@ -2,11 +2,11 @@
 	<table class="w-full mb-12 text-left" style="border-collapse: separate; border-spacing: 0.625rem">
 		<thead class="font-header text-lg-responsive text-grey-dark">
 			<tr>
-				<th class="font-light min-w-16">Release Date</th>
+				<th class="font-light min-w-28 lg:min-w-40">Release Date</th>
 				<th class="font-light"></th>
-				<th class="font-light min-w-64">Song and Artist</th>
-				<th class="font-light min-w-32">Record Label</th>
-				<th class="font-light min-w-48">Subgenres</th>
+				<th class="font-light min-w-32 xl:min-w-128 xxl:min-w-192">Song and Artist</th>
+				<th class="font-light xl:min-w-48 hidden lg:table-cell">Record Label</th>
+				<th class="font-light xl:min-w-96">Subgenres</th>
 			</tr>
 		</thead>
 		<template v-for="(trackList, dateIndex) in Array.from(tracksByDate.values())">

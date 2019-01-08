@@ -114,6 +114,9 @@ nav a:hover {
 	text-white;
 }
 
+.text-md-responsive {
+	@apply text-xs;
+}
 
 .text-lg-responsive {
 	@apply text-sm;
@@ -132,6 +135,10 @@ nav a:hover {
 }
 
 @screen sm {
+	.text-md-responsive {
+		@apply text-sm;
+	}
+	
 	.text-lg-responsive {
 		@apply text-md;
 	}
@@ -150,6 +157,10 @@ nav a:hover {
 }
 
 @screen md {
+	.text-md-responsive {
+		@apply text-md;
+	}
+	
 	.text-lg-responsive {
 		@apply text-lg;
 	}

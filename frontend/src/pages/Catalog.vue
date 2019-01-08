@@ -2,8 +2,8 @@
 	<div class="font-sans min-h-screen flex flex-col relative">
 		<div class="h-1 bg-green"></div>
 		<the-header :link-inactive="'green'" :link-active="'green-dark'"></the-header>
-		<main class="flex flex-1 justify-center">
-			<div class="mt-8 px-8">
+		<main class="flex mx-auto">
+			<div class="mt-8 px-1 sm:px-4 md:px-8">
 				<transition name="fade-slow">
 					<div v-if="tracks !== undefined && tracks.length > 0">
 						<track-catalog :tracks="tracks" ref="trackCatalog"></track-catalog>
@@ -69,7 +69,7 @@
 		created(): void {
 			window.addEventListener('scroll', this.scrolled);
 			
-			this.isLoadingTracks = true
+			(this as any).isLoadingTracks = true
 			request("https://genre.guide/graphql", `
 				{
 					tracks {
@@ -80,13 +80,13 @@
 				((data as any).tracks as object[]).forEach((track, index) => {
 					(track as any).transitionIndex = index;
 					(this as any).tracks.push(track);
-				})
+				});
 				
-				this.isLoadingTracks = false
+				(this as any).isLoadingTracks = false
 				// Don't ask questions
 				let component = this;
 				setTimeout(function () {
-					component.$refs.trackCatalog.updateTracks((data as any).tracks.length)
+					(component.$refs.trackCatalog as any).updateTracks((data as any).tracks.length)
 				}, 0);
 			}).catch(error => {
 				if (error instanceof TypeError && error.message.startsWith("NetworkError")) {
@@ -114,7 +114,7 @@
 		},
 		methods: {
 			loadMoreTracks(): void {
-				this.isLoadingTracks = true
+				(this as any).isLoadingTracks = true
 				
 				request("https://genre.guide/graphql", `
 					query tracksFromBeforeTheLastTrackCurrentlyInTheCatalog($beforeID: ID!) {
@@ -124,18 +124,16 @@
 					}
 				`, {
 					beforeID: (this as any).tracks[(this as any).tracks.length - 1].id
-				}).then((data: Object): void => {
-					((data as any).tracks as object[]).forEach((track, index) => {
-						(track as any).transitionIndex = index;
+				}).then((data: Object) => {
+					((data as any).tracks as object[]).forEach((track: any, index: number): void => {
+						track.transitionIndex = index;
 						(this as any).tracks.push(track);
-					})
-					this.isLoadingTracks = false;
-					this.$refs.trackCatalog.updateTracks((data as any).tracks.length);
+					});
+					(this as any).isLoadingTracks = false;
+					(this.$refs.trackCatalog as any).updateTracks((data as any).tracks.length);
 				})
 			},
-			scrolled(event): void {
-				const element = event.target
-				
+			scrolled(event: Event): void {
 				if ((3 * window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
 					if (!(this as any).isLoadingTracks) {
 						(this as any).loadMoreTracks()
