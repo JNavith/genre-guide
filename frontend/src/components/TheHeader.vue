@@ -6,7 +6,7 @@
 				<span class="ml-2 opacity-75 font-normal text-2xl-responsive">(alpha)</span>
 			</a>
 			<div class="flex ml-6">
-				<a v-for="dest in ['catalog', 'genres', 'about']" :key="dest" :href="'/'+dest" class="block mr-3 sm:mr-6 md:mr-10 text-xl-responsive transition font-normal" :class="['text-'+linkInactive, 'hover:text-'+linkActive]">{{ dest }}</a>
+				<a v-for="dest in ['catalog']" :key="dest" :href="'/'+dest" class="block mr-3 sm:mr-6 md:mr-10 text-xl-responsive transition font-normal" :class="['text-'+linkInactive, 'hover:text-'+linkActive]">{{ dest }}</a>
 			</div>
 		</nav>
 	</header>

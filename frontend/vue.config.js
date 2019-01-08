@@ -18,8 +18,8 @@ let pages = {
 		meta: {
 			description: "Learn about genres by their history, characteristics, and examples",
 			author: "Navith",
-			"og:image": "img/1x1-logo.png",
-			"twitter:card": "summary_large_image",
+			"og:image": "/img/1x1-logo.png",
+			"twitter:card": "summary",
 			"twitter:site": siteName,
 			"twitter:image:alt": siteName
 		},
