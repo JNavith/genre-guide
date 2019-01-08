@@ -67,9 +67,10 @@
 		created: function () {
 			// Delayed fade-in based on index
 			let thisComponent = this;
+			const delay = (1 + Math.sqrt(this.transitionIndex)) * 100
 			setTimeout(function () {
 				thisComponent.show = true
-			}, (1 + Math.sqrt(this.index)) * 100)
+			}, delay)
 		},
 		data: function () {
 			return {
@@ -121,7 +122,7 @@
 				default: "[[], []]",
 			},
 			
-			index: {
+			transitionIndex: {
 				type: Number,
 				required: false,
 				default: 0

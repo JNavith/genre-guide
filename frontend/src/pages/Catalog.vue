@@ -6,8 +6,11 @@
 			<div class="mt-8 px-8">
 				<transition name="fade-slow">
 					<div v-if="tracks !== undefined && tracks.length > 0">
-						<track-catalog :tracks="tracks"></track-catalog>
-						<button type="button" @click="loadMoreTracks" class="border-green text-green border-2 rounded-full p-3 mb-8 active:text-green-dark">Click me</button>
+						<track-catalog :tracks="tracks" ref="trackCatalog"></track-catalog>
+						<div v-if="isLoadingTracks" class="w-full flex flex-col justify-center items-center text-grey mt-6 mb-12">
+							<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
+							More tracks are loading
+						</div>
 					</div>
 					<div v-else class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh">
 						<div v-if="errorMessage === ''" class="flex flex-1 w-full justify-center items-center">
@@ -41,6 +44,22 @@
 	
 	import "../../tailwind.postcss"
 	
+	let tracksFragment = `
+		date {
+			year
+			monthName: month_name
+			day
+		}
+		id
+		name
+		artist
+		recordLabel: record_label
+		image
+		subgenresWithTailwindColorsJSON: subgenres_flat_json(and_colors: TAILWIND)
+		subgenresWithHexColorsJSON: subgenres_flat_json(and_colors: HEX)
+	`
+	
+	
 	export default Vue.extend({
 		components: {
 			LineScalePulseOutRapidLoader,
@@ -48,26 +67,27 @@
 			TrackCatalog,
 		},
 		created(): void {
+			window.addEventListener('scroll', this.scrolled);
+			
+			this.isLoadingTracks = true
 			request("https://genre.guide/graphql", `
 				{
 					tracks {
-						date {
-							year
-							monthName: month_name
-							day
-						}
-						id
-						name
-						artist
-						recordLabel: record_label
-						image
-						subgenresWithTailwindColorsJSON: subgenres_flat_json(and_colors: TAILWIND)
-						subgenresWithHexColorsJSON: subgenres_flat_json(and_colors: HEX)
+						${tracksFragment}
 					}
 				}
 			`).then((data: Object): void => {
-				(this as any).tracks = (data as any).tracks as Object[];
-				(this as any).lastTrack = (this as any).tracks[(this as any).tracks.length - 1]
+				((data as any).tracks as object[]).forEach((track, index) => {
+					(track as any).transitionIndex = index;
+					(this as any).tracks.push(track);
+				})
+				
+				this.isLoadingTracks = false
+				// Don't ask questions
+				let component = this;
+				setTimeout(function () {
+					component.$refs.trackCatalog.updateTracks((data as any).tracks.length)
+				}, 0);
 			}).catch(error => {
 				if (error instanceof TypeError && error.message.startsWith("NetworkError")) {
 					(this as any).errorMessage = "There was a network error trying to load the catalog"
@@ -84,16 +104,45 @@
 		},
 		data(): Object {
 			return {
+				isLoadingTracks: true,
 				tracks: [] as string[],
 				errorMessage: ""
 			}
 		},
+		destroyed() {
+			window.addEventListener('scroll', this.scrolled);
+		},
 		methods: {
 			loadMoreTracks(): void {
-				console.log("ok fine")
-				console.log(this.lastTrack.id)
-			}
-		}
+				this.isLoadingTracks = true
+				
+				request("https://genre.guide/graphql", `
+					query tracksFromBeforeTheLastTrackCurrentlyInTheCatalog($beforeID: ID!) {
+						tracks(before_id: $beforeID) {
+							${tracksFragment}
+						}
+					}
+				`, {
+					beforeID: (this as any).tracks[(this as any).tracks.length - 1].id
+				}).then((data: Object): void => {
+					((data as any).tracks as object[]).forEach((track, index) => {
+						(track as any).transitionIndex = index;
+						(this as any).tracks.push(track);
+					})
+					this.isLoadingTracks = false;
+					this.$refs.trackCatalog.updateTracks((data as any).tracks.length);
+				})
+			},
+			scrolled(event): void {
+				const element = event.target
+				
+				if ((3 * window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+					if (!(this as any).isLoadingTracks) {
+						(this as any).loadMoreTracks()
+					}
+				}
+			},
+		},
 	})
 </script>
 

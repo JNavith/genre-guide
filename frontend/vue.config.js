@@ -34,7 +34,7 @@ pages.catalog = {
 	}
 }
 
-for (let page in Object.values(pages)) {
+for (let page of Object.values(pages)) {
 	page.meta["og:title"] = page.title
 	page.meta["og:description"] = page.meta.description
 	page.meta["twitter:title"] = page.title

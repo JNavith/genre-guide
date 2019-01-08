@@ -2,15 +2,15 @@
 	<table class="w-full mb-12 text-left" style="border-collapse: separate; border-spacing: 0.625rem">
 		<thead class="font-header text-lg-responsive text-grey-dark">
 			<tr>
-				<th class="font-light">Release Date</th>
+				<th class="font-light min-w-16">Release Date</th>
 				<th class="font-light"></th>
-				<th class="font-light">Song and Artist</th>
-				<th class="font-light">Record Label</th>
-				<th class="font-light">Subgenres</th>
+				<th class="font-light min-w-64">Song and Artist</th>
+				<th class="font-light min-w-32">Record Label</th>
+				<th class="font-light min-w-48">Subgenres</th>
 			</tr>
 		</thead>
 		<template v-for="(trackList, dateIndex) in Array.from(tracksByDate.values())">
-			<!-- Hack to imitate padding / margin in a table-->
+			<!-- Hack to imitate padding / margin in a table -->
 			<tr class="h-8" v-if="dateIndex > 0"></tr>
 			<!-- Border -->
 			<tr class="h-1 bg-grey-light">
@@ -19,9 +19,7 @@
 			<!-- Hack to imitate padding / margin in a table-->
 			<tr class="h-3"></tr>
 			
-			<template v-for="(track, index) in trackList">
-				<TrackEntry :key="track.id" v-bind="track" :index="getTrackNumberInList(trackList, index)" />
-			</template>
+			<TrackEntry v-for="track in trackList" :key="track.id" v-bind="track" />
 		</template>
 	</table>
 </template>
@@ -31,53 +29,41 @@
 	import Vue from 'vue';
 	
 	function dateObjToString(date) {
-		return date.year + " " + date.month_name + " " + date.day
+		return date.year + " " + date.monthName + " " + date.day
 	}
 	
 	export default Vue.extend({
 		name: "TrackCatalog",
 		components: {TrackEntry},
-		computed: {
-			tracksByDate() {
-				const map = this.tracks.reduce((map, nextTrack) => {
-					const asString = dateObjToString(nextTrack.date);
-					
-					if (map.get(asString) === undefined) {
-						nextTrack.showDate = true;
-						map.set(asString, [nextTrack]);
-					} else {
-						nextTrack.showDate = false;
-						map.get(asString).push(nextTrack)
-					}
-					return map
-				}, new Map([]));
-				
-				return map
+		data() {
+			return {
+				tracksByDate: new Map([])
 			}
 		},
 		methods: {
-			getTrackNumberInList: function (trackList, index) {
-				for (let [date, candidateTrackList] of this.tracksByDate) {
-					if (trackList === candidateTrackList) {
-						const groupIndex = Array.from(this.tracksByDate.keys()).indexOf(date);
-						
-						let trackNumber = index;
-						for (let i = 0; i < groupIndex; i++) {
-							trackNumber += Array.from(this.tracksByDate.values())[i].length
-						}
-						
-						return trackNumber
+			updateTracks: function (tracksAddedThisTime) {
+				for (let track of this.tracks.slice(this.tracks.length - tracksAddedThisTime, this.tracks.length)) {
+					const asString = dateObjToString(track.date);
+					
+					if (this.tracksByDate.get(asString) === undefined) {
+						track.showDate = true;
+						this.tracksByDate.set(asString, [track])
+					} else {
+						track.showDate = false;
+						this.tracksByDate.get(asString).push(track)
 					}
 				}
-			}
+				
+				this.$forceUpdate();
+			},
 		},
 		props: {
 			tracks: {
 				type: Array,
-				required:
-					true
+				required: true,
+				default: [],
 			}
-		}
+		},
 	})
 </script>
 
