@@ -9,23 +9,40 @@ class TailwindExtractor {
 }
 
 const siteName = "genre.guide"
+const author = "Navith"
 
-let pages = {
+const baseMeta = {
+	author: author,
+	"og:image": "/img/1x1-logo.png",
+	"twitter:card": "summary",
+	"twitter:site": siteName,
+	"twitter:image:alt": siteName
+}
+
+
+const pages = {
 	index: {
 		entry: "src/pages/catalog.ts",
 		fileName: "catalog.html",
 		title: `Catalog - ${siteName}`,
 		meta: {
+			...baseMeta,
 			description: "Learn about genres by their history, characteristics, and examples",
-			author: "Navith",
-			"og:image": "/img/1x1-logo.png",
-			"twitter:card": "summary",
-			"twitter:site": siteName,
-			"twitter:image:alt": siteName
 		},
 	},
+	
+	about: {
+		entry: "src/pages/about.ts",
+		fileName: "about.html",
+		title: `About ${siteName}`,
+		meta: {
+			...baseMeta,
+			description: `How we made ${siteName}`,
+		}
+	}
 };
 
+// For now, the catalog page is basically the index
 pages.catalog = {
 	...pages.index,
 	meta: {
@@ -34,6 +51,7 @@ pages.catalog = {
 	}
 }
 
+// Derive duplicated (basically) meta properties from the originally defined ones
 for (let page of Object.values(pages)) {
 	page.meta["og:title"] = page.title
 	page.meta["og:description"] = page.meta.description

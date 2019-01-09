@@ -35,6 +35,7 @@
 <script lang="ts">
 	import Vue from "vue"
 	import request from "graphql-request"
+	
 	import TheHeader from "../components/TheHeader.vue"
 	import TrackCatalog from '../components/TrackCatalog.vue'
 	
