@@ -32,10 +32,11 @@ def get_all_tracks(genre_sheet: Spreadsheet) -> "Iterator[Track]":
 				# Replace the bare ? with ? (Genre)
 				track = track._replace(subgenre=cast(str, track.subgenre).replace("?", f"? ({track.genre})", 1))
 		# Ambiguity for Trap as well
+		# todo: make this happen on any subgenre in the tree
 		elif track.subgenre.startswith("Trap"):
 			if track.genre == "Hip Hop":
 				track = track._replace(subgenre=cast(str, track.subgenre).replace("Trap", "Trap (Hip Hop)", 1))
-			elif track.genre == "Trap":
+			elif track.genre in {"Trap", "Trap (EDM)"}:
 				track = track._replace(subgenre=cast(str, track.subgenre).replace("Trap", "Trap (EDM)", 1))
 		
 		# Replace the textual subgenre with the parsed one
