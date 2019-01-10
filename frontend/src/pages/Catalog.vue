@@ -3,7 +3,7 @@
 		<div class="h-1 bg-green"></div>
 		<the-header :link-inactive="'green'" :link-active="'green-dark'"></the-header>
 		<main class="flex flex-1 mx-auto">
-			<div class="mt-8 px-1 sm:px-4 md:px-8">
+			<div class="mt-12 px-1 sm:px-4 md:px-8">
 				<transition name="fade-slow">
 					<div v-if="tracks !== undefined && tracks.length > 0">
 						<track-catalog :tracks="tracks" ref="trackCatalog"></track-catalog>

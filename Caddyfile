@@ -8,6 +8,10 @@ https://{$DOMAIN_NAME} {
 		if {path} is /catalog
 		to /catalog.html
 	}
+	rewrite {
+		if {path} is /about
+		to /about.html
+	}
 	
 	proxy /graphql graphql-server:80 {
 		transparent

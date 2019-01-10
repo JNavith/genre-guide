@@ -95,8 +95,11 @@ let genreColors = (() => {
 |
 */
 
-let original_colors = {
+let originalColors = {
 	'transparent': 'transparent',
+	'current-color': 'currentColor',
+	
+	'genre-this': 'var(--genre-this-color)',
 	
 	'black': '#000000',
 	'black-light': '#22292f',
@@ -112,11 +115,9 @@ let original_colors = {
 	'green-darker': '#00570E',
 	'green-dark': '#009802',
 	'green': '#0FBB00',
-	
-	'genre-this': 'var(--genre-this-color)',
 };
 
-let colors = Object.assign(original_colors, genreColors);
+let colors = Object.assign(originalColors, genreColors);
 
 module.exports = {
 	
@@ -429,7 +430,7 @@ module.exports = {
 	|
 	*/
 	
-	borderColors: global.Object.assign({default: colors['grey-light']}, colors),
+	borderColors: global.Object.assign({default: colors['current-color']}, colors),
 	
 	
 	/*
@@ -494,6 +495,7 @@ module.exports = {
 		'20': '5rem',
 		'24': '6rem',
 		'32': '8rem',
+		'40': '10rem',
 		'48': '12rem',
 		'64': '16rem',
 		'72': '18rem',
@@ -544,6 +546,7 @@ module.exports = {
 		'20': '5rem',
 		'24': '6rem',
 		'32': '8rem',
+		'40': '10rem',
 		'48': '12rem',
 		'64': '16rem',
 		'128': '32rem',
@@ -598,6 +601,7 @@ module.exports = {
 	
 	minHeight: {
 		'0': '0',
+		'48': '12rem',
 		'full': '100%',
 		'screen': '100vh'
 	},
@@ -965,18 +969,24 @@ module.exports = {
 				'slow': 'all 2s ease',
 			}
 		}),
-		// Container
+		
+		require("tailwindcss-typography")({
+			variants: [],
+			textShadows: {
+				"default": "0 4px 8px hsla(0deg, 0%, 0%, 0.12)",
+			},
+		}),
+		
+		// Container replacement
 		(function ({screens}) {
 				return function ({addComponents, config}) {
 					let subcomponents = {maxWidth: screens.default};
-					let screen_config = config("screens", []);
+					let screenConfig = config("screens", []);
 					
-					for (let [screen, max_width] of Object.entries(screens)) {
+					for (let [screen, maxWidth] of Object.entries(screens)) {
 						if (screen === "default") continue;
 						
-						subcomponents["@media (min-width: " + screen_config[screen] + ")"] = {
-							maxWidth: max_width,
-						}
+						subcomponents[`@media (min-width: ${screenConfig[screen]})`] = {maxWidth}
 					}
 					
 					addComponents({".container": subcomponents});
@@ -987,8 +997,8 @@ module.exports = {
 				"default": "none",
 				"sm": "30rem",
 				"md": "40rem",
-				"lg": "50rem",
-				"xxl": "110rem",
+				"lg": "60rem",
+				"xl": "70rem",
 			}
 		}),
 	],
