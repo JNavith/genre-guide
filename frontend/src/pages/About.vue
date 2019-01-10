@@ -60,7 +60,7 @@
 					},
 					{
 						title: "GraphQL",
-						descriptionHtml: `genre.guide’s API is available over the GraphQL query language at <a href="/graphql" class="font-medium underline text-current-color hover:text-white transition">this endpoint</a>. <br /> Opening this link in the browser will bring you to the GraphiQL playground, where you can experiment building queries with autocompletion.`,
+						descriptionHtml: `genre.guide’s API is available over the GraphQL query language at <a href="/graphql" class="font-medium underline text-current-color hover:text-white transition">this endpoint</a>. <br /> Opening this link in the browser will bring you to the GraphiQL playground, where you can and explore the schema experiment building queries with autocompletion. <br /> Note that the API is provisional and likely to break while you aren't looking.`,
 						colorBackground: "#E535AB",
 						colorForeground: "#FFFFFF",
 						colorForegroundSecondary: "#FBCBFF",

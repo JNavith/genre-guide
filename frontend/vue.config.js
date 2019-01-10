@@ -37,7 +37,7 @@ const pages = {
 		title: `About ${siteName}`,
 		meta: {
 			...baseMeta,
-			description: `How we made ${siteName}`,
+			description: `How we make ${siteName}`,
 		}
 	}
 };
