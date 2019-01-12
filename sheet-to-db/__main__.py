@@ -44,7 +44,7 @@ async def main(loop: AbstractEventLoop):
 		futures: List[List[Awaitable]] = [
 			await seed_redis_with_track_data(redis, create_tracks_data_set(get_all_tracks(genre_sheet))),
 			
-			await seed_redis_with_subgenre_data(redis, create_subgenres_data_set(build_up_subgenre_information(genre_sheet)))
+			await seed_redis_with_subgenre_data(redis, create_subgenres_data_set(*build_up_subgenre_information(genre_sheet)))
 		]
 		
 		print(f"going to wait for {sum(map(len, futures))} futures to finish before exiting", flush=True)

@@ -130,7 +130,7 @@ services:
       context: ./sheet-to-db
     # Uncomment to run tests
     # todo: move tests to api
-    # command: ["sh", "./run-tests.sh"]
+    #    command: ["sh", "/app/run-tests.sh"]
     command: ["python3", "-m", "app"]
     container_name: sheet-to-db
     env_file:
@@ -149,10 +149,16 @@ services:
       - ./sheet-to-db/__init__.py:/app/__init__.py:ro
       - ./sheet-to-db/__main__.py:/app/__main__.py:ro
       - ./sheet-to-db/genres.py:/app/genres.py:ro
+      - ./sheet-to-db/gspread_notes.py:/app/gspread_notes.py:ro
       - ./sheet-to-db/tracks.py:/app/tracks.py:ro
-      - ./config-and-secrets/client_secret.json:/app/client_secret.json:ro
+      
       - ./api/genre_utils.py:/app/genre_utils.py:ro
       - ./api/track_utils.py:/app/track_utils.py:ro
+      - ./api/tests/test_parse_alternative_names.py:/app/test_parse_alternative_names.py:ro
+      - ./api/tests/test_parse_genre.py:/app/test_parse_genre.py:ro
+      - ./api/tests/run-tests.sh:/app/run-tests.sh:ro
+      
+      - ./config-and-secrets/client_secret.json:/app/client_secret.json:ro
     working_dir: /
 
 

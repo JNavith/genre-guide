@@ -103,7 +103,8 @@ class Color(ObjectType):
 class Subgenre(ObjectType):
 	"""A subgenre, as understood on the Genre Sheet"""
 	
-	name = String(required=True, description='The name of the subgenre, e.x. "Brostep"')
+	name = String(required=True, description='The primary name of the subgenre, e.x. "Brostep"')
+	alternative_names = List(String, description='Alternative names for the subgenre, e.x. {"DnB"} for Drum & Bass')
 	is_genre = Boolean(required=True, description='Whether the subgenre is actually a genre (has its own category and color), e.x. true for Rock, false for Future House')
 	genre = Field(lambda: Subgenre, required=True, description="The category that this subgenre belongs to, and that it inherits its color from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass")
 	color = Field(Color, description="Color information about this subgenre, including the text color it uses on the Genre Sheet and the background color")
@@ -114,6 +115,11 @@ class Subgenre(ObjectType):
 	@lru_cache(maxsize=1024)
 	def _get_redis_key(subgenre_name: str) -> str:
 		return f"subgenre:{subgenre_name}"
+	
+	@staticmethod
+	@lru_cache(maxsize=1024)
+	def _get_redis_key_for_alias(alias: str) -> str:
+		return f"subgenre:alias:{alias}"
 	
 	@staticmethod
 	@lru_cache(maxsize=64)
@@ -127,6 +133,9 @@ class Subgenre(ObjectType):
 	@property
 	def _redis_key(self):
 		return Subgenre._get_redis_key(cast(str, self.name))
+	
+	async def resolve_alternative_names(self, info):
+		return [name.decode("utf8") for name in await do_redis("hget", self._redis_key, "alternative_names")]
 	
 	async def resolve_is_genre(self, info):
 		result: Optional[str] = await do_redis("hget", self._redis_key, "is_genre")
@@ -279,10 +288,12 @@ class Query(ObjectType):
 	
 	async def resolve_subgenre(self, info, name):
 		if not (await do_redis("sismember", "subgenres", name)):
-			if not name.startswith("?"):
-				raise GraphQLError(f"{name} is not a valid subgenre!")
+			if name.startswith("?"):
+				name = Subgenre._transform_unknown_subgenre(name)
 			
-			name = Subgenre._transform_unknown_subgenre(name)
+			aliases_to: Optional[bytes] = await do_redis("get", Subgenre._get_redis_key_for_alias(name))
+			if aliases_to is not None:
+				name = aliases_to.decode("utf8")
 			
 			if not (await do_redis("sismember", "subgenres", name)):
 				raise GraphQLError(f"{name} is not a valid subgenre!")

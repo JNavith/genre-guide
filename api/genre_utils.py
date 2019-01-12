@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Set, Tuple, Union
+from typing import DefaultDict, Dict, Iterator, List, Set, Tuple, Union, cast
 
 OPERATORS: Set[str] = {"|", ">", "~"}
 DIVIDERS: Set[str] = {"||", ">>", "~~"}
@@ -98,3 +98,41 @@ def flatten_subgenres(subgenres: Tuple) -> List[str]:
 		flat_list.append(subgenre_or_group_or_symbol)
 	
 	return flat_list
+
+
+def non_empty_lines_no_whitespace(text: str) -> Iterator[str]:
+	return cast(Iterator[str], map(str.strip, cast(Iterator[str], filter(bool, text.splitlines(keepends=False)))))
+
+
+def parse_alternative_names(note: str) -> Set[str]:
+	names: Set[str] = set()
+	
+	line: str
+	for (index, line) in enumerate(non_empty_lines_no_whitespace(note)):
+		if line.lower() == "alternative names:":
+			continue
+		
+		if line.lower().startswith("short for"):
+			words = line.split()
+			# Get the text after "Short for" because it's the name
+			name = " ".join(words[2:])
+			names.add(name)
+			continue
+		
+		if index == 0:
+			# Add extra terms to whitelist here
+			if line.lower() in {"umbrella term", "variations:"}:
+				continue
+			
+			raise ValueError(f"""the first line of {note!r} is neither "Alternative names:" nor "Short for {{name}}", so it is improperly formatted""")
+		
+		for indicator in [" (shortened", " (retronym", " (plural"]:
+			if indicator in line.lower():
+				name = line[:line.lower().index(indicator)]
+				names.add(name)
+				break
+		else:
+			# At this point, the text in the line is the subgenre name
+			names.add(line)
+	
+	return names

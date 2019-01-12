@@ -10,6 +10,10 @@ from gspread import Spreadsheet, Worksheet
 from gspread.utils import rowcol_to_a1
 from gspread_formatting import CellFormat, CellFormatComponent
 
+# noinspection PyUnresolvedReferences
+from .genre_utils import parse_alternative_names
+from .gspread_notes import get_notes
+
 
 def get_effective_formats(worksheet: Worksheet, row_start: int, col_start: int, row_end: int, col_end: int) -> Generator[List[CellFormat], None, None]:
 	"""Matrix equivalent of gspread-formatting's get_effective_format which only works on one cell
@@ -79,7 +83,7 @@ def get_genre_colors(genre_sheet: Spreadsheet) -> Dict[str, Tuple[str, str]]:
 	return genre_to_color
 
 
-def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[str, Any]]:
+def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, str]]:
 	"This thing is frightening."
 	
 	genres_tab: Worksheet = genre_sheet.worksheet(getenv("GENRES_SHEET_NAME"))
@@ -94,6 +98,7 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 	col_end: int = 8
 	
 	all_formats = list(get_effective_formats(genres_tab, row_start=row_start, col_start=col_start, row_end=row_end, col_end=col_end))
+	all_notes = list(get_notes(genres_tab, row_start=row_start, col_start=col_start, row_end=row_end, col_end=col_end))
 	
 	# All genres (not subgenres)
 	genres: Set[str] = set()
@@ -115,6 +120,8 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 	# E.x. "Vaportrap": "Vaporwave"
 	# E.x. "Future Bass": "Future Bass"
 	subgenre_to_genre: Dict[str, str] = {}
+	
+	subgenre_to_alternative_names: DefaultDict[str, Set[str]] = defaultdict(set)
 	
 	row_num: int
 	row: List[str]
@@ -139,10 +146,7 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 			# Update the hierarchy information
 			hierarchy[col_num]: Tuple[int, str] = (row_num, subgenre)
 			
-			# Because we're working with a defaultdict, this will find or create the set
-			this_subgenres_origins: Set[str] = origins[subgenre]
-			
-			# Add origin information for subgenres only (because there will be an index error for genres at the left-most column
+			# Add origin information for subgenres only (because there will be an index error for genres at the left-most column)
 			if col_num > col_start:
 				parent_row, parent_subgenre = hierarchy[col_num - 1]
 				
@@ -155,13 +159,31 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 					breakpoint()
 				
 				# Add the parent to this subgenre's origins
-				this_subgenres_origins.add(parent_subgenre)
+				# Because we're working with a defaultdict, this will find or create the set
+				origins[subgenre].add(parent_subgenre)
 			
 			# If this subgenre belongs to this genre without being italicized or strikethroughed,
 			# then it takes on its color
 			subgenre_format = all_formats[row_num - row_start][-1]
 			if not subgenre_format.textFormat.strikethrough and not subgenre_format.textFormat.italic:
 				subgenre_to_genre[subgenre] = hierarchy[1][1]
+			
+			try:
+				# This can raise an IndexError because the function just cuts off rows (at the end)
+				# that don't have any notes
+				this_rows_notes = all_notes[row_num - row_start]
+			except IndexError:
+				# The note above tells us that this row doesn't have any notes
+				pass
+			else:
+				# Find the note in the row
+				try:
+					note: str = next(filter(bool, this_rows_notes))
+				except StopIteration:
+					# There are no notes
+					pass
+				else:
+					subgenre_to_alternative_names[subgenre].update(parse_alternative_names(note))
 			
 			# Finally, add this to the list of subgenres
 			subgenres.add(subgenre)
@@ -173,7 +195,7 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 	if __debug__:
 		# Be confident that every subgenre has origins and belongs to a genre / has a color
 		for subgenre in subgenres:
-			if subgenre not in subgenre_to_genre or subgenre not in origins:
+			if (subgenre not in genres) and (subgenre not in subgenre_to_genre or subgenre not in origins):
 				# Manually intervene to see the problem
 				breakpoint()
 		
@@ -192,14 +214,20 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 		# Manually intervene to see the problem
 		breakpoint()
 	
-	for subgenre, parents in origins.items():
+	aliases: Dict[str, str] = {}
+	
+	for subgenre in subgenres:
 		full_data[subgenre]["name"] = subgenre
-		full_data[subgenre]["origins"] = tuple(parents)
+		full_data[subgenre]["alternative_names"] = tuple(sorted(subgenre_to_alternative_names[subgenre]))
+		full_data[subgenre]["origins"] = tuple(origins[subgenre])
 		full_data[subgenre]["genre"] = subgenre_to_genre[subgenre]
 		
-		for parent in parents:
+		for parent in origins[subgenre]:
 			# Includes derivatives (the only difference is that derivatives are genres)
 			full_data[parent].setdefault("subgenres", set()).add(subgenre)
+		
+		for alias in subgenre_to_alternative_names[subgenre]:
+			aliases[alias] = subgenre
 		
 		is_genre: bool = subgenre in genres
 		full_data[subgenre]["is_genre"] = dumps(is_genre)
@@ -207,13 +235,14 @@ def build_up_subgenre_information(genre_sheet: Spreadsheet) -> Dict[str, Dict[st
 	
 	# Now that that loop above has completed, "freeze" all the origins and subgenres into a tuple, and JSON-dump them
 	for subgenre, data in full_data.items():
+		data["alternative_names"] = dumps(tuple(data.get("alternative_names", ())))
 		data["origins"] = dumps(tuple(data.get("origins", ())))
 		data["subgenres"] = dumps(tuple(data.get("subgenres", ())))
 	
-	return full_data
+	return full_data, aliases
 
 
-def create_subgenres_data_set(subgenre_data: Dict[str, Dict[str, Any]]) -> Dict[str, List[Tuple]]:
+def create_subgenres_data_set(subgenre_data: Dict[str, Dict[str, Any]], aliases: Dict[str, str]) -> Dict[str, List[Tuple]]:
 	"Create a mapping (basically just a list with some names) in preparation for Redis actions"
 	
 	actions: DefaultDict[str, List[Tuple]] = defaultdict(list)
@@ -227,6 +256,9 @@ def create_subgenres_data_set(subgenre_data: Dict[str, Dict[str, Any]]) -> Dict[
 	# Add to the set of all subgenres
 	# actions["all_subgenres"].append((f"{subgenre}",))
 	# Not necessary - I am doing this in the same loop as `subgenre_by_name` in the function below 
+	
+	for alias, points_to in aliases.items():
+		actions["subgenre_aliases_to"].append((f"subgenre:alias:{alias}", points_to))
 	
 	return actions
 
@@ -263,6 +295,15 @@ async def seed_redis_with_subgenre_data(redis: Redis, subgenre_data_set: Dict[st
 		# This too
 		if loads(dictionary["is_genre"]):
 			transaction.sadd("genres", dictionary["name"])
+
+	for index, (alias_key_name, points_to) in enumerate(subgenre_data_set["subgenre_aliases_to"], start=index + 1):
+		if (index % actions_per_transaction) == (actions_per_transaction - 1):
+			awaitables.append(transaction.execute())
+			# Create a new transaction
+			transaction: MultiExec = redis.multi_exec()
+		
+		transaction.set(alias_key_name, points_to)
+	
 	
 	subgenres_to_remove = subgenres_already_in_database - subgenres_being_added
 	print("Removing subgenres", subgenres_to_remove, flush=True, file=stderr)

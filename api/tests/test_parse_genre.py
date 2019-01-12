@@ -1,6 +1,6 @@
 from pytest import raises
 
-from .genres import parse_genre
+from .genre_utils import parse_genre
 
 
 def test_parse_genre_single():
