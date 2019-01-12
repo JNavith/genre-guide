@@ -135,7 +135,7 @@ class Subgenre(ObjectType):
 		return Subgenre._get_redis_key(cast(str, self.name))
 	
 	async def resolve_alternative_names(self, info):
-		return loads(do_redis("hget", self._redis_key, "alternative_names", encoding="utf8"))
+		return loads(await do_redis("hget", self._redis_key, "alternative_names", encoding="utf8"))
 	
 	async def resolve_is_genre(self, info):
 		result: Optional[str] = await do_redis("hget", self._redis_key, "is_genre")
