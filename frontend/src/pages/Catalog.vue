@@ -41,6 +41,7 @@
 	
 	import 'vue-loaders/dist/vue-loaders.css'
 	// @ts-ignore
+	// noinspection TypeScriptCheckImport
 	import {LineScalePulseOutRapidLoader} from 'vue-loaders';
 	
 	import "../../tailwind.postcss"
@@ -92,10 +93,12 @@
 			}).catch(error => {
 				if (error instanceof TypeError && error.message.startsWith("NetworkError")) {
 					(this as any).errorMessage = "There was a network error trying to load the catalog"
-				} else if (error.hasOwnProperty("response") && error.response!.errors.length > 0) {
-					(this as any).errorMessage = "There was an error in the catalog response itself, which is probably out of your control"
-				} else {
-					(this as any).errorMessage = "An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console"
+				} else { // noinspection TypeScriptUnresolvedVariable
+					if (error.hasOwnProperty("response") && error.response!.errors.length > 0) {
+						(this as any).errorMessage = "There was an error in the catalog response itself, which is probably out of your control"
+					} else {
+						(this as any).errorMessage = "An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console"
+					}
 				}
 				
 				(window as any).catalogError = error

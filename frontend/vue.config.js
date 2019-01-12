@@ -39,6 +39,16 @@ const pages = {
 			...baseMeta,
 			description: `How we make ${siteName}`,
 		}
+	},
+	
+	subgenre: {
+		entry: "src/pages/subgenre.ts",
+		fileName: "subgenre.html",
+		title: `Subgenre - ${siteName}`,
+		meta: {
+			...baseMeta,
+			description: "Learn about a particular subgenre and see examples of it in particular tracks"
+		}
 	}
 };
 
