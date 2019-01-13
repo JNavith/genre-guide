@@ -80,6 +80,19 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	tracks_already_in_database: Set[str] = {track_id.decode("utf8") for track_id in await redis.smembers("tracks")}
 	tracks_being_added: Set[str] = set()
 	
+	# Destroy all date lists (they will be re-added shortly, if they're still valid, anyway)
+	# Necessary to fix the ordering of tracks on the dates
+	for alias_key_name in await redis.keys("date:*", encoding="utf8"):
+		transaction.delete(alias_key_name)
+	
+	# Destroy the set of all dates (they will be re-added shortly, if they're still valid, anyway)
+	transaction.delete("dates")
+	
+	# Do it now (before any date lists can be added and this accidentally destroy them)
+	await transaction.execute()
+	# Create a new transaction
+	transaction: MultiExec = redis.multi_exec()
+	
 	index: int = -1
 	
 	for index, (track_set_name, track_id) in enumerate(tracks_data_set["track_hash_in_set"], start=index + 1):
