@@ -82,8 +82,8 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	
 	# Destroy all date lists (they will be re-added shortly, if they're still valid, anyway)
 	# Necessary to fix the ordering of tracks on the dates
-	for alias_key_name in await redis.keys("date:*", encoding="utf8"):
-		transaction.delete(alias_key_name)
+	for date_key_name in await redis.keys("date:*", encoding="utf8"):
+		transaction.delete(date_key_name)
 	
 	# Destroy the set of all dates (they will be re-added shortly, if they're still valid, anyway)
 	transaction.delete("dates")
@@ -122,9 +122,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 			awaitables.append(transaction.execute())
 			transaction: MultiExec = redis.multi_exec()
 		
-		# Only add the track to the tracks by a certain date list if the track isn't already in the database
-		if track_id not in tracks_already_in_database:
-			transaction.rpush(date, track_id)
+		transaction.rpush(date, track_id)
 	
 	for index, (date_set_name, date) in enumerate(tracks_data_set["dates_set"], start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
