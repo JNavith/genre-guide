@@ -77,21 +77,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 	# Initial transaction object (will be overwritten every `actions_per_transaction` loops)
 	transaction: MultiExec = redis.multi_exec()
 	
-	tracks_already_in_database: Set[str] = {track_id.decode("utf8") for track_id in await redis.smembers("tracks")}
 	tracks_being_added: Set[str] = set()
-	
-	# Destroy all date lists (they will be re-added shortly, if they're still valid, anyway)
-	# Necessary to fix the ordering of tracks on the dates
-	for date_key_name in await redis.keys("date:*", encoding="utf8"):
-		transaction.delete(date_key_name)
-	
-	# Destroy the set of all dates (they will be re-added shortly, if they're still valid, anyway)
-	transaction.delete("dates")
-	
-	# Do it now (before any date lists can be added and this accidentally destroy them)
-	await transaction.execute()
-	# Create a new transaction
-	transaction: MultiExec = redis.multi_exec()
 	
 	index: int = -1
 	
@@ -106,6 +92,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		tracks_being_added.add(track_id)
 		transaction.sadd(track_set_name, track_id)
 	
+	# Continue where the last one left off (in terms of grouping by transaction)
 	for index, (track_id, dictionary) in enumerate(tracks_data_set["track_by_hash_as_key"], start=index + 1):
 		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
 		# (there must be a better way)
@@ -116,7 +103,6 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		
 		transaction.hmset_dict(track_id, dictionary)
 	
-	# Continue where the last one left off (in terms of grouping by transaction)
 	for index, (date, track_id) in enumerate(tracks_data_set["dates_tracks"], start=index + 1):
 		if (index % actions_per_transaction) == (actions_per_transaction - 1):
 			awaitables.append(transaction.execute())
@@ -131,30 +117,7 @@ async def seed_redis_with_track_data(redis: Redis, tracks_data_set: Dict[str, Li
 		
 		transaction.sadd(date_set_name, date)
 	
-	tracks_new_to_db: Set[str] = tracks_being_added - tracks_already_in_database
-	print("Just added", tracks_new_to_db)
-	
-	tracks_to_remove: Set[str] = tracks_already_in_database - tracks_being_added
-	print("Removing tracks", tracks_to_remove)
-	
-	# Remove songs that were removed from the sheet
-	for index, track_id in enumerate(tracks_to_remove, start=index + 1):
-		if (index % actions_per_transaction) == (actions_per_transaction - 1):
-			awaitables.append(transaction.execute())
-			transaction: MultiExec = redis.multi_exec()
-		
-		release_date = (await redis.hget(f"track:{track_id}", "release")).decode("utf8")
-		
-		# Remove from the tracks set
-		transaction.srem("tracks", f"{track_id}")
-		# Remove the key
-		transaction.unlink(f"track:{track_id}")
-		# Remove the track from its release date's list of tracks
-		transaction.lrem(f"date:{release_date}", 1, f"{track_id}")
-		# Remove the date from the set of dates if there are no releases on it
-		# (We have to query the Redis object directly or else it'll hang indefinitely)
-		if not await redis.llen(f"date:{release_date}"):
-			transaction.srem("dates", f"{release_date}")
+	print(f"Just added {len(tracks_being_added)} tracks")
 	
 	# Add leftovers (that didn't make it into a group)
 	awaitables.append(transaction.execute())

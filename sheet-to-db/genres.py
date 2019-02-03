@@ -2,7 +2,6 @@ from collections import defaultdict
 from itertools import count
 from json import dumps, loads
 from os import getenv
-from sys import stderr
 from typing import Any, Awaitable, DefaultDict, Dict, Generator, Iterator, List, Set, Tuple
 
 from aioredis.commands import MultiExec, Redis
@@ -271,16 +270,6 @@ async def seed_redis_with_subgenre_data(redis: Redis, subgenre_data_set: Dict[st
 	# Initial transaction object (will be overwritten every `actions_per_transaction` loops)
 	transaction: MultiExec = redis.multi_exec()
 	
-	# Destroy all aliases (they will be re-added shortly, if they're still valid, anyway)
-	for alias_key_name in await redis.keys("subgenre:alias:*", encoding="utf8"):
-		transaction.delete(alias_key_name)
-	
-	# Do it now (before any aliases can be added and this accidentally destroy them)
-	await transaction.execute()
-	# Create a new transaction
-	transaction: MultiExec = redis.multi_exec()
-	
-	subgenres_already_in_database: Set[str] = {subgenre_name.decode("utf8") for subgenre_name in await redis.smembers("subgenres")}
 	subgenres_being_added: Set[str] = set()
 	
 	index: int = -1
@@ -312,21 +301,6 @@ async def seed_redis_with_subgenre_data(redis: Redis, subgenre_data_set: Dict[st
 			transaction: MultiExec = redis.multi_exec()
 		
 		transaction.set(alias_key_name, points_to)
-	
-	subgenres_to_remove = subgenres_already_in_database - subgenres_being_added
-	print("Removing subgenres", subgenres_to_remove, flush=True, file=stderr)
-	
-	for index, subgenre_to_remove in enumerate(subgenres_to_remove, start=index + 1):
-		# Compared against `actions_per_transaction-1` so that the first transaction isn't empty
-		# (there must be a better way)
-		if (index % actions_per_transaction) == (actions_per_transaction - 1):
-			awaitables.append(transaction.execute())
-			# Create a new transaction
-			transaction: MultiExec = redis.multi_exec()
-		
-		transaction.unlink(f"subgenre:{subgenre_to_remove}")
-		transaction.srem("subgenres", f"{subgenre_to_remove}")
-		transaction.srem("genres", f"{subgenre_to_remove}")
 	
 	# Add leftovers (that didn't make it into a group)
 	awaitables.append(transaction.execute())

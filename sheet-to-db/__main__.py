@@ -40,6 +40,9 @@ async def main(loop: AbstractEventLoop):
 	with closing(await create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True"))) as redis:
 		genre_sheet: Spreadsheet = open_genre_sheet()
 		
+		print("destroying the Redis database before refilling it", flush=True)
+		await redis.flushall()
+		
 		print("preparing to seed the Redis database", flush=True)
 		futures: List[List[Awaitable]] = [
 			await seed_redis_with_track_data(redis, create_tracks_data_set(get_all_tracks(genre_sheet))),
