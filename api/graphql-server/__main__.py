@@ -62,6 +62,15 @@ class Color(ObjectType):
 	background = Field(String, representation=ColorRepresentation(name="representation", description="The format for the color, such as HEX"), description="The background color for the genre on the Genre Sheet")
 	
 	@staticmethod
+	@lru_cache(maxsize=64)
+	def _create_tailwind_class_name_for_genre(genre_name: str) -> str:
+		words: typing_List[str] = (cast(str, genre_name)).lower().split()
+		words_alpha_only: typing_List[str] = ["".join([letter for letter in word if letter.isalpha()]) for word in words]
+		words_hyphenated: str = '-'.join(words_alpha_only)
+		reduced_hyphens: str = sub(r"-+", "-", words_hyphenated)
+		return f"genre-{reduced_hyphens}"
+	
+	@staticmethod
 	async def _get_hex_colors(genre_name: str) -> Optional[typing_List[str]]:
 		"""Returns None for subgenres, and a list of hex codes like ["#ec00db", "#ffffff"] for genres"""
 		return loads((await do_redis("hget", Subgenre._get_redis_key(genre_name), "color")).decode("utf8"))
@@ -82,20 +91,11 @@ class Color(ObjectType):
 		
 		raise GraphQLError(f"unknown representation {representation!r} for foreground color")
 	
-	@staticmethod
-	@lru_cache(maxsize=64)
-	def _create_class_name_for_genre(genre_name: str) -> str:
-		words: typing_List[str] = (cast(str, genre_name)).lower().split()
-		words_alpha_only: typing_List[str] = ["".join([letter for letter in word if letter.isalpha()]) for word in words]
-		words_hyphenated: str = '-'.join(words_alpha_only)
-		reduced_hyphens: str = sub(r"-+", "-", words_hyphenated)
-		return f"genre-{reduced_hyphens}"
-	
 	async def resolve_background(self, info, representation: ColorRepresentation = ColorRepresentation.HEX):
 		if representation == ColorRepresentation.HEX:
 			return (await Color._get_hex_colors(cast(str, self.from_genre)))[0]
 		elif representation == ColorRepresentation.TAILWIND:
-			return Color._create_class_name_for_genre(cast(str, self.from_genre))
+			return Color._create_tailwind_class_name_for_genre(cast(str, self.from_genre))
 		
 		raise GraphQLError(f"unknown representation {representation!r} for background color")
 
@@ -105,6 +105,7 @@ class Subgenre(ObjectType):
 	
 	name = String(required=True, description='The primary name of the subgenre, e.x. "Brostep"')
 	alternative_names = List(String, description='Alternative names for the subgenre, e.x. {"DnB"} for Drum & Bass')
+	names = List(String, description="The primary name of the subgenre, followed by its alternative names")
 	is_genre = Boolean(required=True, description='Whether the subgenre is actually a genre (has its own category and color), e.x. true for Rock, false for Future House')
 	genre = Field(lambda: Subgenre, required=True, description="The category that this subgenre belongs to, and that it inherits its color from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass")
 	color = Field(Color, description="Color information about this subgenre, including the text color it uses on the Genre Sheet and the background color")
@@ -123,12 +124,19 @@ class Subgenre(ObjectType):
 	
 	@staticmethod
 	@lru_cache(maxsize=64)
-	def _transform_unknown_subgenre(unknown_subgenre_text: str) -> str:
-		# ? (Pop) -> Pop
-		# Yes, I realize it's silly to reduce an unknown subgenre of a genre to that genre itself,
-		# But call me when it really is a problem
-		*_, genre_with_parenthesis = unknown_subgenre_text.partition("(")
-		return genre_with_parenthesis[:-1]
+	def _clean_subgenre_name(subgenre_text: str) -> str:
+		if subgenre_text.startswith("?"):
+			# ? (Pop) -> Pop
+			# Yes, I realize it's silly to reduce an unknown subgenre of a genre to that genre itself,
+			# But call me when it really is a problem
+			*_, genre_with_parenthesis = subgenre_text.partition("(")
+			subgenre_text = genre_with_parenthesis[:-1]
+		
+		# Note that this leaves the "Experimental" subgenre alone because of the trailing space
+		if subgenre_text.startswith("Experimental "):
+			subgenre_text = subgenre_text.replace("Experimental ", "")
+		
+		return subgenre_text
 	
 	@property
 	def _redis_key(self):
@@ -136,6 +144,9 @@ class Subgenre(ObjectType):
 	
 	async def resolve_alternative_names(self, info):
 		return loads(await do_redis("hget", self._redis_key, "alternative_names", encoding="utf8"))
+	
+	async def resolve_names(self, info):
+		return [self.name, *(await self.resolve_alternative_names(info=info))]
 	
 	async def resolve_is_genre(self, info):
 		result: Optional[str] = await do_redis("hget", self._redis_key, "is_genre")
@@ -226,25 +237,15 @@ class Track(ObjectType):
 			return dumps(flat_list)
 		
 		colors: typing_List[Optional[Tuple[str, str]]] = []
-		for subgenre in flat_list:
+		for subgenre in map(Subgenre._clean_subgenre_name, flat_list):
 			if subgenre in {"|", ">", "~"}:
 				colors.append(None)
+			elif await do_redis("sismember", "subgenres", subgenre):
+				color_info = await Subgenre(name=subgenre).resolve_color(info)
+				colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
 			else:
-				if await do_redis("sismember", "subgenres", subgenre):
-					color_info = await Subgenre(name=subgenre).resolve_color(info)
-					colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
-				else:
-					if not subgenre.startswith("?"):
-						# The subgenre does not exist
-						colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
-					else:
-						subgenre = Subgenre._transform_unknown_subgenre(subgenre)
-						if await do_redis("sismember", "subgenres", subgenre):
-							color_info = await Subgenre(name=subgenre).resolve_color(info)
-							colors.append((await color_info.resolve_background(info, representation=and_colors), await color_info.resolve_foreground(info, representation=and_colors)))
-						else:
-							# This is an unknown subgenre of a genre that does not exist
-							colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
+				# The subgenre does not exist
+				colors.append(("black", "white") if and_colors == ColorRepresentation.TAILWIND else ("#000000", "#ffffff"))
 		
 		return dumps([flat_list, colors])
 	
