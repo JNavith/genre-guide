@@ -1,30 +1,30 @@
 <template>
 	<tr class="align-middle" :style="fadeIn ? {visibility: show ? 'visible' : 'hidden', transition: 'opacity 250ms ease-in, transform 120ms cubic-bezier(0,0,0,1)', opacity: show ? 1 : 0, transform: show ? 'translateY(0)' : 'translateY(-200%)'} : {}">
 		<!-- Date (only on first entry in group) -->
-		<td :class="showDate ? ['align-top', 'font-header', 'font-light', 'bg-white', 'sticky', 'pin-t'] : []" :style="showDate ? {'top': '1rem'} : {}">
+		<td :class="showDate ? ['font-header', 'font-light', 'bg-white', 'sticky', 'top-4', 'rounded-lg', 'shadow-white-glow'] : []">
 			<div v-if="showDate">
-				<p class="text-2xl-responsive text-grey-dark leading-none">{{ date.year }}</p>
-				<p class="text-xl-responsive text-grey">{{ date.monthName }} {{ date.day }}</p>
+				<p class="text-2xl-responsive text-gray-600 leading-none">{{ date.year }}</p>
+				<p class="text-xl-responsive text-gray-400">{{ date.monthName }} {{ date.day }}</p>
 			</div>
 		</td>
 		<!-- End date -->
 		
 		<!-- Artwork -->
-		<td class="align-top">
-			<img v-if="image !== null" :src="image" :alt="name" class="h-12 w-12 shadow-sm" />
-			<track-art-missing v-else class="h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10 xl:h-12 xl:w-12 shadow-sm" :color-background="hexColors[0][0]" :color-foreground="hexColors[0][1]"></track-art-missing>
+		<td>
+			<img v-if="image !== null" :src="image" :alt="name" class="h-12 w-12 shadow-md" />
+			<track-art-missing v-else class="h-8 w-8 sm:h-10 sm:w-10 md:h-12 md:w-12 shadow-md" :color-background="hexColors[0][0]" :color-foreground="hexColors[0][1]"></track-art-missing>
 		</td>
 		<!-- End artwork -->
 		
 		<!-- Title and artist -->
 		<td>
-			<p class="text-lg-responsive font-thin text-black-light leading-tight">{{ name }}</p>
-			<p class="text-md-responsive font-thin text-grey-dark">{{ artist }}</p>
+			<p class="text-lg-responsive font-thin text-gray-900 leading-tight">{{ name }}</p>
+			<p class="text-md-responsive font-thin text-gray-600">{{ artist }}</p>
 		</td>
 		<!-- End title and artist -->
 		
 		<!-- Record label -->
-		<td class="hidden lg:table-cell"><p class="text-lg-responsive font-thin text-grey-dark">{{ recordLabel }}</p>
+		<td class="hidden lg:table-cell"><p class="text-lg-responsive font-thin text-gray-600">{{ recordLabel }}</p>
 		</td>
 		<!-- End record label -->
 		

@@ -1,15 +1,15 @@
 <template>
-	<div class="font-sans min-h-screen flex flex-1 flex-col relative">
-		<div class="h-1 transition" :class="isLoaded ? ('bg-' + genreTailwind) : 'bg-grey-dark'"></div>
-		<the-header link-inactive="grey-dark" link-active="grey-darkest"></the-header>
+	<div class="font-sans leading-tight min-h-screen flex flex-1 flex-col relative selection:text-white" :class="isLoaded ? ('selection:bg-' + genreTailwind) : 'selection:bg-gray-600'">
+		<div class="h-1 transition" :class="isLoaded ? ('bg-' + genreTailwind) : 'bg-gray-600'"></div>
+		<the-header link-inactive="gray-600" link-active="gray-800"></the-header>
 		<main class="flex flex-1 flex-col w-full">
 			<transition name="fade-slow">
 				<div v-if="isLoaded" key="1" class="mx-6 md:mx-10 lg:mx-16 xxl:mb-16">
 					<div class="container mx-auto flex flex-col xxl:flex-row">
-						<div class="flex-1 mb-20 xxl:mb-0 xxl:mr-10 self-start xxl:sticky pin-t pt-8 -mt-8">
+						<div class="flex-1 mb-20 xxl:mb-0 xxl:mr-10 self-start xxl:sticky top-0 pt-8 -mt-8">
 							<div class="table border-b-4 border-genre-this ml-1 mb-5">
 								<h1 class="font-black md:font-medium text-4xl sm:text-5xl md:text-6xl text-black font-header -ml-1 mb-1">Space Bass</h1>
-								<h2 class="font-thin text-2xl-responsive italic font-header text-grey-darkest mb-2">Also known as
+								<h2 class="font-thin text-2xl-responsive italic font-header text-gray-800 mb-2">Also known as
 									<strong class="font-medium">Midtempo Bass</strong> or
 									<strong class="font-medium">REZZ Bass</strong>
 								</h2>
@@ -18,21 +18,19 @@
 								A genre popularized by REZZ. She makes this genre. Gesaffelstein did it first though. Here is more history. And also how you can tell what makes this genre what it is. REZZ though. REZZity REZZ REZZ. REZZ REZZ REZZ. Listen to REZZ.
 							</p>
 							<div class="flex-1 py-8 container mx-auto">
-								<div class="text-black rounded-md tracking-medium">
+								<div class="text-black rounded tracking-medium">
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<div v-else key="2" class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh">
-					<div class="flex flex-1 w-full justify-center items-center">
-						<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
-					</div>
+				<div v-else key="2" class="fixed inset-0 flex flex-col justify-center items-center text-gray-400">
+					<line-scale-pulse-out-rapid-loader size="3rem" color="#CBD5E0"></line-scale-pulse-out-rapid-loader>
 					<p class="mt-6 text-2xl-responsive">The subgenre view is loading</p>
 				</div>
 			</transition>
 		</main>
-		<div class="h-1 transition" :class="isLoaded ? ('bg-' + genreTailwind) : 'bg-grey-dark'"></div>
+		<div class="h-1 transition" :class="isLoaded ? ('bg-' + genreTailwind) : 'bg-gray-600'"></div>
 	</div>
 </template>
 

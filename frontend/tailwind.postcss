@@ -27,19 +27,20 @@
  *
  * @import "tailwindcss/preflight";
  */
-@tailwind preflight;
+@tailwind base;
 
 a {
 	@apply no-underline;
+	
+	&:hover {
+		@apply underline;
+		
+		nav & {
+			@apply no-underline;
+		}
+	}
 }
 
-a:hover {
-	@apply underline;
-}
-
-nav a:hover {
-	@apply no-underline;
-}
 
 /**
  * This injects any component classes registered by plugins.
@@ -92,88 +93,81 @@ nav a:hover {
  * @import "utilities/skew-transforms";
  */
 
+.borders-separate {
+	border-collapse: separate;
+}
+
+.border-spacing-3\.5 {
+	border-spacing: 0.875rem;
+}
+
+
 @variants hover {
 	.-translate-y-1 {
 		transform: translateY(-0.25rem);
 	}
 }
 
-
-.selection-green::selection {
-	@apply bg-green
-	text-white;
-}
-
-.selection-genre-this::selection, .selection-genre-this *::selection {
-	@apply bg-genre-this
-	text-white;
-}
-
-::selection {
-	@apply bg-green
-	text-white;
-}
-
 .text-md-responsive {
 	@apply text-xs;
+	
+	@screen sm {
+		@apply text-sm;
+	}
+	
+	@screen md {
+		@apply text-md;
+	}
+	
+	@scren lg {
+		@apply text-lg;
+	}
 }
 
 .text-lg-responsive {
 	@apply text-sm;
+	
+	@screen sm {
+		@apply text-md;
+	}
+	
+	@screen md {
+		@apply text-lg;
+	}
 }
 
 .text-xl-responsive {
 	@apply text-md;
+	
+	@screen sm {
+		@apply text-lg;
+	}
+	
+	@screen md {
+		@apply text-xl;
+	}
 }
 
 .text-2xl-responsive {
 	@apply text-lg;
+	
+	@screen sm {
+		@apply text-xl;
+	}
+	
+	@screen md {
+		@apply text-2xl;
+	}
 }
 
 .text-3xl-responsive {
 	@apply text-xl;
-}
-
-@screen sm {
-	.text-md-responsive {
-		@apply text-sm;
-	}
 	
-	.text-lg-responsive {
-		@apply text-md;
-	}
-	
-	.text-xl-responsive {
-		@apply text-lg;
-	}
-	
-	.text-2xl-responsive {
-		@apply text-xl;
-	}
-	
-	.text-3xl-responsive {
-		@apply text-2xl;
-	}
-}
-
-@screen md {
-	.text-md-responsive {
-		@apply text-md;
-	}
-	
-	.text-lg-responsive {
-		@apply text-lg;
-	}
-	
-	.text-xl-responsive {
-		@apply text-xl;
-	}
-	
-	.text-2xl-responsive {
+	@screen sm {
 		@apply text-2xl;
 	}
 	
-	.text-3xl-responsive {
+	@screen md {
 		@apply text-3xl;
 	}
 }

@@ -1,21 +1,19 @@
 <template>
-	<div class="font-sans min-h-screen flex flex-col relative">
+	<div class="font-sans leading-tight min-h-screen flex flex-col selection:bg-green selection:text-white">
 		<div class="h-1 bg-green"></div>
-		<the-header :link-inactive="'green'" :link-active="'green-dark'"></the-header>
+		<the-header link-inactive="green" link-active="green-dark"></the-header>
 		<main class="flex flex-1 mx-auto">
-			<div class="mt-12 px-1 sm:px-4 md:px-8">
+			<div class="mt-12 px-1 sm:px-4 md:px-8 flex-shrink-0">
 				<transition name="fade-slow">
-					<div v-if="tracks !== undefined && tracks.length > 0">
+					<div v-if="tracks !== undefined && tracks.length > 0 && errorMessage === ''">
 						<track-catalog :tracks="tracks" ref="trackCatalog"></track-catalog>
-						<div v-if="isLoadingTracks" class="w-full flex flex-col justify-center items-center text-grey mt-6 mb-12">
-							<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
+						<div v-if="isLoadingTracks" class="w-full flex flex-col justify-center items-center text-gray-400 mt-6 mb-12">
+							<line-scale-pulse-out-rapid-loader size="3rem" color="#CBD5E0"></line-scale-pulse-out-rapid-loader>
 							More tracks are loading
 						</div>
 					</div>
-					<div v-else class="fixed pin-x flex flex-col justify-center items-center text-grey" style="top: 40vh">
-						<div v-if="errorMessage === ''" class="flex flex-1 w-full justify-center items-center">
-							<line-scale-pulse-out-rapid-loader size="50px" color="#B8C2CC"></line-scale-pulse-out-rapid-loader>
-						</div>
+					<div v-else class="fixed inset-0 flex flex-col justify-center items-center text-gray-400">
+						<line-scale-pulse-out-rapid-loader size="3rem" color="#CBD5E0"></line-scale-pulse-out-rapid-loader>
 						<p class="mt-6 text-2xl-responsive">
 							<template v-if="errorMessage === ''">
 								The catalog is loading
@@ -46,7 +44,7 @@
 	
 	import "../../tailwind.postcss"
 	
-	let tracksFragment = `
+	const tracksFragment = `
 		date {
 			year
 			monthName: month_name

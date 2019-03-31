@@ -21,13 +21,13 @@ const baseMeta = {
 
 
 const pages = {
-	index: {
+	catalog: {
 		entry: "src/pages/catalog.ts",
 		fileName: "catalog.html",
 		title: `Catalog - ${siteName}`,
 		meta: {
 			...baseMeta,
-			description: "Learn about genres by their history, characteristics, and examples",
+			description: "Browse the catalog of songs with identified subgenres",
 		},
 	},
 	
@@ -52,12 +52,12 @@ const pages = {
 	}
 };
 
-// For now, the catalog page is basically the index
-pages.catalog = {
-	...pages.index,
+// For now, the index page is the catalog
+pages.index = {
+	...pages.catalog,
 	meta: {
-		...pages.index.meta,
-		description: "Browse the catalog of songs with identified subgenres",
+		...pages.catalog.meta,
+		description: "Learn about genres by their history, characteristics, and examples",
 	}
 }
 
@@ -74,7 +74,7 @@ for (let page of Object.values(pages)) {
 module.exports = {
 	configureWebpack: {
 		plugins: [
-			new PurgecssPlugin({
+			...process.env.NODE_ENV === "production" ? [new PurgecssPlugin({
 				paths: [
 					...glob.sync(`./src/**/*.vue`, {nodir: true}),
 					...glob.sync(`./src/**/*.html`, {nodir: true}),
@@ -86,19 +86,14 @@ module.exports = {
 						extensions: ['vue', 'html']
 					},
 				],
-			}),
+				whitelist: ["text-green", "hover:text-green-dark", "text-gray-700", "hover:text-gray-800",
+					"w-8", "h-8", "w-6", "h-6", "border-spacing-3.5", "bg-black", "text-white", "text-black", "line-scale-pulse-out-rapid",
+					"vue-loaders"],
+				// Remove unnecessary variants, but keep the regular ones
+				whitelistPatterns: [/^bg-genre-[\w-]+/],
+			})] : [],
 		],
 	},
 	integrity: process.env.NODE_ENV === "production",
 	pages: pages
 };
-
-
-if (process.env.NODE_ENV !== "production") {
-	console.log("hello what I assume is a development build from vue config!")
-	// Exclude purgecss from dev builds
-	console.log("skipping purgecss in development mode")
-	module.exports.configureWebpack.plugins.pop();
-} else {
-	console.log("hello production build from vue config!")
-}
