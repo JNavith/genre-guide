@@ -13,11 +13,11 @@
 #    
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
-from asyncio import AbstractEventLoop, as_completed, get_event_loop
+from asyncio import AbstractEventLoop, as_completed, get_event_loop, wait_for
 from contextlib import closing
 from itertools import chain
 from os import getenv
-from typing import Awaitable, List
+from typing import Awaitable, Coroutine, List
 
 from aioredis import Redis, ReplyError, create_redis_pool
 from gspread import Client, Spreadsheet, authorize
@@ -37,11 +37,20 @@ def open_genre_sheet() -> Spreadsheet:
 
 async def main(loop: AbstractEventLoop):
 	redis: Redis
-	with closing(await create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True"))) as redis:
-		genre_sheet: Spreadsheet = open_genre_sheet()
+	
+	redis_pool: Coroutine = create_redis_pool(getenv("REDIS_HOST", "redis://redis"), password=getenv("REDIS_PASSWORD"), ssl=(getenv("REDIS_SSL", "False") == "True"))
+
+	print("about to connect to redis", flush=True)
+	with closing(await wait_for(redis_pool, timeout=30)) as redis:
+		print("connected to redis", flush=True)
 		
 		print("destroying the Redis database before refilling it", flush=True)
 		await redis.flushall()
+		print("destroyed the Redis database", flush=True)
+		
+		print("about to open the Genre Sheet", flush=True)
+		genre_sheet: Spreadsheet = open_genre_sheet()
+		print("opened the Genre Sheet", flush=True)
 		
 		print("preparing to seed the Redis database", flush=True)
 		futures: List[List[Awaitable]] = [
