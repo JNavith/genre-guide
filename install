@@ -13,12 +13,7 @@ docker-compose up -d redis
 docker-compose up --build sheet-to-db
 docker-compose stop redis
 
-# Start Redis again so the GraphQL server can use it to answer Webpack about genre color information
-docker-compose up -d redis
-docker-compose up -d graphql-server
-# Let Webpack build our CSS file
-docker-compose up --build webpack
-# Stop the GraphQL server
-docker-compose stop graphql-server
+# Build the Tailwind CSS file
+docker-compose up --build frontend
 
 # Everything should be built and ready for ./run (assuming proper configuration)
