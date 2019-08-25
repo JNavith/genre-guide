@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-docker-compose up -d redis graphql-server web caddy
+docker-compose up -d redis graphql-server caddy
