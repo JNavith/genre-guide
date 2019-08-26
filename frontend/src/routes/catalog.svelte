@@ -101,45 +101,47 @@
 <div
   in:fade={{ duration: 1250 }}
   class="flex flex-col flex-1 items-center justify-center px-8">
-  {#await initialTrackLoad}
-    <div class="flex flex-1 items-center justify-center my-4">
-      <div class="line-scale-pulse-out-rapid h-24 flex items-center">
-        <!-- This particular loader needs 5 children -->
-        {#each Array(5) as _}
-          <div
-            class="theme-light:bg-gray-400 theme-dark:bg-gray-600 rounded-full
-            mx-1 w-2" />
-        {/each}
+  {#if process.browser}
+    {#await initialTrackLoad}
+      <div class="flex flex-1 items-center justify-center my-4">
+        <div class="line-scale-pulse-out-rapid h-24 flex items-center">
+          <!-- This particular loader needs 5 children -->
+          {#each Array(5) as _}
+            <div
+              class="theme-light:bg-gray-400 theme-dark:bg-gray-600 rounded-full
+              mx-1 w-2" />
+          {/each}
+        </div>
       </div>
-    </div>
-  {:then}
-    <TrackCatalog {tracks} />
-    <div class="flex flex-1 items-center justify-center my-4">
-      <div class="line-scale-pulse-out-rapid h-24 flex items-center">
-        {#each Array(5) as _}
-          <div
-            class="theme-light:bg-gray-400 theme-dark:bg-gray-600 rounded-full
-            mx-1 w-2" />
-        {/each}
+    {:then}
+      <TrackCatalog {tracks} />
+      <div class="flex flex-1 items-center justify-center my-4">
+        <div class="line-scale-pulse-out-rapid h-24 flex items-center">
+          {#each Array(5) as _}
+            <div
+              class="theme-light:bg-gray-400 theme-dark:bg-gray-600 rounded-full
+              mx-1 w-2" />
+          {/each}
+        </div>
       </div>
-    </div>
-  {:catch error}
-    <div
-      class="flex flex-col items-center text-lg theme-light:text-gray-500
-      theme-dark:text-gray-600">
-      <div class="w-6 h-6">
-        <FrownIcon />
+    {:catch error}
+      <div
+        class="flex flex-col items-center text-lg theme-light:text-gray-500
+        theme-dark:text-gray-600">
+        <div class="w-6 h-6">
+          <FrownIcon />
+        </div>
+        <span>
+          {#if error.message === 'Network error: NetworkError when attempting to fetch resource.'}
+            There was a network error caused by trying to load the catalog
+          {:else if error.graphQLErrors !== undefined && error.graphQLErrors.length > 0}
+            There was an error in the catalog response, which is probably out of
+            your control
+          {:else}
+            {console.log(error) || console.log(Object.entries(error)) || 'An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console to inspect what went wrong'}
+          {/if}
+        </span>
       </div>
-      <span>
-        {#if error.message === 'Network error: NetworkError when attempting to fetch resource.'}
-          There was a network error caused by trying to load the catalog
-        {:else if error.graphQLErrors !== undefined && error.graphQLErrors.length > 0}
-          There was an error in the catalog response, which is probably out of
-          your control
-        {:else}
-          {console.log(error) || console.log(Object.entries(error)) || 'An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console to inspect what went wrong'}
-        {/if}
-      </span>
-    </div>
-  {/await}
+    {/await}
+  {/if}
 </div>
