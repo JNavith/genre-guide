@@ -10,7 +10,7 @@
     "build:tailwind": "node ./node_modules/cross-env/dist/bin/cross-env.js NODE_ENV=production node ./node_modules/postcss-cli/bin/postcss src/tailwind.postcss -o static/main.css",
     "build": "concurrently \"npm run build:tailwind\" \"npm run build:sapper\"",
     "start": "node __sapper__/build",
-    "export:sapper": "node ./node_modules/sapper/dist/cli.js export --legacy",
+    "export:sapper": "node --max-old-space-size=1024 ./node_modules/sapper/dist/cli.js export --legacy",
     "preexport": "npm run build:tailwind",
     "export": "npm run export:sapper",
     "cy:run": "cypress run",
