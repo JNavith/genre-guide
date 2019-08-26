@@ -4,16 +4,18 @@
   "version": "0.0.1",
   "scripts": {
     "dev:sapper": "node ./node_modules/sapper/dist/cli.js dev",
+    "dev:tailwind": "cross-env NODE_ENV=development node ./node_modules/postcss-cli/bin/postcss src/tailwind.postcss -o static/main.css -w",
+    "dev": "concurrently \"npm:dev:sapper\" \"npm:dev:tailwind\"",
     "build:sapper": "node ./node_modules/sapper/dist/cli.js build --legacy",
-    "export": "node ./node_modules/sapper/dist/cli.js export --legacy",
+    "build:tailwind": "node ./node_modules/cross-env/dist/bin/cross-env.js NODE_ENV=production node ./node_modules/postcss-cli/bin/postcss src/tailwind.postcss -o static/main.css",
+    "build": "concurrently \"npm run build:tailwind\" \"npm run build:sapper\"",
     "start": "node __sapper__/build",
+    "export:sapper": "node ./node_modules/sapper/dist/cli.js export --legacy",
+    "preexport": "npm run build:tailwind",
+    "export": "npm run export:sapper",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
-    "test": "run-p --race dev cy:run",
-    "watch:tailwind": "node ./node_modules/postcss-cli/bin/postcss src/tailwind.postcss -o static/main.css -w",
-    "build:tailwind": "set NODE_ENV=production && node ./node_modules/postcss-cli/bin/postcss src/tailwind.postcss -o static/main.css",
-    "build": "concurrently \"npm run build:tailwind\" \"npm run build:sapper\"",
-    "dev": "concurrently \"npm:dev:sapper\" \"npm:watch:tailwind\""
+    "test": "run-p --race dev cy:run"
   },
   "dependencies": {
     "apollo-boost": "^0.4.3",
@@ -32,6 +34,7 @@
     "@babel/runtime": "^7.0.0",
     "@fullhuman/postcss-purgecss": "^1.2.0",
     "concurrently": "^4.1.1",
+    "cross-env": "^5.2.0",
     "cssnano": "^4.1.10",
     "npm-run-all": "^4.1.5",
     "postcss-cli": "^6.1.3",
