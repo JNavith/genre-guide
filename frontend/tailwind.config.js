@@ -1,6 +1,6 @@
 /*
-    genre.guide - Tailwind Configuration File
-    Copyright (C) 2019 Navith
+    genre.guide - Tailwind configuration file
+    Copyright (C) 2020 Navith
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -13,7 +13,7 @@
     GNU Affero General Public License for more details.
 
     You should have received a copy of the GNU Affero General Public License
-    along with this program. If not, see <https://www.gnu.org/licenses/>. 
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 /*
@@ -27,224 +27,142 @@ View the full documentation at https://tailwindcss.com.
 
 */
 
-const defaultConfig = require("tailwindcss/defaultConfig");
-
-const customNative = require("tailwindcss-custom-native");
+const {theme: defaultTheme, variants: defaultVariants} = require("tailwindcss/defaultConfig");
+const {colors, fontFamily, themes} = require("./src/globals/design-system");
 
 module.exports = {
-  theme: {
-    extend: {
-      borderCollapse: {
-        separate: "separate"
-      },
+	theme: {
+		extend: {
+			borderColor: {default: "currentColor"},
 
-      borderColor: {
-        default: "currentColor"
-      },
+			borderSpacing: {"4": "1rem"},
 
-      borderSpacing: {
-        "4": "1rem"
-      },
+			boxShadow: (theme) => ({
+				"outline": "0 0 0 3px hsla(121, 100%, 30%, 0.625)",
+				"outline-with-lg": `${defaultTheme.boxShadow.lg}, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
+				"white-glow": `0 0 8px 4px ${theme("colors.white")}`,
+				"gray-900-glow": `0 0 8px 4px ${theme("colors.gray.900")}`,
+			}),
 
-      boxShadow: theme => ({
-        outline: "0 0 0 3px hsla(121, 100%, 30%, 0.625)",
-        "outline-with-lg": `${
-          defaultConfig.theme.boxShadow.lg
-        }, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
-        "white-glow": `0 0 8px 4px ${theme("colors.white")}`,
-        "gray-900-glow": `0 0 8px 4px ${theme("colors.gray.900")}`
-      }),
+			colors: {
+				"transparent": "transparent",
+				"current": "currentColor",
+				"inherit": "inherit",
+				...colors,
+			},
 
-      colors: {
-        transparent: "transparent",
-        "current-color": "currentColor",
-        inherit: "inherit",
+			customUtilities: {
+				"borderSpacing": {},
+			},
 
-        var: {
-          // Used on subgenre view pages only
-          genre: "var(--color-genre)",
+			minWidth: (theme) => theme("spacing"),
 
-          // Used on the "about" page only
-          background: "var(--color-background)",
-          foreground: "var(--color-foreground)",
-          "foreground-accent": "var(--color-foreground-accent)"
-        },
+			spacing: {
+				"7": "1.75rem",
+				"9": "2.25rem",
+				"72": "18rem",
+				"96": "24rem",
+				"128": "32rem",
+			},
+		},
 
-        "google-sheets": "#23A566",
+		fontFamily: {
+			heading: [...fontFamily.heading, ...defaultTheme.fontFamily.sans],
+			body: [...fontFamily.body, ...defaultTheme.fontFamily.sans],
+		},
 
-        green: {
-          100: "#E7F8E6",
-          200: "#CFF1CC",
-          300: "#87DD80",
-          400: "#57CF4D",
-          500: "#0FBB00",
-          600: "#009802",
-          700: "#007808",
-          800: "#00570E"
-        }
-      },
+		linearGradientColors: (theme) => ({
+			"teal-300-blue-400": [theme("colors.teal.300"), theme("colors.blue.400")],
+			"indigo-700-purple-900": [theme("colors.indigo.700"), theme("colors.purple.900")],
+		}),
 
-      fontFamily: {
-        heading: ["Poppins", "Heebo", ...defaultConfig.theme.fontFamily.sans],
-        body: ["Heebo", ...defaultConfig.theme.fontFamily.sans]
-      },
+		radialGradientColors: (theme) => ({
+			"yellow-200-orange-300": [theme("colors.yellow.300"), theme("colors.orange.300")],
+			"gray-100-gray-200": [theme("colors.gray.100"), theme("colors.gray.200")],
+		}),
 
-      fontSize: {
-        "7xl": "6rem",
-        "8xl": "8rem"
-      },
+		themes,
+	},
 
-      minWidth: theme => theme("spacing"),
+	corePlugins: {placeholderColor: false},
 
-      pseudo: {
-        selection: "selection"
-      },
+	variants: {
+		backgroundColor: [
+			...defaultVariants.backgroundColor,
+			"selection",
+			"selection:important",
+			"theme-light",
+			"theme-light:hover",
+			"theme-light:focus",
+			"theme-light:active",
+			"theme-dark",
+			"theme-dark:hover",
+			"theme-dark:focus",
+			"theme-dark:active",
+		],
+		boxShadow: [...defaultVariants.boxShadow, "theme-light", "theme-dark"],
+		cursor: [...defaultVariants.cursor, "hover"],
+		textColor: [
+			...defaultVariants.textColor,
+			"selection",
+			"selection:important",
+			"theme-light",
+			"theme-light:hover",
+			"theme-light:focus",
+			"theme-light:active",
+			"theme-dark",
+			"theme-dark:hover",
+			"theme-dark:focus",
+			"theme-dark:active",
+		],
+	},
 
-      spacing: {
-        "72": "18rem",
-        "96": "24rem",
-        "128": "32rem"
-      }
-    },
+	plugins: [
+		require("@tailwindcss/ui"),
+		require("tailwindcss-custom-native"),
+		require("tailwindcss-gradients"),
 
-    backgroundImage: {
-      // Used on the "about" page only
-      "var-background-image": "var(--image-background)"
-    },
+		// Add theme variants
+		({addVariant, e, theme}) => {
+			theme("themes", []).forEach((themeName) => {
+				// Default / unprefixed variant
+				addVariant(`theme-${themeName}`, ({modifySelectors, separator}) => modifySelectors(({className}) => `.${e(`theme-${themeName}`)} .${e(`theme-${themeName}${separator}${className}`)}`));
 
-    fill: {
-      "current-color": "currentColor"
-    },
+				// Hover, focus, and active variants
+				["hover", "focus", "active"].forEach((regularVariant) => {
+					addVariant(
+						`theme-${themeName}:${regularVariant}`,
+						({modifySelectors, separator}) => modifySelectors(({className}) => `.${e(`theme-${themeName}`)} .${e(`theme-${themeName}${separator}${regularVariant}${separator}${className}`)}:${regularVariant}`),
+					);
+				});
+			});
+		},
 
-    linearGradients: theme => ({
-      directions: {
-        t: "to top"
-      },
-      colors: {
-        "teal-200-blue-400": [theme("colors.teal.200"), theme("colors.blue.400")],
-        "indigo-700-purple-900": [theme("colors.indigo.700"), theme("colors.purple.900")]
-      }
-    }),
+		// Add selection variant
+		({addVariant, e}) => {
+			addVariant("selection", ({modifySelectors, separator}) => {
+				modifySelectors(({className}) => {
+					const selectionClassName = e(`selection${separator}${className}`);
 
-    negativeTranslate: {
-      "y-1": "translateY(-0.25rem)"
-    },
+					return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
+				});
+			});
+		},
 
-    radialGradients: theme => ({
-      shapes: {
-        default: "ellipse"
-      },
-      sizes: {
-        default: "closest-side"
-      },
-      positions: {
-        default: "center"
-      },
-      colors: {
-        "yellow-400-orange-300": [theme("colors.yellow.400"), theme("colors.orange.300")],
-        "gray-100-gray-200": [theme("colors.gray.100"), theme("colors.gray.200")]
-      }
-    }),
+		// Add important selection variant
+		({addVariant, e}) => {
+			addVariant("selection:important", ({container, modifySelectors, separator}) => {
+				container.walkRules((rule) => {
+					rule.walkDecls((decl) => {
+						decl.important = true;
+					});
+				});
 
-    stroke: {
-      "current-color": "currentColor"
-    },
-
-    themes: ["light", "dark"]
-  },
-
-  variants: {
-    backgroundColor: [
-      ...defaultConfig.variants.backgroundColor,
-      "selection",
-      "theme-light",
-      "theme-light:hover",
-      "theme-light:focus",
-      "theme-light:active",
-      "theme-dark",
-      "theme-dark:hover",
-      "theme-dark:focus",
-      "theme-dark:active"
-    ],
-    borderRadius: [...defaultConfig.variants.borderRadius, "important"],
-    boxShadow: [...defaultConfig.variants.boxShadow, "theme-light", "theme-dark"],
-    cursor: [...defaultConfig.variants.cursor, "hover"],
-    height: [...defaultConfig.variants.height, "important"],
-    textColor: [
-      ...defaultConfig.variants.textColor,
-      "selection",
-      "theme-light",
-      "theme-light:hover",
-      "theme-light:focus",
-      "theme-light:active",
-      "theme-dark",
-      "theme-dark:hover",
-      "theme-dark:focus",
-      "theme-dark:active"
-    ],
-    negativeTranslate: ["hover", "focus"],
-    width: [...defaultConfig.variants.width, "important"]
-  },
-
-  plugins: [
-    require("tailwindcss-gradients")(),
-    require("tailwindcss-transitions")(),
-
-    // Custom utilities
-    customNative({ key: "backgroundImage", rename: "bg" }),
-    customNative({ key: "borderSpacing" }),
-    customNative({ key: "borderCollapse", rename: "borders" }),
-    customNative({ key: "negativeTranslate", property: "transform", rename: "-translate" }),
-
-    // Add theme variants
-    function({ addVariant, e, theme }) {
-      theme("themes", []).forEach(themeName => {
-        // Default / unprefixed variant
-        addVariant(`theme-${themeName}`, ({ modifySelectors, separator }) => {
-          modifySelectors(({ className }) => {
-            return `.${e(`theme-${themeName}`)} .${e(
-              `theme-${themeName}${separator}${className}`
-            )}`;
-          });
-        });
-
-        // Hover, focus, and active variants
-        ["hover", "focus", "active"].forEach(regularVariant => {
-          addVariant(
-            `theme-${themeName}:${regularVariant}`,
-            ({ modifySelectors, separator }) => {
-              modifySelectors(({ className }) => {
-                return `.${e(`theme-${themeName}`)} .${e(
-                  `theme-${themeName}${separator}${regularVariant}${separator}${className}`
-                )}:${regularVariant}`;
-              });
-            }
-          );
-        });
-      });
-    },
-
-    // Add the important variant
-    function({ addVariant }) {
-      addVariant("important", ({ container }) => {
-        container.walkRules(rule => {
-          rule.selector = `.\\!${rule.selector.slice(1)}`;
-          rule.walkDecls(decl => {
-            decl.important = true;
-          });
-        });
-      });
-    },
-
-    // Add selection variant
-    function({ addVariant, e }) {
-      addVariant("selection", ({ modifySelectors, separator }) => {
-        modifySelectors(({ className }) => {
-          return `.${e(`selection${separator}${className}`)}::selection, .${e(
-            `selection${separator}${className}`
-          )} ::selection`;
-        });
-      });
-    }
-  ]
+				modifySelectors(({className}) => {
+					const selectionClassName = e(`selection${separator}!${className}`);
+					return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
+				});
+			});
+		},
+	],
 };

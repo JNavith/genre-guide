@@ -1,4 +1,12 @@
+.firebase/
+.rpt2_cache/
+__sapper__/
+__pycache__/
 config-and-secrets/
 dist/
-redis/
+firebase-debug.log
 frontend/node_modules/
+frontend/functions/node_modules/
+frontend/src/node_modules/@sapper/
+redis/
+frontend/static/main.css

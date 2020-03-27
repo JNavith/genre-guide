@@ -1,188 +1,119 @@
-<script>
-  import { onMount } from "svelte";
-  import { sineIn, sineOut, sineInOut } from "svelte/easing";
-  import { fade } from "svelte/transition";
-  import { writable } from "svelte/store";
-  import { SettingsIcon } from "svelte-feather-icons";
-  import { localStorageStore } from "../stores.js";
-  import { fadeSlide } from "../transitions.js";
-  import RenderlessDropdown from "./Renderless/Dropdown.svelte";
+<!--
+    genre.guide - Top level settings menu Svelte component
+    Copyright (C) 2020 Navith
 
-  const KEY_ENTER = 13;
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  let close;
-  let toggle;
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-  const toggleTheme = () => ($theme = $theme === "light" ? "dark" : "light");
-  const toggleThemeUsesOS = () => ($themeUsesOS = !$themeUsesOS);
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
 
-  // Backup values
-  let theme = writable("light");
-  let themeUsesOS = writable(true);
+<script lang="typescript">
+	// @ts-ignore
+	import { sineIn, sineOut, sineInOut } from "svelte/easing";
+	// @ts-ignore
+	import { SettingsIcon } from "svelte-feather-icons";
+	// @ts-ignore
+	import { easingFunctions, transitionDurations, transitionFunctions, themes } from "../globals/design-system";
+	import { writable } from "svelte/store";
 
-  let osSupportsThemes = true;
+	// @ts-ignore
+	import Binary from "./Renderless/Binary.svelte";
+	// @ts-ignore
+	import StyledSwitch from "./Switches/Styled.svelte";
+	// @ts-ignore
+	import ThemeSwitch from "./Switches/Theme.svelte";
+	// @ts-ignore
+	import ThemeLogic from "./Renderless/ThemeLogic.svelte";
 
-  // Only run in the browser
-  if (process.browser) {
-    // Use light theme by default
-    theme = localStorageStore("settings.theme", "light");
+	// @ts-ignore
+	const { short } = transitionDurations;
+	// @ts-ignore
+	const { fadeSlide } = transitionFunctions;
+	// @ts-ignore
+	const { smoothIn, smoothOut } = easingFunctions;
+	// @ts-ignore
+	const { opacity: shortOpacityDuration, transform: shortTransformDuration} = short;
 
-    // Take the theme from the OS by default
-    themeUsesOS = localStorageStore("settings.theme.usesOS", true);
-  }
+	// @ts-ignore
+	let closeDropdown: () => void;
+	// @ts-ignore
+	let toggleDropdown: () => void;
 
-  // Listen to theme changes
-  $: if (process.browser) {
-    // Check the user's OS's theme
-    const prefersLight = matchMedia("(prefers-color-scheme: light)");
-    const prefersDark = matchMedia("(prefers-color-scheme: dark)");
-
-    // Initial page load check
-    if (prefersLight.matches) {
-      osSupportsThemes = true;
-      if ($themeUsesOS) $theme = "light";
-    } else if (prefersDark.matches) {
-      osSupportsThemes = true;
-      if ($themeUsesOS) $theme = "dark";
-    } else {
-      // If neither matches, it's because there is no support provided by the OS (I think)
-      osSupportsThemes = false;
-      $themeUsesOS = false;
-    }
-
-    // Listen for changes
-    prefersLight.addListener(event => {
-      if (event.matches && $themeUsesOS) $theme = "light";
-    });
-    prefersDark.addListener(event => {
-      if (event.matches && $themeUsesOS) $theme = "dark";
-    });
-  }
-
-  // Update the root HTML object's classes when the theme changes
-  $: if (process.browser) {
-    let classToReplace = null;
-
-    document.documentElement.classList.forEach(className => {
-      if (className.startsWith("theme-")) {
-        classToReplace = className;
-      }
-    });
-
-    // Replace the theme class
-    if (classToReplace !== null) {
-      document.documentElement.classList.replace(
-        classToReplace,
-        `theme-${$theme}`
-      );
-    }
-    // Or add a new theme class (when one isn't present)
-    else {
-      document.documentElement.classList.add(`theme-${$theme}`);
-    }
-  }
-
-  export let segment;
+	// @ts-ignore
+	let theme = writable<undefined | "light" | "dark">(undefined);
+	// @ts-ignore
+	let systemTheme = writable<undefined | boolean>(undefined);
+	// @ts-ignore
+	let systemThemeSupported: boolean;
 </script>
 
-<svelte:window on:click={close} on:storage={theme.onStorage} />
-<svelte:body class={'theme:' + $theme} />
+<svelte:window on:click={() => closeDropdown()} />
 
-<RenderlessDropdown let:close let:isOpen let:toggle>
-  <div
-    title="Settings"
-    class={'block mr-3 sm:mr-4 md:mr-6 h-3 md:h-4 w-3 md:w-4 flex-shrink-0 hover:cursor-pointer ' + (segment !== 'about' ? 'theme-light:text-green-500 theme-light:hover:text-green-600 theme-dark:text-green-400 theme-dark:hover:text-green-300' : 'text-white')}
-    on:click|stopPropagation={toggle}
-    on:keydown={event => {
-      if (event.keyCode == KEY_ENTER) {
-        toggle();
-      }
-    }}
-    tabindex="0">
-    <SettingsIcon />
-  </div>
+<ThemeLogic bind:theme bind:systemTheme bind:systemThemeSupported />
 
-  {#if isOpen}
-    <ul
-      in:fadeSlide={{ opacityDuration: 250, opacityEasing: sineIn, translateYPercent: -200, transformDuration: 120, transformEasing: sineOut }}
-      out:fadeSlide={{ opacityDuration: 250, opacityEasing: sineOut, translateYPercent: -100, transformDuration: 120, transformEasing: sineOut }}
-      class="absolute top-0 right-0 z-10 whitespace-no-wrap mr-3 sm:mr-4 md:mr-6
-      mt-6 px-3 py-2 theme-light:bg-gray-100 theme-light:text-gray-700
-      theme-dark:bg-gray-800 theme-dark:text-gray-400 font-heading list-none
-      rounded shadow-md"
-      on:click|stopPropagation>
+<Binary
+	initial={false}
+	bind:turnOff={closeDropdown}
+	let:state
+	bind:toggle={toggleDropdown}>
+	<div
+		title="Settings"
+		class="block mr-3 sm:mr-4 md:mr-6 h-4 w-4 flex-shrink-0
+		hover:cursor-pointer theme-light:text-green-500
+		theme-light:hover:text-green-600 theme-dark:text-green-400
+		theme-dark:hover:text-green-300"
+		on:click|stopPropagation={() => toggleDropdown()}
+		on:keydown={({ key }) => {
+			if (key == 'Enter') toggleDropdown();
+		}}
+		tabindex="0">
+		<SettingsIcon />
+	</div>
 
-      <li
-        class={'flex justify-between items-center ' + (osSupportsThemes ? '' : 'cursor-not-allowed opacity-50')}
-        title={osSupportsThemes ? '' : 'This option is disabled because your operating system or web browser does not support theming. Instead, set your theme manually with the switch below'}>
+	{#if state}
+		<ul
+			in:fadeSlide={{ opacityDuration: shortOpacityDuration, opacityEasing: smoothIn, translateYPercent: -200, transformDuration: shortTransformDuration, transformEasing: smoothOut }}
+			out:fadeSlide={{ opacityDuration: shortOpacityDuration, opacityEasing: smoothOut, translateYPercent: -100, transformDuration: shortTransformDuration, transformEasing: smoothOut }}
+			class="absolute top-0 right-0 z-10 whitespace-no-wrap mr-3 sm:mr-4
+			md:mr-6 mt-6 px-3 py-2 theme-light:bg-gray-100
+			theme-light:text-gray-700 theme-dark:bg-gray-800
+			theme-dark:text-gray-400 font-body font-light list-none rounded shadow-md"
+			on:click|stopPropagation>
 
-        {#if osSupportsThemes}
-          <span
-            class="lowercase"
-            title={'Your theme on this website will automatically update to match the one your operating system uses'}>
-            Use OS theme
-          </span>
-        {:else}
-          <span class="lowercase">Use OS theme</span>
-        {/if}
-        <!-- Toggle using the OS theme on click -->
-        <div
-          class="ml-2 w-10 h-5 rounded-full"
-          on:click={event => {
-            if (osSupportsThemes) toggleThemeUsesOS();
-          }}
-          on:keydown={event => {
-            if (osSupportsThemes && event.keyCode == KEY_ENTER) toggleThemeUsesOS();
-          }}
-          tabindex="0"
-          title={$themeUsesOS ? 'on' : 'off'}>
+			<li
+				class="flex justify-between items-center {!systemThemeSupported ? 'cursor-not-allowed opacity-50' : ''}"
+				title={!systemThemeSupported ? 'This option is disabled because your operating system or web browser does not support theming. Instead, set your theme manually with the switch below' : undefined}>
+				<span
+					class="lowercase"
+					title={systemThemeSupported ? 'Your theme on this website will automatically update to match the one your device uses' : undefined}>
+					Use device theme
+				</span>
 
-          {#each ['off', 'on'] as particularOptionOuter}
-            <div
-              class={'rounded-full w-10 h-5 absolute transition-opacity ' + (osSupportsThemes ? 'cursor-pointer ' : 'cursor-not-allowed ') + (particularOptionOuter === 'off' ? 'bg-gray-400 ' : 'bg-green-500 ') + ($themeUsesOS == (particularOptionOuter === 'on') ? 'opacity-100' : 'opacity-0')}>
+				<StyledSwitch
+					bind:state={$systemTheme}
+					disabled={!systemThemeSupported} />
+			</li>
 
-              {#each ['off', 'on'] as particularOptionInner}
-                <div
-                  class={'block w-3 h-3 ml-1 mt-1 rounded-full absolute left-0 top-0 transition-all ' + (particularOptionInner === 'off' ? 'bg-white ' : 'bg-white ') + (!$themeUsesOS ? (particularOptionInner == 'off' ? 'mr-6 opacity-100' : 'mr-6 opacity-0') : particularOptionInner == 'off' ? 'ml-6 opacity-0' : 'ml-6 opacity-100')} />
-              {/each}
-              <!-- Need an empty div that the inner part of the button can have a right margin against -->
-              <div />
-            </div>
-          {/each}
-        </div>
-      </li>
+			<li
+				class="flex justify-between items-center mt-2 transition-opacity
+				{systemThemeSupported && $systemTheme ? 'cursor-not-allowed opacity-50' : ''}"
+				title={systemThemeSupported && $systemTheme ? "The theme cannot be changed while 'use os theme' is on because it would have no effect. Disable it to be able to manually change the theme" : undefined}>
 
-      <li
-        class={'flex justify-between items-center mt-2 transition-opacity ' + ($themeUsesOS ? 'cursor-not-allowed opacity-50' : '')}
-        title={$themeUsesOS ? "The theme cannot be changed while 'use os theme' is on because it would have no effect. Disable it to be able to manually change the theme" : ''}>
-        <span class="lowercase ">Theme</span>
-        <!-- Switch themes on click -->
-        <div
-          class="ml-2 w-10 h-5 rounded-full"
-          on:click={() => {
-            if (!$themeUsesOS) toggleTheme();
-          }}
-          on:keydown={event => {
-            if (!$themeUsesOS && event.keyCode == KEY_ENTER) toggleTheme();
-          }}
-          tabindex="0"
-          title={$theme}>
+				<span class="lowercase">Theme</span>
 
-          {#each ['light', 'dark'] as particularThemeOuter}
-            <div
-              class={'rounded-full w-10 h-5 absolute transition-opacity ' + ($themeUsesOS ? 'cursor-not-allowed ' : 'cursor-pointer ') + (particularThemeOuter === 'light' ? 'bg-gradient-t-teal-200-blue-400 ' : 'bg-gradient-t-indigo-700-purple-900 ') + ($theme == particularThemeOuter ? 'opacity-100' : 'opacity-0')}>
-
-              {#each ['light', 'dark'] as particularThemeInner}
-                <div
-                  class={'block w-3 h-3 ml-1 mt-1 rounded-full absolute left-0 top-0 transition-all ' + (particularThemeInner === 'light' ? 'bg-radial-yellow-400-orange-300 ' : 'bg-radial-gray-100-gray-200 ') + ($theme === 'light' ? (particularThemeInner == 'light' ? 'mr-6 opacity-100' : 'mr-6 opacity-0') : particularThemeInner == 'light' ? 'ml-6 opacity-0' : 'ml-6 opacity-100')} />
-              {/each}
-              <!-- Need an empty div that the inner part of the button can have a right margin against -->
-              <div />
-            </div>
-          {/each}
-        </div>
-      </li>
-
-    </ul>
-  {/if}
-</RenderlessDropdown>
+				<ThemeSwitch
+					bind:state={$theme}
+					disabled={systemThemeSupported && $systemTheme} />
+			</li>
+		</ul>
+	{/if}
+</Binary>

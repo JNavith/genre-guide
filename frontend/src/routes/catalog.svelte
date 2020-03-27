@@ -1,145 +1,117 @@
-<script>
-  import { get } from "svelte/store";
-  import { sineIn } from "svelte/easing";
-  import { fade } from "svelte/transition";
-  import fetch from "node-fetch";
-  import ApolloClient from "apollo-boost";
-  import { query } from "svelte-apollo";
-  import { FrownIcon } from "svelte-feather-icons";
-  import { GET_MOST_RECENT_TRACKS, getTracksBefore } from "../queries";
-  import { siteName } from "../stores";
-  import TrackCatalog from "../components/TrackCatalog.svelte";
+<!--
+    genre.guide - Catalog page Svelte route
+    Copyright (C) 2020 Navith
 
-  const client = new ApolloClient({
-    uri: "https://genre.guide/graphql",
-    fetch
-  });
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-  let innerHeight, scrollY;
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-  let tracks = [];
-  let isLoadingTracks;
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
 
-  const loadTracks = () => {
-    if (isLoadingTracks) return;
-    isLoadingTracks = true;
 
-    let tracksRequestStore;
-    let initialTrackLoad;
+<script context="module">
+  import api from "../globals/api";
 
-    if (tracks.length == 0) {
-      tracksRequestStore = query(client, { query: GET_MOST_RECENT_TRACKS });
-      // This is a promise so it can make the await block in the HTML work
-      initialTrackLoad = new Promise((resolve, reject) =>
-        tracksRequestStore.subscribe(tracksRequest =>
-          tracksRequest.then(tracksResponse => resolve(undefined))
-        )
-      );
-    } else {
-      tracksRequestStore = query(client, {
-        query: getTracksBefore(tracks[tracks.length - 1].id)
-      });
-    }
+  const TRACK_FRAGMENT = `
+		artist
+		date
+		id
+		image
+		name
+		recordLabel
+		subgenresFlat {
+			... on Subgenre {
+				names
+				textColor
+				backgroundColor
+			}
+			... on Operator {
+				symbol
+			}
+		}
+	`;
 
-    tracksRequestStore.subscribe(tracksRequest =>
-      tracksRequest.then(({ data: { tracks: newTracks } }) => {
-        newTracks.forEach((track, loadIndex) => {
-          track.loadIndex = loadIndex;
-        });
+  const GET_MOST_RECENT_TRACKS = `
+		{
+			tracks {
+				${TRACK_FRAGMENT}
+			}
+		}
+	`;
 
-        tracks = [...tracks, ...newTracks];
-        isLoadingTracks = false;
-      })
-    );
+  const GET_TRACKS_BEFORE_ID = `
+		query getTracks($beforeId: ID!) {
+			tracks(before_id: $beforeId) {
+				${TRACK_FRAGMENT}
+			}
+		}
+	`;
 
-    return initialTrackLoad;
-  };
+  export async function preload() {
+    if (!process.browser) return;
 
-  const initialTrackLoad = loadTracks();
+    console.log("hi from me");
+    const {
+      data: { tracks }
+    } = await api({ fetch: this.fetch, query: GET_MOST_RECENT_TRACKS });
+
+    tracks.forEach((track, loadIndex) => {
+      track.loadIndex = loadIndex;
+    });
+
+    console.log("bye from me");
+    console.log({ tracks });
+
+    return { tracks };
+  }
 </script>
 
-<style>
-  /* https://github.com/ConnorAtherton/loaders.css */
-  @keyframes line-scale-pulse-out-rapid {
-    0%,
-    100% {
-      height: 6rem;
-    }
-    80% {
-      height: 1rem;
-    }
-  }
-  .line-scale-pulse-out-rapid > div {
-    animation-fill-mode: both;
-    display: inline-block;
-    vertical-align: middle;
-    animation: line-scale-pulse-out-rapid 0.9s 0s infinite
-      cubic-bezier(0.11, 0.49, 0.38, 0.78);
-  }
-  .line-scale-pulse-out-rapid > div:nth-child(2),
-  .line-scale-pulse-out-rapid > div:nth-child(4) {
-    animation-delay: -0.25s !important;
-  }
-  .line-scale-pulse-out-rapid > div:nth-child(1),
-  .line-scale-pulse-out-rapid > div:nth-child(5) {
-    animation-delay: -0.5s !important;
-  }
-</style>
+<script>
+  import { routes } from "../globals/site";
 
-<svelte:head>
-  <title>Catalog - {$siteName}</title>
-</svelte:head>
+  import Metadata from "../components/Renderless/Metadata.svelte";
+  import NavigationBarTopLevel from "../components/NavigationBarTopLevel.svelte";
+  import TrackCatalog from "../components/TrackCatalog.svelte";
+  import AccentBar from "../components/AccentBar.svelte";
+  import MusicVisualizerLoader from "../components/MusicVisualizerLoader.svelte";
+
+  const {
+    catalog: { pageTitle, description }
+  } = routes;
+
+  export let tracks = [];
+
+  // TODO: robot3 finite state machine
+  let isLoadingTracks = false;
+</script>
 
 <svelte:window
-  bind:scrollY
-  bind:innerHeight
-  on:scroll|passive={() => {
-    if (innerHeight * 3 + scrollY > document.body.offsetHeight) loadTracks();
-  }} />
-<svelte:body bind:offsetHeight />
+  on:scroll|passive={async () => {
+    if (isLoadingTracks) return;
 
-<div
-  in:fade={{ duration: 1250 }}
-  class="flex flex-col flex-1 items-center justify-center px-8">
-  {#await initialTrackLoad}
-    <div class="flex flex-1 items-center justify-center my-4">
-      <div class="line-scale-pulse-out-rapid h-24 flex items-center">
-        <!-- This particular loader needs 5 children -->
-        {#each Array(5) as _}
-          <div
-            class="theme-light:bg-gray-400 theme-dark:bg-gray-600 rounded-full
-            mx-1 w-2" />
-        {/each}
-      </div>
-    </div>
-  {:then}
-    <TrackCatalog {tracks} />
-    <div class="flex flex-1 items-center justify-center my-4">
-      <div class="line-scale-pulse-out-rapid h-24 flex items-center">
-        {#each Array(5) as _}
-          <div
-            class="theme-light:bg-gray-400 theme-dark:bg-gray-600 rounded-full
-            mx-1 w-2" />
-        {/each}
-      </div>
-    </div>
-  {:catch error}
-    <div
-      class="flex flex-col items-center text-lg theme-light:text-gray-500
-      theme-dark:text-gray-600">
-      <div class="w-6 h-6">
-        <FrownIcon />
-      </div>
-      <span>
-        {#if error.message === 'Network error: NetworkError when attempting to fetch resource.'}
-          There was a network error caused by trying to load the catalog
-        {:else if error.graphQLErrors !== undefined && error.graphQLErrors.length > 0}
-          There was an error in the catalog response, which is probably out of
-          your control
-        {:else}
-          {console.log(error) || console.log(Object.entries(error)) || 'An unknown error occurred loading the catalog. If you understand JavaScript, see the developer console to inspect what went wrong'}
-        {/if}
-      </span>
-    </div>
-  {/await}
-</div>
+    isLoadingTracks = false;
+  }} />
+
+<Metadata {pageTitle} {description} />
+
+<AccentBar />
+
+<NavigationBarTopLevel />
+
+<main class="flex-1 flex flex-col items-center px-8">
+  <TrackCatalog {tracks} />
+
+  <div class="flex items-center justify-center my-4">
+    <MusicVisualizerLoader />
+  </div>
+</main>
+
+<AccentBar />

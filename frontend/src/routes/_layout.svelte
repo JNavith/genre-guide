@@ -1,18 +1,31 @@
-<script>
-  import NavigationBarTopLevel from "../components/NavigationBarTopLevel.svelte";
+<!--
+    genre.guide - Sitewide page layout Svelte file
+    Copyright (C) 2020 Navith
 
-  export let segment;
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+<script lang="typescript">
+	// @ts-ignore
+	import ThemeLogic from "../components/Renderless/ThemeLogic.svelte";
+	
+	export let segment: string;
 </script>
 
-<div
-  class={'h-1 ' + (segment !== 'about' ? 'theme-light:bg-green-500 theme-dark:bg-green-400' : 'bg-google-sheets')} />
-
-<NavigationBarTopLevel {segment} />
-
-<main class="flex-1 flex flex-col">
-  <slot />
-</main>
-
-{#if segment !== 'about'}
-  <div class="h-1 theme-light:bg-green-500 theme-dark:bg-green-400" />
+{#if process.browser}
+	<ThemeLogic />
 {/if}
+
+<slot {segment} />

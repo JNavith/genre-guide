@@ -1,34 +1,51 @@
+<!--
+    genre.guide - Sapper template HTML file
+    Copyright (C) 2020 Navith
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
 <!DOCTYPE html>
-<html class="leading-none">
+<html>
 
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 
-    %sapper.base%
+		%sapper.base%
 
-    <link rel="manifest" href="manifest.json" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+		<link rel="manifest" href="manifest.json" />
+		<link rel="icon" type="image/png" href="favicon.png" />
 
-    <link rel="stylesheet" href="/main.css" />
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500|Heebo:300,400,500" rel="stylesheet" />
-    <!-- Sapper generates a <style> tag containing critical CSS
-  	for the current page. CSS for the rest of the app is
-  	lazily loaded when it precaches secondary pages -->
-    %sapper.styles%
+		<link rel="stylesheet" href="/main.css" />
 
-    <!-- This contains the contents of the <svelte:head> component, if
-	  the current page has one -->
-    %sapper.head%
-  </head>
+		<!-- Sapper generates a <style> tag containing critical CSS
+  		for the current page. CSS for the rest of the app is
+  		lazily loaded when it precaches secondary pages -->
+		%sapper.styles%
 
-  <body
-    class="w-full min-h-screen flex flex-col font-body transition-ease transition-250 transition-colors theme-light:bg-white theme-light:text-gray-900 theme-dark:bg-gray-900 theme-dark:text-white selection:bg-green-500 selection:text-white">
-    <div class="flex-1 flex flex-col" id="sapper">
-      %sapper.html%
-    </div>
+		<!-- This contains the contents of the <svelte:head> component, if
+		the current page has one -->
+		%sapper.head%
+	</head>
 
-    %sapper.scripts%
-  </body>
+	<body class="w-full min-h-screen flex flex-col font-body leading-none duration-200 transition-colors ease-in-out theme-light:bg-white theme-light:text-gray-900 theme-dark:bg-gray-900 theme-dark:text-white selection:bg-green-500 selection:text-white">
+		<div class="flex-1 flex flex-col" id="sapper">
+			%sapper.html%
+		</div>
 
+		%sapper.scripts%
+	</body>
 </html>

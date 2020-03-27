@@ -1,0 +1,15 @@
+{
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "[javascript]": {
+        "editor.formatOnSave": false
+    },
+    "[typescript]": {
+        "editor.formatOnSave": false
+    },
+    "svelte.plugin.typescript.diagnostics.enable": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+}
