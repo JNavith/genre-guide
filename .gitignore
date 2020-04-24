@@ -1,4 +1,5 @@
 .firebase/
+/.history/
 .rpt2_cache/
 __sapper__/
 __pycache__/
