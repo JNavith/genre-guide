@@ -16,6 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+
 const { https: { onRequest } } = require("firebase-functions");
 
 const {createSapperAndApolloServer} = require("./__sapper__/build/server/server");
