@@ -90,8 +90,7 @@ module.exports = {
 					const transformTimeEased = transformEasing(transformTime);
 
 					return `opacity: ${opacityTimeEased * opacity};
-			  transform: translate(${translateXPercent *
-						(1 - transformTimeEased)}%, ${translateYPercent * (1 - transformTimeEased)}%)`;
+			  		        transform: translate(${translateXPercent * (1 - transformTimeEased)}%, ${translateYPercent * (1 - transformTimeEased)}%)`;
 				},
 			};
 		},
