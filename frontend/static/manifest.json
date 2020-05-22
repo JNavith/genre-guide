@@ -1,20 +1,19 @@
 {
-	"background_color": "#ffffff",
-	"theme_color": "#333333",
-	"name": "TODO",
-	"short_name": "TODO",
-	"display": "minimal-ui",
-	"start_url": "/",
+	"short_name": "genre.guide",
+	"name": "genre.guide",
+	"description": "Learn about genres by their history, characteristics, and examples",
+	"lang": "en-US",
+	"dir": "ltr",
 	"icons": [
 		{
-			"src": "logo-192.png",
-			"sizes": "192x192",
-			"type": "image/png"
-		},
-		{
-			"src": "logo-512.png",
-			"sizes": "512x512",
-			"type": "image/png"
+			"src": "img/1x1-logo.png",
+			"sizes": "1200x1200",
+			"type": "image/png",
+			"purpose": "any maskable"
 		}
-	]
+	],
+	"start_url": "/",
+	"display": "minimal-ui",
+	"background_color": "#FFFFFF",
+	"theme_color": "#0FBB00"
 }

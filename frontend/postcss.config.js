@@ -16,12 +16,14 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-
+/* eslint-disable global-require */
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 
 module.exports = {
 	plugins: [
+		require("postcss-import"),
+
 		require("tailwindcss")("./tailwind.config.js"),
 
 		require("postcss-preset-env")({
@@ -35,14 +37,14 @@ module.exports = {
 
 		!dev && require("@fullhuman/postcss-purgecss")({
 			content: ["./src/**/*.svelte", "./src/**/*.html"],
-			defaultExtractor: (content) => content.match(/[A-Za-z0-9-_:\/\.]+/g) || [], // eslint-disable-line no-useless-escape
+			defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d-/:%.]+)/gm)].map(([_match, group, ..._rest]) => group),
 			whitelist: ["theme-light", "theme-dark"],
 		}),
 
 		!dev && require("cssnano")({
 			preset: [
 				"default",
-				{discardComments: {removeAll: true}},
+				{ discardComments: { removeAll: true } },
 			],
 		}),
 	],

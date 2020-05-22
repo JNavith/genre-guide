@@ -31,6 +31,7 @@ const {theme: defaultTheme, variants: defaultVariants} = require("tailwindcss/de
 const {colors, fontFamily, themes} = require("./src/globals/design-system");
 
 module.exports = {
+	purge: false,
 	theme: {
 		extend: {
 			borderColor: {default: "currentColor"},
@@ -118,7 +119,7 @@ module.exports = {
 	},
 
 	plugins: [
-		require("@tailwindcss/ui"),
+		// require("@tailwindcss/ui"),
 		require("tailwindcss-custom-native"),
 		require("tailwindcss-gradients"),
 

@@ -15,8 +15,16 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+const preprocess = require("svelte-preprocess");
 
+const mode = process.env.NODE_ENV;
+const dev = mode === "development";
 
-const {preprocess} = require("@pyoner/svelte-ts-preprocess");
-
-module.exports = {preprocess: preprocess()};
+module.exports = {
+    preprocess: preprocess({
+        postcss: true,
+        typescript: {
+            transpileOnly: dev,
+        },
+    }),
+};
