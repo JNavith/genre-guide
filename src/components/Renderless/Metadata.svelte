@@ -37,7 +37,9 @@
 	export let imageAlt: string = siteName;
 
 	// @ts-ignore
-	let metaTags: any;
+	let metaTags: {
+		[property: string]: string;
+	};
 
 	$: metaTags = {
 		"twitter:site": siteName,
