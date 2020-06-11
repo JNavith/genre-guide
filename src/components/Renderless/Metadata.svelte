@@ -33,7 +33,7 @@
 
 	export let author: string = siteAuthor;
 
-	export let image: string = "/img/1x1-logo.png";
+	export let image: string = "/img/logo-512.png";
 	export let imageAlt: string = siteName;
 
 	// @ts-ignore
