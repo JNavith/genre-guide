@@ -21,6 +21,7 @@ devDependencies:
   '@types/express': 4.17.6
   '@types/helmet': 0.0.47
   '@types/ioredis': 4.16.4
+  '@types/lodash-es': 4.17.3
   '@types/node-fetch': 2.5.7
   '@types/uuid': 8.0.0
   '@typescript-eslint/eslint-plugin': 3.2.0_ac50c8aa16ddb60722eab507f8fe73f1
@@ -1455,6 +1456,16 @@ packages:
     dev: true
     resolution:
       integrity: sha512-ABxVkrNWa4O/Jp24EYI/hRNqEVRlhB9g09p48neQp4m3xL1TJtdWk2NyNQSMCU45ejeELMQZBYyfstyVvO2H3Q==
+  /@types/lodash-es/4.17.3:
+    dependencies:
+      '@types/lodash': 4.14.155
+    dev: true
+    resolution:
+      integrity: sha512-iHI0i7ZAL1qepz1Y7f3EKg/zUMDwDfTzitx+AlHhJJvXwenP682ZyGbgPSc5Ej3eEAKVbNWKFuwOadCj5vBbYQ==
+  /@types/lodash/4.14.155:
+    dev: true
+    resolution:
+      integrity: sha512-vEcX7S7aPhsBCivxMwAANQburHBtfN9RdyXFk84IJmu2Z4Hkg1tOFgaslRiEqqvoLtbCBi6ika1EMspE+NZ9Lg==
   /@types/long/4.0.1:
     dev: true
     resolution:
@@ -8882,6 +8893,7 @@ specifiers:
   '@types/express': ^4.17.3
   '@types/helmet': ^0.0.47
   '@types/ioredis': ^4.16.4
+  '@types/lodash-es': ^4.17.3
   '@types/node-fetch': ^2.5.7
   '@types/uuid': ^8.0.0
   '@typescript-eslint/eslint-plugin': ^3.2.0

@@ -33,9 +33,7 @@ from .tracks import create_tracks_data_set, get_all_tracks, seed_redis_with_trac
 
 def open_genre_sheet() -> Spreadsheet:
     scope: List[str] = ["https://www.googleapis.com/auth/drive.readonly"]
-    keyfile = Path(
-        __file__
-    ).parent.parent.parent / "config-and-secrets" / "client_secret.json"
+    keyfile = Path(__file__).parent.parent.parent / "config" / "client_secret.json"
     credentials: ServiceAccountCredentials = ServiceAccountCredentials.from_json_keyfile_name(
         str(keyfile), scope)
     client: Client = authorize(credentials)
@@ -51,6 +49,7 @@ async def main():
     redis_pool: Coroutine[Redis] = create_redis_pool(
         redis_host,
         password=redis_password,
+        # This is so sad
         ssl=_create_unverified_context() if ssl else False)
 
     print("about to connect to redis", flush=True)

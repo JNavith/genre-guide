@@ -7,9 +7,10 @@ The site is offline for the foreseeable future.
 
 
 How to use:
-1. Update the files in `config-and-secrets` (read their comments), which goes as follows:
-    1. Create a project in the Google API console and make a service account that has access to the Drive API. Download its `client_secret.json` file and place it in the `config-and-secrets` directory (replacing the one currently there). A decent overview of how to do that can be found [here](https://www.youtube.com/watch?v=vISRn5qFrkM)
-    1. Update `google-sheets.env` to reflect the characteristics of your own spreadsheet
+These instructions are out of date.
+
+1. Create a project in the Google API console and make a service account that has access to the Drive API. Download its `client_secret.json` file and place it in the `config` directory (replacing the one currently there). A decent overview of how to do that can be found [here](https://www.youtube.com/watch?v=vISRn5qFrkM)
+1. Update `google-sheets.env` to reflect the characteristics of your own spreadsheet
 
 
 ## Contributing

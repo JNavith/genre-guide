@@ -20,7 +20,6 @@
 	import { SettingsIcon } from "svelte-feather-icons";
 	import { writable } from "svelte/store";
 	
-	import Binary from "../components/Renderless/Binary.svelte";
 	import StyledSwitch from "../components/Switches/Styled.svelte";
 	import ThemeSwitch from "../components/Switches/Theme.svelte";
 	
