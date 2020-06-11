@@ -17,82 +17,77 @@
 */
 
 
-const { sineIn, sineInOut, sineOut } = require("svelte/easing");
+import { sineIn, sineInOut, sineOut } from "svelte/easing";
 
+export const colors = {
+	green: {
+		100: "#E7F8E6",
+		200: "#CFF1CC",
+		300: "#87DD80",
+		400: "#57CF4D",
+		500: "#0FBB00",
+		600: "#009802",
+		700: "#007808",
+		800: "#00570E",
+	},
+};
 
-module.exports = {
-	colors: {
-		green: {
-			100: "#E7F8E6",
-			200: "#CFF1CC",
-			300: "#87DD80",
-			400: "#57CF4D",
-			500: "#0FBB00",
-			600: "#009802",
-			700: "#007808",
-			800: "#00570E",
+export const easingFunctions = {
+	smoothIn: sineIn,
+	smoothOut: sineOut,
+	smoothInOut: sineInOut,
+};
+
+export const fontFamily = {
+	heading: ["Poppins", "Roboto"],
+	body: ["Roboto"],
+};
+
+export const fontMagicianConfig = {
+	display: "swap",
+	foundries: ["custom", "google"],
+	formats: ["local", "otf", "woff2", "woff", "eot", "svg", "ttf"],
+	custom: {},
+};
+
+export const transitionDurations = {
+	short: {
+		default: 200,
+		opacity: 250,
+		transform: 120,
+	},
+};
+
+export const transitionFunctions = {
+	fadeSlide(
+		node,
+		{
+			delay = 0,
+			opacityDuration = 500,
+			opacityEasing = (t) => t,
+			translateXPercent = 0,
+			translateYPercent = 100,
+			transformDuration = 500,
+			transformEasing = (t) => t,
 		},
-	},
+	) {
+		const opacity = Number(getComputedStyle(node).opacity);
 
-	easingFunctions: {
-		smoothIn: sineIn,
-		smoothOut: sineOut,
-		smoothInOut: sineInOut,
-	},
+		const maxDuration = Math.max(opacityDuration, transformDuration);
 
-	fontFamily: {
-		heading: ["Poppins", "Roboto"],
-		body: ["Roboto"],
-	},
+		return {
+			delay,
+			duration: maxDuration,
+			css: (t) => {
+				const opacityTime = Math.min(t * (maxDuration / opacityDuration), 1);
+				const opacityTimeEased = opacityEasing(opacityTime);
 
-	fontMagicianConfig: {
-		display: "swap",
-		foundries: ["custom", "google"],
-		formats: ["local", "otf", "woff2", "woff", "eot", "svg", "ttf"],
-		custom: {},
-	},
+				const transformTime = Math.min(t * (maxDuration / transformDuration), 1);
+				const transformTimeEased = transformEasing(transformTime);
 
-	themes: ["light", "dark"],
-
-	transitionDurations: {
-		short: {
-			default: 200,
-			opacity: 250,
-			transform: 120,
-		},
-	},
-
-	transitionFunctions: {
-		fadeSlide(
-			node,
-			{
-				delay = 0,
-				opacityDuration = 500,
-				opacityEasing = (t) => t,
-				translateXPercent = 0,
-				translateYPercent = 100,
-				transformDuration = 500,
-				transformEasing = (t) => t,
+				return `opacity: ${opacityTimeEased * opacity};
+						transform: translate(${translateXPercent * (1 - transformTimeEased)}%, ${translateYPercent * (1 - transformTimeEased)}%)`;
 			},
-		) {
-			const opacity = Number(getComputedStyle(node).opacity);
-
-			const maxDuration = Math.max(opacityDuration, transformDuration);
-
-			return {
-				delay,
-				duration: maxDuration,
-				css: (t) => {
-					const opacityTime = Math.min(t * (maxDuration / opacityDuration), 1);
-					const opacityTimeEased = opacityEasing(opacityTime);
-
-					const transformTime = Math.min(t * (maxDuration / transformDuration), 1);
-					const transformTimeEased = transformEasing(transformTime);
-
-					return `opacity: ${opacityTimeEased * opacity};
-			  		        transform: translate(${translateXPercent * (1 - transformTimeEased)}%, ${translateYPercent * (1 - transformTimeEased)}%)`;
-				},
-			};
-		},
+		};
 	},
 };

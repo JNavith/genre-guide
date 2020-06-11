@@ -23,35 +23,35 @@
 
 	export let state: boolean = false;
 	export let disabled: boolean;
+
+	const toggle = () => {
+		state = !state;
+	}
 </script>
 
-<Binary bind:state let:toggle>
-	<div
-		class="ml-2 w-10 h-5 rounded-full"
-		on:click={() => {
-			if (!disabled) toggle();
-		}}
-		on:keydown={({ key }) => {
-			if (!disabled && key == 'Enter') toggle();
-		}}
-		tabindex="0">
+<button
+	class="ml-2 w-10 h-5 rounded-full relative"
+	on:click={toggle}
+	title={state}
+	aria-pressed={state}
+	{disabled}>
 
-		{#each [false, true] as outer}
-			<div
-				class="rounded-full w-10 h-5 absolute transition-opacity {disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-				{outer ? 'bg-green-500' : 'bg-gray-400'}
-				{state === outer ? 'opacity-100' : 'opacity-0'}">
+	{#each [false, true] as outer}
+		<div
+			class="rounded-full w-10 h-5 transition-opacity absolute inset-0
+			{disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
+			{outer ? 'bg-green-500' : 'bg-gray-400'}
+			{state === outer ? 'opacity-100' : 'opacity-0'}">
 
-				{#each [false, true] as inner}
-					<div
-						class="block w-3 h-3 ml-1 mt-1 rounded-full absolute
-						left-0 top-0 transition-all bg-white {state ? 'ml-6' : 'mr-6'}
-						{inner === state ? 'opacity-100' : 'opacity-0'}" />
-				{/each}
+			{#each [false, true] as inner}
+				<div
+					class="block w-3 h-3 ml-1 mt-1 rounded-full absolute inset-0
+					left-0 top-0 transition-all bg-white {state ? 'ml-6' : 'mr-6'}
+					{inner === state ? 'opacity-100' : 'opacity-0'}" />
+			{/each}
 
-				<!-- Need an empty div that the inner part of the buttstate can have a right margin against -->
-				<div />
-			</div>
-		{/each}
-	</div>
-</Binary>
+			<!-- Need an empty div that the inner part of the buttstate can have a right margin against -->
+			<div />
+		</div>
+	{/each}
+</button>

@@ -18,23 +18,19 @@
 
 
 <script lang="typescript">
-	// @ts-ignore
-	import ThemeLogic from "../components/Renderless/ThemeLogic.svelte";
-	
-	// `segment` create a warning if not expected: https://github.com/sveltejs/sapper-template/issues/210
+    import { getContext, setContext } from "svelte";
+
+    import themeLogic from "../globals/theme-logic";
+    
+	// `segment` will create a warning if not expected: https://github.com/sveltejs/sapper-template/issues/210
 	// https://github.com/sveltejs/sapper/issues/824
-	export let segment: string;
+	export let segment: string = "";
 	// Silence unused export property warning
-	// @ts-ignore
-	if (segment) {};
+    if (segment) {};
 </script>
 
 <style lang="postcss" global>
 	@import "../global.pcss";
 </style>
-
-{#if process.browser}
-	<ThemeLogic />
-{/if}
 
 <slot />

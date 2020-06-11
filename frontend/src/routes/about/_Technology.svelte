@@ -20,11 +20,6 @@
 <script lang="typescript">
 	import { onMount } from "svelte";
 
-	// @ts-ignore
-	import { stores } from "@sapper/app";
-	// @ts-ignore
-	const { preloading } = stores();
-
 	import {
 		easingFunctions,
 		transitionDurations,
@@ -32,15 +27,12 @@
 	} from "../../globals/design-system";
 
 	const { short } = transitionDurations;
-	// @ts-ignore
 	const {
 		opacity: shortOpacityDuration,
 		transform: shortTransformDuration
 	} = short;
 
-	// @ts-ignore
 	const { fadeSlide } = transitionFunctions;
-	// @ts-ignore
 	const { smoothIn, smoothOut } = easingFunctions;
 
 	export let index: number;
@@ -55,11 +47,7 @@
 
 	export let image: string;
 
-	// @ts-ignore
-    let mounted: boolean = false;
-	// Trigger the out transition when the next page is being preloaded to
-	// @ts-ignore
-	$: if ($preloading) mounted = false;
+    let mounted: boolean = !process.browser;
 	onMount(() => {
 		mounted = true;
 
@@ -75,7 +63,7 @@
 	}
 
 	.technology :global(a) {
-		font-weight: 500;
+		@apply font-medium;
 	}
 
 	.technology :global(a):hover,

@@ -15,16 +15,18 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-const preprocess = require("svelte-preprocess");
 
-const mode = process.env.NODE_ENV;
-const dev = mode === "development";
+import sveltePreprocess from "svelte-preprocess";
+import postcss from "./postcss.config";
 
-module.exports = {
-    preprocess: preprocess({
-        postcss: true,
-        typescript: {
-            transpileOnly: dev,
-        },
-    }),
-};
+const dev = process.env.NODE_ENV === "development";
+
+export const preprocess = sveltePreprocess({
+	postcss,
+	typescript: {
+		// This returns compilation times back to what they're like without TypeScript
+		// And still type checks for production builds
+		// Use IDE tools for type checking during development instead
+		transpileOnly: dev,
+	},
+});

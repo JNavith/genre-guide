@@ -1,5 +1,5 @@
 /*
-    genre.guide - Main GraphQL server TypeScript file
+    genre.guide - Sapper client JavaScript file
     Copyright (C) 2020 Navith
 
     This program is free software: you can redistribute it and/or modify
@@ -16,26 +16,9 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+// @ts-ignore -- generated package
+import * as sapper from "@sapper/app"; // eslint-disable-line import/no-unresolved
 
-import "reflect-metadata";
-import { ApolloServer } from "apollo-server-express";
-import { buildSchema } from "type-graphql";
-
-import { OperatorResolver } from "./Operator";
-import { SubgenreResolver } from "./Subgenre";
-import { TrackResolver } from "./Track";
-
-export const createApolloServer = async (): Promise<ApolloServer> => {
-	const schema = await buildSchema({
-		dateScalarMode: "isoDate",
-		resolvers: [OperatorResolver, SubgenreResolver, TrackResolver],
-	});
-
-	const apolloServer = new ApolloServer({
-		schema,
-		playground: true,
-		introspection: true,
-	});
-
-	return apolloServer;
-};
+sapper.start({
+	target: document.querySelector("#sapper"),
+});

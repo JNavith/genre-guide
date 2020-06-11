@@ -18,103 +18,108 @@
 
 
 import "reflect-metadata";
-import { ObjectType, Field, FieldResolver, Query, Resolver, ResolverInterface, Root } from "type-graphql";
+import {
+	ObjectType, Field, FieldResolver, Query, Resolver, ResolverInterface, Root,
+} from "type-graphql";
 
 import { client } from "./redis";
 
 @ObjectType({ description: "A subgenre, as understood on the Genre Sheet" })
 export class Subgenre {
-    constructor(
+	constructor(
         readonly primaryName: string,
-    ) { }
+	) { }
 
-    @Field(type => [String], { description: 'The primary name of the subgenre, e.x. "Brostep", followed by alternative names for the subgenre, e.x. {"DnB", "D&B"} for Drum & Bass' })
+    @Field((type) => [String], { description: "The primary name of the subgenre, e.x. \"Brostep\", followed by alternative names for the subgenre, e.x. {\"DnB\", \"D&B\"} for Drum & Bass" })
     names?: string[];
 
-    @Field(type => Subgenre, { description: "The genre category that this subgenre belongs to, which is where its color comes from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass" })
+    @Field((type) => Subgenre, { description: "The genre category that this subgenre belongs to, which is where its color comes from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass" })
     category?: this;
 
-    @Field(type => [Subgenre], { description: 'The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime' })
+    @Field((type) => [Subgenre], { description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime" })
     origins?: this[];
 
-    @Field(type => [Subgenre], { description: 'The list of subgenres that originate *directly* from this subgenre, e.x. {Deathstep, Drumstep} for Dubstep, {} for Footwork, {Electro Swing, Jazzstep} for Nu-Jazz' })
+    @Field((type) => [Subgenre], { description: "The list of subgenres that originate *directly* from this subgenre, e.x. {Deathstep, Drumstep} for Dubstep, {} for Footwork, {Electro Swing, Jazzstep} for Nu-Jazz" })
     children?: this[];
 
-    @Field(type => String, { description: "The text color this subgenre uses on the Genre Sheet, in hex, e.x. '#000000' for Ambient" })
+    @Field((type) => String, { description: "The text color this subgenre uses on the Genre Sheet, in hex, e.x. '#000000' for Ambient" })
     textColor?: string;
 
-    @Field(type => String, { description: "The background color this subgenre uses on the Genre Sheet, in hex, e.x. '#009600' for Hardcore" })
+    @Field((type) => String, { description: "The background color this subgenre uses on the Genre Sheet, in hex, e.x. '#009600' for Hardcore" })
     backgroundColor?: string;
 
-    @Field(type => String, { nullable: true, description: "A paragraph describing of this subgenre. Currently, no descriptions are available for any subgenre, so this always returns null" })
+    @Field((type) => String, { nullable: true, description: "A paragraph describing of this subgenre. Currently, no descriptions are available for any subgenre, so this always returns null" })
     description?: string | null;
-};
+}
 
-@Resolver(of => Subgenre)
+@Resolver((of) => Subgenre)
 export class SubgenreResolver implements ResolverInterface<Subgenre> {
-    @Query(returns => [Subgenre], { description: "Retrieve all subgenres from the sheet (database)" })
-    async allSubgenres(): Promise<Subgenre[]> {
-        return (await client.smembers("subgenres")).map(primaryName => new Subgenre(primaryName));
-    }
+    @Query((returns) => [Subgenre], { description: "Retrieve all subgenres from the sheet (database)" })
+	async allSubgenres(): Promise<Subgenre[]> {
+		return (await client.smembers("subgenres")).map((primaryName) => new Subgenre(primaryName));
+	}
 
-    @Query(returns => [Subgenre], { description: "Retrieve all categories (genres) from the sheet (database)" })
+    @Query((returns) => [Subgenre], { description: "Retrieve all categories (genres) from the sheet (database)" })
     async allCategories() {
-        return (await client.smembers("genres")).map(primaryName => new Subgenre(primaryName));
+    	return (await client.smembers("genres")).map((primaryName) => new Subgenre(primaryName));
     }
 
     @FieldResolver()
     async names(@Root() subgenre: Subgenre) {
-        const alternativeNames = await client.hget(`subgenre:${subgenre.primaryName}`, "alternative_names");
-        const parsed = JSON.parse(alternativeNames!);
-        return [subgenre.primaryName, ...(parsed === null ? [] : parsed)];
+    	const alternativeNames = await client.hget(`subgenre:${subgenre.primaryName}`, "alternative_names");
+    	const parsed = JSON.parse(alternativeNames!);
+    	return [subgenre.primaryName, ...(parsed === null ? [] : parsed)];
     }
 
     @FieldResolver()
     async category(@Root() subgenre: Subgenre) {
-        const genre = await client.hget(`subgenre:${subgenre.primaryName}`, "genre");
-        if (genre !== null) return new Subgenre(genre!);
+        // Someone, somewhere, used Trap ambiguously so we have to fix that here and hope we're right
+        if (subgenre.primaryName === "Trap") return new Subgenre("Trap (EDM)");
+
+    	const genre = await client.hget(`subgenre:${subgenre.primaryName}`, "genre");
+        if (genre !== null) return new Subgenre(genre);
+
         const [, subgenreWithRightParenthesis] = subgenre.primaryName.split("(");
-        const category = subgenreWithRightParenthesis.substring(0, subgenreWithRightParenthesis.length - 1);
-        return new Subgenre(category);
+        return new Subgenre(subgenreWithRightParenthesis.substring(0, subgenreWithRightParenthesis.length - 1));
     }
 
     @FieldResolver()
     async origins(@Root() subgenre: Subgenre) {
-        const origins = await client.hget(`subgenre:${subgenre.primaryName}`, "origins");
-        return JSON.parse(origins!).map((primaryName: string) => new Subgenre(primaryName));
+    	const origins = await client.hget(`subgenre:${subgenre.primaryName}`, "origins");
+    	return JSON.parse(origins!).map((primaryName: string) => new Subgenre(primaryName));
     }
 
     @FieldResolver()
     async children(@Root() subgenre: Subgenre) {
-        const children = await client.hget(`subgenre:${subgenre.primaryName}`, "subgenres");
-        return JSON.parse(children!).map((primaryName: string) => new Subgenre(primaryName));
+    	const children = await client.hget(`subgenre:${subgenre.primaryName}`, "subgenres");
+    	return JSON.parse(children!).map((primaryName: string) => new Subgenre(primaryName));
     }
 
     @FieldResolver()
     async textColor(@Root() subgenre: Subgenre): Promise<string> {
-        if (subgenre.primaryName === null) return "#FFFFFF";
-        const colors = await client.hget(`subgenre:${subgenre.primaryName}`, "color");
-        // Return the category's color if this subgenre does not have color information stored in the database
-        if (colors === "null" || colors === null) {
-            return await this.textColor(await this.category(subgenre));
-        }
-        return JSON.parse(colors)[1];
+    	if (subgenre.primaryName === null) return "#FFFFFF";
+    	const colors = await client.hget(`subgenre:${subgenre.primaryName}`, "color");
+    	// Return the category's color if this subgenre does not have color information stored in the database
+    	if (colors === "null" || colors === null) {
+    		return await this.textColor(await this.category(subgenre));
+    	}
+    	return JSON.parse(colors)[1];
     }
 
     @FieldResolver()
     async backgroundColor(@Root() subgenre: Subgenre): Promise<string> {
-        if (subgenre.primaryName === null) return "#000000";
-        const colors = await client.hget(`subgenre:${subgenre.primaryName}`, "color");
-        // Return the category's color if this subgenre does not have color information stored in the database
-        if (colors === "null" || colors === null) {
-            return await this.backgroundColor(await this.category(subgenre));
-        }
-        return JSON.parse(colors)[0];
+    	if (subgenre.primaryName === null) return "#000000";
+    	const colors = await client.hget(`subgenre:${subgenre.primaryName}`, "color");
+    	// Return the category's color if this subgenre does not have color information stored in the database
+    	if (colors === "null" || colors === null) {
+    		return await this.backgroundColor(await this.category(subgenre));
+    	}
+    	return JSON.parse(colors)[0];
     }
 
     @FieldResolver()
     async description(@Root() subgenre: Subgenre) {
-        // TODO: allow for descriptions to exist
-        return null;
+    	// TODO: allow for descriptions to exist
+    	return null;
     }
-};
+}

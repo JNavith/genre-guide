@@ -18,44 +18,43 @@
 
 
 <script lang="typescript">
-	// @ts-ignore
+	import { indexOf } from "lodash-es";
 	import Binary from "../Renderless/Binary.svelte";
-	// @ts-ignore
-	import { themes } from "../../globals/design-system";
 
-	export let state: "light" | "dark";
-	export let disabled: boolean;
+	const states = ["light", "dark"];
+	export let state: "light" | "dark" | undefined;
+	export let disabled;
+
+	const toggle = () => {
+		const nextState = (indexOf(states, state) + 1) % states.length;
+		state = states[nextState]; 
+	}
 </script>
 
-<Binary options={themes} bind:state let:toggle>
-	<div
-		class="ml-2 w-10 h-5 rounded-full"
-		on:click={() => {
-			if (!disabled) toggle();
-		}}
-		on:keydown={({ key }) => {
-			if (!disabled && key == 'Enter') toggle();
-		}}
-		tabindex="0"
-		title={state}>
+<button
+	class="ml-2 w-10 h-5 rounded-full relative"
+	on:click={toggle}
+	title={state}
+	aria-pressed={state === states[states.length - 1]}
+	{disabled}>
 
-		{#each themes as outer}
-			<div
-				class="rounded-full w-10 h-5 absolute transition-opacity {state == outer ? 'opacity-100' : 'opacity-0'}
-				{disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-				{outer === 'dark' ? 'bg-gradient-t-indigo-700-purple-900' : 'bg-gradient-t-teal-300-blue-400'}">
+	{#each states as outer}
+		<div
+			class="rounded-full w-10 h-5 transition-opacity absolute inset-0
+			{state == outer ? 'opacity-100' : 'opacity-0'}
+			{disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
+			{outer === 'dark' ? 'bg-gradient-t-indigo-700-purple-900' : 'bg-gradient-t-teal-300-blue-400'}">
 
-				{#each themes as inner}
-					<div
-						class="block w-3 h-3 ml-1 mt-1 rounded-full absolute
-						left-0 top-0 transition-all {inner === 'dark' ? 'bg-radial-gray-100-gray-200' : 'bg-radial-yellow-200-orange-300'}
-						{state === 'dark' ? 'ml-6' : 'mr-6'}
-						{state === inner ? 'opacity-100' : 'opacity-0'}" />
-				{/each}
+			{#each states as inner}
+				<div
+					class="block w-3 h-3 ml-1 mt-1 rounded-full absolute inset-0
+					left-0 top-0 transition-all {inner === 'dark' ? 'bg-radial-gray-100-gray-200' : 'bg-radial-yellow-300-orange-300'}
+					{state === 'dark' ? 'ml-6' : 'mr-6'}
+					{state === inner ? 'opacity-100' : 'opacity-0'}" />
+			{/each}
 
-				<!-- Need an empty div that the inner part of the button can have a right margin against -->
-				<div />
-			</div>
-		{/each}
-	</div>
-</Binary>
+			<!-- Need an empty div that the inner part of the button can have a right margin against -->
+			<div />
+		</div>
+	{/each}
+</button>

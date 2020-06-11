@@ -16,36 +16,45 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-/* eslint-disable global-require */
+import cssnano from "cssnano";
+import postcssImport from "postcss-import";
+import postcssFontMagician from "postcss-font-magician";
+import postcssPresetEnv from "postcss-preset-env";
+import postcssPurgecss from "@fullhuman/postcss-purgecss";
+import tailwindcss from "tailwindcss";
+import tailwindcssConfig from "./tailwind.config";
+
+import { fontMagicianConfig } from "./src/globals/design-system";
+
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 
-module.exports = {
+export default {
 	plugins: [
-		require("postcss-import"),
+		postcssImport,
 
-		require("tailwindcss")("./tailwind.config.js"),
+		tailwindcss(tailwindcssConfig),
 
-		require("postcss-preset-env")({
+		postcssPresetEnv({
 			features: {
 				// https://github.com/tailwindcss/tailwindcss/issues/1190
 				"focus-within-pseudo-class": false,
 			},
 		}),
 
-		require("postcss-font-magician")(require("./src/globals/design-system").fontMagicianConfig),
+		postcssFontMagician(fontMagicianConfig),
 
-		!dev && require("@fullhuman/postcss-purgecss")({
+		!dev && postcssPurgecss({
 			content: ["./src/**/*.svelte", "./src/**/*.html"],
 			defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d-/:%.]+)/gm)].map(([_match, group, ..._rest]) => group),
-			whitelist: ["theme-light", "theme-dark"],
+			whitelist: ["light-theme", "dark-theme"],
 		}),
 
-		!dev && require("cssnano")({
+		!dev && cssnano({
 			preset: [
 				"default",
 				{ discardComments: { removeAll: true } },
 			],
 		}),
-	],
+	].filter(Boolean),
 };

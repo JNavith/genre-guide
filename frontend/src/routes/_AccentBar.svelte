@@ -1,5 +1,5 @@
 <!--
-    genre.guide - matchMedia renderless Svelte component
+    genre.guide - Green accent bar Svelte component
     Copyright (C) 2020 Navith
 
     This program is free software: you can redistribute it and/or modify
@@ -16,30 +16,4 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-
-<script lang="typescript">
-	import { onMount } from "svelte";
-
-	export let query: string;
-
-	// @ts-ignore
-	const mediaQueryList: MediaQueryList = matchMedia(query);
-	export let matches: boolean = mediaQueryList.matches;
-
-	interface HandlerOptions {
-		matches: boolean;
-	}
-	const handler = (options: HandlerOptions) => {
-		matches = options.matches;
-	};
-
-	onMount(() => {
-		mediaQueryList.addListener(handler);
-
-		return () => {
-			mediaQueryList.removeListener(handler);
-		};
-	});
-</script>
-
-<slot {matches} />
+<div class="h-1 light-theme:bg-green-500 dark-theme:bg-green-400" />

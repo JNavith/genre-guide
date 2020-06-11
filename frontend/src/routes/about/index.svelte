@@ -18,14 +18,10 @@
 
 
 <script lang="typescript">
-	// @ts-ignore
 	import Metadata from "../../components/Renderless/Metadata.svelte";
-	// @ts-ignore
 	import NavigationBarAbout from "./_NavigationBarAbout.svelte";
-	// @ts-ignore
 	import Technology from "./_Technology.svelte";
 
-	// @ts-ignore
 	import { routes, technologies } from "../../globals/site";
 </script>
 
