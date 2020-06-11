@@ -1,5 +1,5 @@
 <!--
-    genre.guide - Theme switch Svelte component
+    genre.guide - Styled switch Svelte component
     Copyright (C) 2020 Navith
 
     This program is free software: you can redistribute it and/or modify
@@ -18,42 +18,36 @@
 
 
 <script lang="typescript">
-	import { indexOf } from "lodash-es";
-	import Binary from "../Renderless/Binary.svelte";
-
-	const states = ["light", "dark"];
-	export let state: "light" | "dark" | undefined;
-	export let disabled;
+	export let state: boolean = false;
+	export let disabled: boolean;
 
 	const toggle = () => {
-		const nextState = (indexOf(states, state) + 1) % states.length;
-		state = states[nextState]; 
+		state = !state;
 	}
 </script>
 
 <button
 	class="ml-2 w-10 h-5 rounded-full relative"
 	on:click={toggle}
-	title={state}
-	aria-pressed={state === states[states.length - 1]}
+	title={state ? "true" : undefined}
+	aria-pressed={state}
 	{disabled}>
 
-	{#each states as outer}
+	{#each [false, true] as outer}
 		<div
 			class="rounded-full w-10 h-5 transition-opacity absolute inset-0
-			{state == outer ? 'opacity-100' : 'opacity-0'}
 			{disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-			{outer === 'dark' ? 'bg-gradient-t-indigo-700-purple-900' : 'bg-gradient-t-teal-300-blue-400'}">
+			{outer ? 'bg-green-500' : 'bg-gray-400'}
+			{state === outer ? 'opacity-100' : 'opacity-0'}">
 
-			{#each states as inner}
+			{#each [false, true] as inner}
 				<div
 					class="block w-3 h-3 ml-1 mt-1 rounded-full absolute inset-0
-					left-0 top-0 transition-all {inner === 'dark' ? 'bg-radial-gray-100-gray-200' : 'bg-radial-yellow-300-orange-300'}
-					{state === 'dark' ? 'ml-6' : 'mr-6'}
-					{state === inner ? 'opacity-100' : 'opacity-0'}" />
+					left-0 top-0 transition-all bg-white {state ? 'ml-6' : 'mr-6'}
+					{inner === state ? 'opacity-100' : 'opacity-0'}" />
 			{/each}
 
-			<!-- Need an empty div that the inner part of the button can have a right margin against -->
+			<!-- Need an empty div that the inner part of the buttstate can have a right margin against -->
 			<div />
 		</div>
 	{/each}

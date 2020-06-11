@@ -20,5 +20,5 @@ oauth2client = "*"
 python_version = "3.8"
 
 [scripts]
-tests = "pipenv run pytest -p no:cacheprovider -v backend"
-clone = "pipenv run python -m backend.sheet_to_db"
+tests = "pipenv run pytest -p no:cacheprovider -v python_backend"
+clone = "pipenv run python -m python_backend.sheet_to_db"

@@ -135,8 +135,8 @@
               <a
                 style="background-color: {item.backgroundColor}; color: {item.textColor}"
                 class="block rounded-full font-medium text-center text-md
-                min-w-32 px-4 py-2 transition-all shadow-md hover:shadow-lg
-                focus:shadow-outline-with-lg transform hover:scale-105 focus:scale-105"
+                min-w-32 px-4 py-2 transition-all shadow-md
+                focus:shadow-outline-with-md transform hover:scale-105 focus:scale-105"
                 href="/subgenre/{encodeURIComponent(item.names[0])}"
                 title={item.names[0]}>
                 {item.names[0]}
