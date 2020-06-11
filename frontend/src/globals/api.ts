@@ -17,17 +17,18 @@
 */
 
 import { Response as FetchResponse, RequestInfo, RequestInit } from "node-fetch";
-import {ExecutionResult as GraphQLExecutionResult} from "graphql";
+import { ExecutionResult as GraphQLExecutionResult } from "graphql";
+
+import { domain } from "./site";
 
 // @ts-ignore
+// eslint-disable-next-line global-require,import/no-unresolved
 if (!process.browser) global.AbortController = require("abort-controller");
-
-// @ts-ignore
-import {domain} from "./site";
 
 export type FetchFunction = (url: RequestInfo, init?: RequestInit) => Promise<FetchResponse>;
 
 export interface Variables {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	[propName: string]: any;
 }
 
@@ -39,12 +40,12 @@ export interface APIOptions {
 
 export type APIResponse = GraphQLExecutionResult;
 
-export default async ({fetch: fetch_, query, variables}: APIOptions): Promise<APIResponse> => {
+export default async ({ fetch: fetch_, query, variables }: APIOptions): Promise<APIResponse> => {
 	const response = await fetch_(
 		`${domain}/graphql`,
 		{
 			method: "POST",
-			headers: {"Content-Type": "application/json"},
+			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({
 				query,
 				variables,
@@ -52,6 +53,6 @@ export default async ({fetch: fetch_, query, variables}: APIOptions): Promise<AP
 		},
 	);
 
-	const {data, errors} = await response.json();
-	return {data, errors};
+	const { data, errors } = await response.json();
+	return { data, errors };
 };

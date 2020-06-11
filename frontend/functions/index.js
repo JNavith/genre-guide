@@ -19,7 +19,7 @@
 
 const { https: { onRequest } } = require("firebase-functions");
 
-const {createSapperAndApolloServer} = require("./__sapper__/build/server/server");
+const { createSapperAndApolloServer } = require("./__sapper__/build/server/server");
 
 const appPromise = createSapperAndApolloServer(false);
 

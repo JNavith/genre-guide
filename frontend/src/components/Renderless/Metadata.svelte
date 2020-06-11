@@ -18,15 +18,16 @@
 
 
 <script lang="typescript">
-	// @ts-ignore
-	import {
-		author as siteAuthor,
-		name as siteName,
-	} from "../../globals/site";
+	import { author as siteAuthor, name as siteName } from "../../globals/site";
+
+	export let route: string = "/";
+	// TODO: actually use this
+	// Silence unused prop warning
+	if (route) {};
+
 
 	export let pageTitle: string | undefined = undefined;
-	export let title: string =
-		pageTitle === undefined ? siteName : `${pageTitle} - ${siteName}`;
+	export let title: string = pageTitle === undefined ? siteName : `${pageTitle} - ${siteName}`;
 
 	export let description: string | undefined = undefined;
 

@@ -16,42 +16,40 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-
 <style>
-	/* https://github.com/ConnorAtherton/loaders.css */
-	@keyframes line-scale-pulse-out-rapid {
-		0%,
-		100% {
-			height: 6rem;
-		}
-		80% {
-			height: 1rem;
-		}
+  /* https://github.com/ConnorAtherton/loaders.css */
+  @keyframes line-scale-pulse-out-rapid {
+    0%,
+    100% {
+      height: 6rem;
     }
-    
-	.line-scale-pulse-out-rapid > div {
-		animation-fill-mode: both;
-		display: inline-block;
-		vertical-align: middle;
-		animation: line-scale-pulse-out-rapid 0.9s 0s infinite
-			cubic-bezier(0.11, 0.49, 0.38, 0.78);
+    80% {
+      height: 1rem;
     }
-    
-	.line-scale-pulse-out-rapid > div:nth-child(2),
-	.line-scale-pulse-out-rapid > div:nth-child(4) {
-		animation-delay: -0.25s !important;
-    }
-    
-	.line-scale-pulse-out-rapid > div:nth-child(1),
-	.line-scale-pulse-out-rapid > div:nth-child(5) {
-		animation-delay: -0.5s !important;
-	}
+  }
+
+  .line-scale-pulse-out-rapid > div {
+    animation-fill-mode: both;
+    display: inline-block;
+    vertical-align: middle;
+    animation: line-scale-pulse-out-rapid 0.9s 0s infinite
+      cubic-bezier(0.11, 0.49, 0.38, 0.78);
+  }
+
+  .line-scale-pulse-out-rapid > div:nth-child(2),
+  .line-scale-pulse-out-rapid > div:nth-child(4) {
+    animation-delay: -0.25s !important;
+  }
+
+  .line-scale-pulse-out-rapid > div:nth-child(1),
+  .line-scale-pulse-out-rapid > div:nth-child(5) {
+    animation-delay: -0.5s !important;
+  }
 </style>
 
 <div class="line-scale-pulse-out-rapid h-24 flex items-center">
-	{#each Array(5) as _}
-		<div
-			class="theme-light:bg-gray-300 theme-dark:bg-gray-600 rounded-full
-			mx-1 w-2" />
-	{/each}
+  {#each Array(5) as _}
+    <div
+      class="light-theme:bg-gray-300 dark-theme:bg-gray-600 rounded-full mx-1 w-2" />
+  {/each}
 </div>
