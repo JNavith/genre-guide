@@ -1,5 +1,5 @@
 {
-	"name": "genre.guide-frontend",
+	"name": "genre.guide",
 	"version": "2020.06.10",
 	"scripts": {
 		"eslint": "eslint",
