@@ -12,6 +12,7 @@
     "node": "10"
   },
   "dependencies": {
+    "class-validator": "^0.12.2",
     "compression": "^1.7.4",
     "express": "^4.17.1",
     "firebase-admin": "^8.9.2",
