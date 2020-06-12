@@ -1,5 +1,5 @@
 /*
-	genre.guide - Redis client TypeScript file
+	genre.guide - GraphQL server: Operator resolver
 	Copyright (C) 2020 Navith
 
 	This program is free software: you can redistribute it and/or modify
@@ -16,36 +16,19 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FieldResolver, Resolver, ResolverInterface, Root } from "type-graphql";
 
-import Redis from "ioredis";
+import { Operator, symbols } from "../object-types/Operator";
 
-const {
-	REDIS_HOST = "redis",
-	REDIS_PORT = "6379",
-	REDIS_PASSWORD,
-} = process.env;
-
-export const client = new Redis(
-	parseInt(REDIS_PORT, 10),
-	REDIS_HOST,
-	{
-		password: REDIS_PASSWORD,
-
-		// This is so sad
-		tls: {
-			rejectUnauthorized: false,
-		},
-		
-		maxRetriesPerRequest: 4,
-	},
-);
-
-client.on("error", async (error) => {
-	if (error.errno === -3008) {
-		console.error(`the given REDIS_HOST (${REDIS_HOST}) is unreachable (because it's probably invalid)`);
-		await client.quit();
-		return;
+@Resolver((of) => Operator)
+export class OperatorResolver implements ResolverInterface<Operator> {
+	@FieldResolver()
+	async symbol(@Root() operator: Operator) {
+		return operator._symbol;
 	}
 
-	console.error(error);
-});
+	@FieldResolver()
+	async name(@Root() operator: Operator) {
+		return symbols[operator._symbol].name;
+	}
+}

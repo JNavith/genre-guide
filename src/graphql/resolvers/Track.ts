@@ -16,15 +16,14 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-import "reflect-metadata";
 import {
-	Arg, Args, ArgsType, ObjectType, Field, FieldResolver, ID, Int, Query, Resolver, ResolverInterface, Root,
+	Arg, Args, ArgsType, Field, FieldResolver, ID, Int, Query, Resolver, ResolverInterface, Root,
 } from "type-graphql";
 
-import { generatorFilter, generatorMap } from "../globals/utils";
-import { convertNestedStringsToTypes, SubgenreGroup, SubgenreOrOperator } from "./SubgenreGroup";
-import { client } from "./redis";
+import { generatorFilter, generatorMap } from "../../globals/utils";
+import { client } from "../redis";
+import { convertNestedStringsToTypes, SubgenreGroup } from "../object-types/SubgenreGroup";
+import { Track } from "../object-types/Track";
 
 
 const allDates = function* (date: Date, step: number): Generator<Date> {
@@ -70,36 +69,6 @@ class TracksArguments {
     limit?: number;
 }
 
-@ObjectType({ description: "A track / song, as may appear on the Genre Sheet" })
-export class Track {
-	constructor(
-        readonly _id: string,
-	) { }
-
-    @Field((type) => ID, { description: "The unique ID associated with this track, for lookup purposes" })
-    id?: string;
-
-    @Field({ description: "The name of the track" })
-    name?: string;
-
-    @Field({ description: "The artist(s) of the track" })
-    artist?: string;
-
-    @Field({ description: "The record label(s) or copyright owner(s) who released and/or own the rights to the track" })
-    recordLabel?: string;
-
-    @Field({ description: "The date the track was released" })
-    date?: Date;
-
-    @Field((type) => SubgenreGroup, { description: "The subgenres and dividers that make up this song, but recursive and hard to work with (though fully accurate and reflective of entries on the Genre Sheet)" })
-    subgenresNested?: SubgenreGroup;
-
-    @Field((type) => [SubgenreOrOperator], { description: "The subgenres and dividers that make up this song, flattened out for simplicity (but with loss of information)" })
-    subgenresFlat?: any;
-
-    @Field((type) => String, { nullable: true, description: "The link to the cover artwork for the track, or null if none is known (currently all tracks return null)" })
-    image?: string | null;
-}
 
 @Resolver((of) => Track)
 export class TrackResolver implements ResolverInterface<Track> {
@@ -143,7 +112,7 @@ export class TrackResolver implements ResolverInterface<Track> {
     		return new Track(id);
     	}
 
-    	return null;
+    	return undefined;
     }
 
     @FieldResolver()
@@ -195,7 +164,7 @@ export class TrackResolver implements ResolverInterface<Track> {
 
     @FieldResolver()
     async image(@Root() track: Track) {
-    	// TODO: Find an external API that would let us query them for artwork
-    	return null;
+		// TODO: Find an external API that would let us query them for artwork
+		return undefined;
     }
 }

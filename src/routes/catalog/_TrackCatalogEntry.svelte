@@ -40,7 +40,7 @@
     day = dateAsDate.getDate() + 1;
   }
 
-  export let subgenresFlat;
+  export let subgenresFlat: any;
 
   let mounted: boolean = !process.browser;
 

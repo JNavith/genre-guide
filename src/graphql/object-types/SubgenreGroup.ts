@@ -1,5 +1,5 @@
 /*
-    genre.guide - GraphQL server: SubgenreGroup TypeScript file
+    genre.guide - GraphQL server: Subgenre Group object type
     Copyright (C) 2020 Navith
 
     This program is free software: you can redistribute it and/or modify
@@ -16,14 +16,10 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { createUnionType, Field, ObjectType, Root } from "type-graphql";
 
-import "reflect-metadata";
-import {
-	createUnionType, Field, ObjectType, Root,
-} from "type-graphql";
-
-import { Subgenre } from "./Subgenre";
-import { Operator, GenreSymbol, symbols } from "./Operator";
+import { Subgenre } from "../object-types/Subgenre";
+import { Operator, GenreSymbol, symbols } from "../object-types/Operator";
 
 
 @ObjectType({ description: "A (recursive) group of subgenres and operators" })
@@ -32,7 +28,6 @@ export class SubgenreGroup {
         readonly _elements: NestedTypes[],
 	) { }
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-use-before-define
 	@Field((type) => [SubgenreOrOperatorOrGroup], { description: "The elements of this group" })
 	async elements(@Root() subgenreGroup: SubgenreGroup): Promise<NestedTypes[]> {
 		return subgenreGroup._elements;

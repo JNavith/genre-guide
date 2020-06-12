@@ -1,5 +1,5 @@
 /*
-    genre.guide - GraphQL server: Subgenre and resolver TypeScript file
+    genre.guide - GraphQL server: Subgenre resolver
     Copyright (C) 2020 Navith
 
     This program is free software: you can redistribute it and/or modify
@@ -16,41 +16,10 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { FieldResolver, Query, Resolver, ResolverInterface, Root } from "type-graphql";
 
-import "reflect-metadata";
-import {
-	ObjectType, Field, FieldResolver, Query, Resolver, ResolverInterface, Root,
-} from "type-graphql";
-
-import { client } from "./redis";
-
-@ObjectType({ description: "A subgenre, as understood on the Genre Sheet" })
-export class Subgenre {
-	constructor(
-        readonly primaryName: string,
-	) { }
-
-    @Field((type) => [String], { description: "The primary name of the subgenre, e.x. \"Brostep\", followed by alternative names for the subgenre, e.x. {\"DnB\", \"D&B\"} for Drum & Bass" })
-    names?: string[];
-
-    @Field((type) => Subgenre, { description: "The genre category that this subgenre belongs to, which is where its color comes from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass" })
-    category?: this;
-
-    @Field((type) => [Subgenre], { description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime" })
-    origins?: this[];
-
-    @Field((type) => [Subgenre], { description: "The list of subgenres that originate *directly* from this subgenre, e.x. {Deathstep, Drumstep} for Dubstep, {} for Footwork, {Electro Swing, Jazzstep} for Nu-Jazz" })
-    children?: this[];
-
-    @Field((type) => String, { description: "The text color this subgenre uses on the Genre Sheet, in hex, e.x. '#000000' for Ambient" })
-    textColor?: string;
-
-    @Field((type) => String, { description: "The background color this subgenre uses on the Genre Sheet, in hex, e.x. '#009600' for Hardcore" })
-    backgroundColor?: string;
-
-    @Field((type) => String, { nullable: true, description: "A paragraph describing of this subgenre. Currently, no descriptions are available for any subgenre, so this always returns null" })
-    description?: string | null;
-}
+import { client } from "../redis";
+import { Subgenre } from "../object-types/Subgenre";
 
 @Resolver((of) => Subgenre)
 export class SubgenreResolver implements ResolverInterface<Subgenre> {
