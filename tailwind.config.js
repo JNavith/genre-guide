@@ -51,7 +51,7 @@ export default {
 
 			boxShadow: (theme) => ({
 				outline: "0 0 0 3px hsla(121, 100%, 30%, 0.625)",
-				"outline-with-md": `${defaultTheme.boxShadow.md}, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
+				"outline-with-lg": `${defaultTheme.boxShadow.lg}, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
 				"white-glow": `0 0 8px 4px ${theme("colors.white")}`,
 				"gray-900-glow": `0 0 8px 4px ${theme("colors.gray.900")}`,
 			}),
