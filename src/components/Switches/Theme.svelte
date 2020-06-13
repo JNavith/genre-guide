@@ -20,9 +20,9 @@
 <script lang="typescript">
 	import { indexOf } from "lodash-es";
 
-	const states = ["light", "dark"];
+	const states: ["light", "dark"] = ["light", "dark"];
 	export let state: "light" | "dark" | undefined;
-	export let disabled;
+	export let disabled: boolean | undefined;
 
 	const toggle = () => {
 		const nextState = (indexOf(states, state) + 1) % states.length;
