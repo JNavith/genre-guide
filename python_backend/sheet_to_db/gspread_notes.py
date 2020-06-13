@@ -54,9 +54,9 @@ def get_notes(worksheet: Worksheet, row_start: int, col_start: int,
 
 
 if __name__ == "__main__":
-    from .__main__ import open_genre_sheet
+    from . import open_google_sheet
 
-    genre_sheet: Spreadsheet = open_genre_sheet()
+    genre_sheet: Spreadsheet = open_google_sheet()
     genres_tab: Worksheet = genre_sheet.worksheet(getenv("GENRES_SHEET_NAME"))
 
     for row_num, row in enumerate(get_notes(genres_tab,

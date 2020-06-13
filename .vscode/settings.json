@@ -10,6 +10,7 @@
         "editor.formatOnSave": false
     },
     "svelte.plugin.typescript.diagnostics.enable": true,
-    "python.linting.pylintEnabled": true,
+    "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
+    "python.linting.mypyEnabled": true,
 }

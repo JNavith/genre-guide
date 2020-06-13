@@ -6,6 +6,8 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 yapf = "*"
+autopep8 = "==1.5.3"
+mypy = "==0.780"
 
 [packages]
 aioredis = "*"
@@ -15,10 +17,12 @@ graphene = "*"
 starlette = "*"
 uvicorn = "*"
 oauth2client = "*"
+firebase-admin = "==4.3.0"
 
 [requires]
 python_version = "3.8"
 
 [scripts]
-tests = "pipenv run pytest -p no:cacheprovider -v python_backend"
-clone = "pipenv run python -m python_backend.sheet_to_db"
+"clone:subgenres" = "pipenv run python -m python_backend.sheet_to_db.subgenres"
+"clone:tracks" = "pipenv run python -m python_backend.sheet_to_db.tracks"
+"tests" = "pipenv run pytest -p no:cacheprovider -v python_backend"

@@ -17,12 +17,12 @@
 
 from collections import defaultdict
 from re import compile
-from typing import DefaultDict, Dict, Iterator, List, Set, Tuple, Union, cast
+from typing import DefaultDict, Dict, Generator, Iterator, List, Set, Tuple, Union, cast
 
 OPERATORS: Set[str] = {"|", ">", "~"}
 DIVIDERS: Set[str] = {"||", ">>", "~~"}
 
-def error_on_more_than_one_kind_of_divider(*, genre_text: str, divider_counts: Dict[str, int]):
+def error_on_more_than_one_kind_of_divider(*, genre_text: str, divider_counts: Dict[str, int]) -> None:
 	if sum(divider_counts.values()) <= 1:
 		return
 	
@@ -32,17 +32,17 @@ def error_on_more_than_one_kind_of_divider(*, genre_text: str, divider_counts: D
 	
 	raise ValueError(f"too many dividers in {genre_text}")
 
-def error_on_misplaced_operators_even(*, genre_text: str, joined_words: List[str]):
+def error_on_misplaced_operators_even(*, genre_text: str, joined_words: List[str]) -> None:
 	for index in range(0, len(joined_words), 2):
 		if joined_words[index] in DIVIDERS or joined_words[index] in OPERATORS:
 			raise ValueError(f"misplaced operator in {genre_text}")
 
-def error_on_misplaced_operators_odd(*, genre_text: str, joined_words: List[str]):
+def error_on_misplaced_operators_odd(*, genre_text: str, joined_words: List[str]) -> None:
 	for index in range(1, len(joined_words), 2):
 		if not (joined_words[index] in DIVIDERS or joined_words[index] in OPERATORS):
 			raise ValueError(f"misplaced operator in {genre_text} (this should not be possible in my mind)")
 
-def make_genre_groups(*, joined_words):
+def make_genre_groups(*, joined_words: List[str]) -> Generator[Union[str, Tuple[str, str, str]], None, None]:
 	skip_indices: Set[int] = set()
 
 	for index, word_or_symbol in enumerate(joined_words):
@@ -63,7 +63,8 @@ def make_genre_groups(*, joined_words):
 			yield word_or_symbol
 			yield joined_words[index + 1][0]
 
-def parse_genre(genre_text: str) -> Tuple:
+
+def parse_genre(genre_text: str) -> Tuple:  # type: ignore
 	words_or_symbols: List[str] = genre_text.split()
 
 	operator_counts: Dict[str, int] = {
@@ -83,7 +84,7 @@ def parse_genre(genre_text: str) -> Tuple:
 	error_on_more_than_one_kind_of_divider(genre_text=genre_text, divider_counts=divider_counts)
 
 	subgenre_index: int = 0
-	words: DefaultDict[List] = defaultdict(list)
+	words: DefaultDict[int, Union[str, List[str]]] = defaultdict(list)
 	for index, word in enumerate(words_or_symbols):
 		if word in operator_counts or word in divider_counts:
 			subgenre_index += 1
@@ -92,7 +93,7 @@ def parse_genre(genre_text: str) -> Tuple:
 			subgenre_index += 1
 			continue
 
-		words[subgenre_index].append(word)
+		cast(List[str], words[subgenre_index]).append(word)
 
 	joined_words: List[str] = [
 		" ".join(word) if isinstance(word, list) else word
@@ -131,22 +132,22 @@ def parse_genre(genre_text: str) -> Tuple:
 			replace_start = next(index for index, word in enumerate(joined_words) if isinstance(word, str) and word.startswith("("))
 			replace_end = next(index for index, word in enumerate(joined_words) if isinstance(word, str) and word.endswith(")"))
 
-			joined_words[replace_start:replace_end + 1] = (parsed_grouping,)
+			joined_words[replace_start:replace_end + 1] = cast(Tuple[str, str, str], (parsed_grouping,))
 		return tuple(joined_words)
 		
 	return tuple(make_genre_groups(joined_words=joined_words))
 
 
-def flatten_subgenres_iter(subgenres: Tuple) -> Iterator[str]:
+
+def flatten_subgenres_iter(subgenres: Tuple) -> Iterator[str]: # type: ignore
 	for subgenre_or_group_or_symbol in subgenres:
-		if not isinstance(subgenre_or_group_or_symbol, str):
+		if isinstance(subgenre_or_group_or_symbol, str):
+			yield subgenre_or_group_or_symbol
+		else:
 			yield from flatten_subgenres(subgenre_or_group_or_symbol)
-			continue
-
-		yield subgenre_or_group_or_symbol
 
 
-def flatten_subgenres(subgenres: Tuple) -> List[str]:
+def flatten_subgenres(subgenres: Tuple) -> List[str]:  # type: ignore
 	return list(flatten_subgenres_iter(subgenres))
 
 
