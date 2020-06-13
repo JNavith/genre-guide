@@ -81,7 +81,6 @@
 	import NavigationBarTopLevel from "../_NavigationBar.svelte";
 	import TrackCatalog from "./_TrackCatalog.svelte";
 	import AccentBar from "../_AccentBar.svelte";
-	import MusicVisualizerLoader from "./_MusicVisualizerLoader.svelte";
 
 	const { catalog } = routes;
 
@@ -110,10 +109,6 @@
 
 <main class="flex-1 flex flex-col items-center px-8">
 	<TrackCatalog {tracks} />
-
-	<div class="flex items-center justify-center my-4">
-		<MusicVisualizerLoader />
-	</div>
 </main>
 
 <AccentBar />
