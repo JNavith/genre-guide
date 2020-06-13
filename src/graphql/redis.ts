@@ -40,6 +40,10 @@ export const client = new Redis(
 	},
 );
 
+client.on("connect", async () => {
+	console.log("successfully connected to redis");
+});
+
 client.on("error", async (error) => {
 	if (error.errno === -3008) {
 		console.error(`the given REDIS_HOST (${REDIS_HOST}) is unreachable (because it's probably invalid)`);
