@@ -22,7 +22,7 @@ import postcssFontMagician from "postcss-font-magician";
 import postcssPresetEnv from "postcss-preset-env";
 import postcssPurgecss from "@fullhuman/postcss-purgecss";
 import tailwindcss from "tailwindcss";
-import tailwindcssConfig from "./tailwind.config";
+import * as tailwindcssConfig from "./tailwind.config";
 
 import { fontMagicianConfig } from "./src/globals/design-system";
 

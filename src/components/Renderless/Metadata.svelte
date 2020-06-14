@@ -16,7 +16,6 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-
 <script lang="typescript">
 	import { author as siteAuthor, name as siteName } from "../../globals/site";
 
@@ -33,10 +32,9 @@
 
 	export let author: string = siteAuthor;
 
-	export let image: string = "/img/logo-512.png";
+	export let image: string = "/logo-512.png";
 	export let imageAlt: string = siteName;
 
-	// @ts-ignore
 	let metaTags: {
 		[property: string]: string;
 	};
@@ -60,7 +58,7 @@
 		"og:image": image,
 		"twitter:image": image,
 
-		"twitter:image:alt": imageAlt
+		"twitter:image:alt": imageAlt,
 	};
 </script>
 

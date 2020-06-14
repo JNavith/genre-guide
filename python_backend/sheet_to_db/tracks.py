@@ -33,7 +33,7 @@ def build_up_track_information(genre_sheet: Spreadsheet, row_start: int, row_end
 	fields: List[str] = [field.casefold() for field in catalog.row_values(1)]
 	Track = namedtuple("Track", fields)
 
-	for entry in catalog.get_all_values()[row_start+1:row_end]:
+	for entry in catalog.get_all_values()[row_start-1:row_end]:
 		track = Track._make(entry)
 
 		if track.genre == "Trap":
@@ -62,9 +62,10 @@ def build_up_track_information(genre_sheet: Spreadsheet, row_start: int, row_end
 		yield track
 
 
-def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: "Iterable[Tracks]") -> None:
+def seed_firestore_with_track_data(firestore: FirestoreClient, row_start: int, tracks: "Iterable[Tracks]") -> None:
 	tracks_collection_ref = firestore.collection("tracks")
-	for i, track in enumerate(tracks):
+	warnings = []
+	for i, track in enumerate(tracks, start=row_start):
 		artist = track.artist
 		title = track.track
 		release = track.release
@@ -74,7 +75,9 @@ def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: "Iterable
 		try:
 			release_date = datetime.strptime(track.release, "%Y-%m-%d")
 		except ValueError:
-			warn(f"{artist} - {title} is being skipped because it doesn't have a valid release date: {release}")
+			warning_message = f"{artist} - {title} is being skipped because it doesn't have a valid release date: {release}"
+			warn(warning_message)
+			warnings.append(warning_message)
 
 		document = {
 			"artist": artist,
@@ -86,17 +89,26 @@ def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: "Iterable
 			"subgenresNested": dumps(track.subgenre),
 		}
 
-		print(i, id_, document)
+		print(f"row {i} ({id_}):", document)
 		# breakpoint()
 
 		document_ref = tracks_collection_ref.document(id_)
 		document_ref.set(document)
+	
+	print()
+	print()
+	print("the cloning process for tracks is done")
+	if warnings:
+		print("it finished with these warnings: ")
+		for warning in warnings:
+			print(warning)
 
 
 if __name__ == "__main__":
 	from sys import argv
+	
 	low, _, high = argv[-1].partition(":")
 	firestore = get_firestore()
 	google_sheet = get_google_sheet()
 	tracks = build_up_track_information(google_sheet, int(low), int(high))
-	seed_firestore_with_track_data(firestore, tracks)
+	seed_firestore_with_track_data(firestore, int(low), tracks)

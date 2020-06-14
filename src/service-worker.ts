@@ -15,6 +15,7 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+
 /* eslint-disable no-restricted-globals,@typescript-eslint/no-explicit-any */
 // @ts-ignore -- generated package
 import { timestamp, files, shell } from "@sapper/service-worker";

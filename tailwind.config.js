@@ -27,7 +27,6 @@
 
 */
 
-
 import tailwindui from "@tailwindcss/ui";
 import tailwindcssCustomNative from "tailwindcss-custom-native";
 import tailwindcssGradients from "tailwindcss-gradients";
@@ -40,133 +39,132 @@ import { colors, fontFamily } from "./src/globals/design-system";
 
 const { theme: defaultTheme, variants: defaultVariants } = defaultConfig;
 
+export const purge = false;
+export const theme = {
+	extend: {
+		borderColor: { default: "currentColor" },
 
-export default {
-	purge: false,
-	theme: {
-		extend: {
-			borderColor: { default: "currentColor" },
+		borderSpacing: { 4: "1rem" },
 
-			borderSpacing: { 4: "1rem" },
-
-			boxShadow: (theme) => ({
-				outline: "0 0 0 3px hsla(121, 100%, 30%, 0.625)",
-				"outline-with-lg": `${defaultTheme.boxShadow.lg}, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
-				"white-glow": `0 0 8px 4px ${theme("colors.white")}`,
-				"gray-900-glow": `0 0 8px 4px ${theme("colors.gray.900")}`,
-			}),
-
-			colors: {
-				transparent: "transparent",
-				current: "currentColor",
-				inherit: "inherit",
-				...colors,
-			},
-
-			customUtilities: {
-				borderSpacing: {},
-			},
-
-			minWidth: (theme) => theme("spacing"),
-
-			spacing: {
-				7: "1.75rem",
-				9: "2.25rem",
-				72: "18rem",
-				96: "24rem",
-				128: "32rem",
-			},
-		},
-
-		fontFamily: {
-			heading: [...fontFamily.heading, ...defaultTheme.fontFamily.sans],
-			body: [...fontFamily.body, ...defaultTheme.fontFamily.sans],
-		},
-
-		linearGradientColors: (theme) => ({
-			"teal-300-blue-400": [theme("colors.teal.300"), theme("colors.blue.400")],
-			"indigo-700-purple-900": [theme("colors.indigo.700"), theme("colors.purple.900")],
+		boxShadow: (theme_) => ({
+			outline: "0 0 0 3px hsla(121, 100%, 30%, 0.625)",
+			"outline-with-lg": `${defaultTheme.boxShadow.lg}, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
+			"white-glow": `0 0 8px 4px ${theme_("colors.white")}`,
+			"gray-900-glow": `0 0 8px 4px ${theme_("colors.gray.900")}`,
 		}),
 
-		radialGradientColors: (theme) => ({
-			"yellow-300-orange-300": [theme("colors.yellow.300"), theme("colors.orange.300")],
-			"gray-100-gray-200": [theme("colors.gray.100"), theme("colors.gray.200")],
-		}),
+		colors: {
+			transparent: "transparent",
+			current: "currentColor",
+			inherit: "inherit",
+			...colors,
+		},
+
+		customUtilities: {
+			borderSpacing: {},
+		},
+
+		minWidth: (theme_) => theme_("spacing"),
+
+		spacing: {
+			7: "1.75rem",
+			9: "2.25rem",
+			72: "18rem",
+			96: "24rem",
+			128: "32rem",
+		},
 	},
 
-	corePlugins: { placeholderColor: false },
-
-	variants: {
-		backgroundColor: [
-			...defaultVariants.backgroundColor,
-			"selection",
-			"selection:important",
-			"light-theme",
-			"light-theme:hover",
-			"light-theme:focus",
-			"dark-theme",
-			"dark-theme:hover",
-			"dark-theme:focus",
-		],
-		boxShadow: [...defaultVariants.boxShadow, "light-theme", "dark-theme"],
-		cursor: [...defaultVariants.cursor, "hover"],
-		textColor: [
-			...defaultVariants.textColor,
-			"selection",
-			"selection:important",
-			"light-theme",
-			"light-theme:hover",
-			"light-theme:focus",
-			"dark-theme",
-			"dark-theme:hover",
-			"dark-theme:focus",
-		],
+	fontFamily: {
+		heading: [...fontFamily.heading, ...defaultTheme.fontFamily.sans],
+		body: [...fontFamily.body, ...defaultTheme.fontFamily.sans],
 	},
 
-	plugins: [
-		tailwindui,
-		tailwindcssCustomNative,
-		tailwindcssGradients,
+	linearGradientColors: (theme_) => ({
+		"teal-300-blue-400": [theme_("colors.teal.300"), theme_("colors.blue.400")],
+		"indigo-700-purple-900": [theme_("colors.indigo.700"), theme_("colors.purple.900")],
+	}),
 
-		tailwindcssThemeVariants({
-			baseSelector: "html",
-			fallback: "light",
-			rename: (themeName) => `${themeName}-theme`,
-			themes: {
-				light: { selector: "[data-theme=light]", mediaQuery: prefersLight },
-				dark: { selector: "[data-theme=dark]", mediaQuery: prefersDark },
-			},
-			variants: {
-				hover,
-				focus,
-				active,
-			},
-		}),
+	radialGradientColors: (theme_) => ({
+		"yellow-300-orange-300": [theme_("colors.yellow.300"), theme_("colors.orange.300")],
+		"gray-100-gray-200": [theme_("colors.gray.100"), theme_("colors.gray.200")],
+	}),
+};
 
-		({ addVariant, e }) => {
-			// Add selection variant
-			addVariant("selection", ({ modifySelectors, separator }) => {
-				modifySelectors(({ className }) => {
-					const selectionClassName = e(`selection${separator}${className}`);
+export const corePlugins = {
+	placeholderColor: false,
+};
 
-					return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
-				});
-			});
-
-			// Add important selection variant
-			addVariant("selection:important", ({ container, modifySelectors, separator }) => {
-				container.walkRules((rule) => {
-					rule.walkDecls((decl) => {
-						// eslint-disable-next-line no-param-reassign
-						decl.important = true;
-					});
-				});
-
-				modifySelectors(({ className }) => {
-					const selectionClassName = e(`selection${separator}!${className}`);
-					return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
-				});
-			});
-		},
+export const variants = {
+	backgroundColor: [
+		...defaultVariants.backgroundColor,
+		"selection",
+		"selection:important",
+		"light-theme",
+		"light-theme:hover",
+		"light-theme:focus",
+		"dark-theme",
+		"dark-theme:hover",
+		"dark-theme:focus",
+	],
+	boxShadow: [...defaultVariants.boxShadow, "light-theme", "dark-theme"],
+	cursor: [...defaultVariants.cursor, "hover"],
+	textColor: [
+		...defaultVariants.textColor,
+		"selection",
+		"selection:important",
+		"light-theme",
+		"light-theme:hover",
+		"light-theme:focus",
+		"dark-theme",
+		"dark-theme:hover",
+		"dark-theme:focus",
 	],
 };
+
+export const plugins = [
+	tailwindui,
+	tailwindcssCustomNative,
+	tailwindcssGradients,
+
+	tailwindcssThemeVariants({
+		baseSelector: "html",
+		fallback: "light",
+		rename: (themeName) => `${themeName}-theme`,
+		themes: {
+			light: { selector: "[data-theme=light]", mediaQuery: prefersLight },
+			dark: { selector: "[data-theme=dark]", mediaQuery: prefersDark },
+		},
+		variants: {
+			hover,
+			focus,
+			active,
+		},
+	}),
+
+	({ addVariant, e }) => {
+		// Add selection variant
+		addVariant("selection", ({ modifySelectors, separator }) => {
+			modifySelectors(({ className }) => {
+				const selectionClassName = e(`selection${separator}${className}`);
+
+				return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
+			});
+		});
+
+		// Add important selection variant
+		addVariant("selection:important", ({ container, modifySelectors, separator }) => {
+			container.walkRules((rule) => {
+				rule.walkDecls((decl) => {
+					// eslint-disable-next-line no-param-reassign
+					decl.important = true;
+				});
+			});
+
+			modifySelectors(({ className }) => {
+				const selectionClassName = e(`selection${separator}!${className}`);
+				return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
+			});
+		});
+	},
+];

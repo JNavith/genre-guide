@@ -17,6 +17,7 @@
 -->
 
 <script lang="typescript">
+	// @ts-ignore
 	import { SettingsIcon } from "svelte-feather-icons";
 	import { writable } from "svelte/store";
 	
@@ -56,7 +57,9 @@
 	class="block mr-3 sm:mr-4 md:mr-6 h-4 w-4 flex-shrink-0 hover:cursor-pointer
 	light-theme:text-green-500 light-theme:hover:text-green-600
 	dark-theme:text-green-400 dark-theme:hover:text-green-300"
-	on:click|stopPropagation={() => open = !open}>
+	on:click|stopPropagation={() => open = !open}
+	aria-haspopup="true"
+	aria-expanded={open}>
 	<SettingsIcon />
 </button>
 

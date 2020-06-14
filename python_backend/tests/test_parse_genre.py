@@ -70,6 +70,8 @@ def test_parse_genre_triple_in_parentheses():
         "Space Bass", "|", ("Drum & Bass", ">", "Brostep"))
     assert parse_genre("(Space Bass | Post-Synthpop) > Electro House") == ((
         "Space Bass", "|", "Post-Synthpop"), ">", "Electro House")
+    assert parse_genre("(Melbourne Bounce > Commercial House) | Progressive Trance") == ((
+        "Melbourne Bounce", ">", "Commercial House"), "|", "Progressive Trance")
 
 
 

@@ -2,13 +2,15 @@
 	"compilerOptions": {
 		"lib": [
 			"DOM",
-			"WebWorker"
+			"WebWorker",
+			"esnext.asynciterable"
 		],
 		"target": "ES2016",
 		"allowSyntheticDefaultImports": true,
 		"experimentalDecorators": true,
 		"emitDecoratorMetadata": true,
 		"moduleResolution": "node",
+		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true
 	},

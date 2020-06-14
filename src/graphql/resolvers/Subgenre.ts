@@ -16,79 +16,95 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FieldResolver, Query, Resolver, ResolverInterface, Root } from "type-graphql";
+import * as admin from "firebase-admin";
+import { plainToClass } from "class-transformer";
+import {
+	FieldResolver, Query, Resolver, ResolverInterface, Root,
+} from "type-graphql";
 
-import { client } from "../redis";
-import { Subgenre } from "../object-types/Subgenre";
+import { GraphQLError } from "graphql";
+import { Document, getCollection, getDocument } from "../firestore";
+import Subgenre from "../object-types/Subgenre";
 
-@Resolver((of) => Subgenre)
+export const SUBGENRES_COLLECTION = "subgenres";
+
+export const FirestoreToSubgenre = (documentData: admin.firestore.DocumentData): Subgenre => plainToClass(Subgenre, documentData);
+
+@Resolver(Subgenre)
 export class SubgenreResolver implements ResolverInterface<Subgenre> {
 	@Query((returns) => [Subgenre], { description: "Retrieve all subgenres from the sheet (database)" })
-	async allSubgenres(): Promise<Subgenre[]> {
-		return (await client.smembers("subgenres")).map((primaryName) => new Subgenre(primaryName));
+	async allSubgenres() {
+		const subgenres = await getCollection(SUBGENRES_COLLECTION);
+		const allSubgenres: Subgenre[] = [];
+
+		subgenres.forEach((document: Document) => {
+			const documentData = document.data();
+			if (documentData) {
+				const subgenre = FirestoreToSubgenre(documentData);
+				allSubgenres.push(subgenre);
+			}
+		});
+
+		return allSubgenres;
 	}
 
 	@Query((returns) => [Subgenre], { description: "Retrieve all categories (genres) from the sheet (database)" })
 	async allCategories() {
-		return (await client.smembers("genres")).map((primaryName) => new Subgenre(primaryName));
+		const subgenres = await getCollection(SUBGENRES_COLLECTION);
+		const allCategories: Subgenre[] = [];
+
+		subgenres.forEach((document: Document) => {
+			const documentData = document.data();
+			if (documentData?.category === document.ref.id) {
+				const subgenre = FirestoreToSubgenre(documentData);
+				allCategories.push(subgenre);
+			}
+		});
+
+		return allCategories;
 	}
 
 	@FieldResolver()
-	async names(@Root() subgenre: Subgenre) {
-		const alternativeNames = await client.hget(`subgenre:${subgenre.primaryName}`, "alternative_names");
-		const parsed = JSON.parse(alternativeNames!);
-		return [subgenre.primaryName, ...(parsed === null ? [] : parsed)];
-	}
-
-	@FieldResolver()
-	async category(@Root() subgenre: Subgenre) {
-		// Someone, somewhere, used Trap ambiguously so we have to fix that here and hope we're right
-		if (subgenre.primaryName === "Trap") return new Subgenre("Trap (EDM)");
-
-		const genre = await client.hget(`subgenre:${subgenre.primaryName}`, "genre");
-		if (genre !== null) return new Subgenre(genre);
-
-		const [, subgenreWithRightParenthesis] = subgenre.primaryName.split("(");
-		return new Subgenre(subgenreWithRightParenthesis.substring(0, subgenreWithRightParenthesis.length - 1));
-	}
-
-	@FieldResolver()
-	async origins(@Root() subgenre: Subgenre) {
-		const origins = await client.hget(`subgenre:${subgenre.primaryName}`, "origins");
-		return JSON.parse(origins!).map((primaryName: string) => new Subgenre(primaryName));
-	}
-
-	@FieldResolver()
-	async children(@Root() subgenre: Subgenre) {
-		const children = await client.hget(`subgenre:${subgenre.primaryName}`, "subgenres");
-		return JSON.parse(children!).map((primaryName: string) => new Subgenre(primaryName));
-	}
-
-	@FieldResolver()
-	async textColor(@Root() subgenre: Subgenre): Promise<string> {
-		if (subgenre.primaryName === null) return "#FFFFFF";
-		const colors = await client.hget(`subgenre:${subgenre.primaryName}`, "color");
-		// Return the category's color if this subgenre does not have color information stored in the database
-		if (colors === "null" || colors === null) {
-			return await this.textColor(await this.category(subgenre));
+	async categorySubgenre(@Root() subgenre: Subgenre) {
+		const doc = await getDocument(SUBGENRES_COLLECTION, subgenre.category);
+		const docData = doc.data();
+		if (docData) {
+			return FirestoreToSubgenre(docData);
 		}
-		return JSON.parse(colors)[1];
+		throw new GraphQLError(`somehow there was no database entry for the ${subgenre.category} subgenre (${subgenre.names[0]}'s category) when it's expected to exist`);
 	}
 
 	@FieldResolver()
-	async backgroundColor(@Root() subgenre: Subgenre): Promise<string> {
-		if (subgenre.primaryName === null) return "#000000";
-		const colors = await client.hget(`subgenre:${subgenre.primaryName}`, "color");
-		// Return the category's color if this subgenre does not have color information stored in the database
-		if (colors === "null" || colors === null) {
-			return await this.backgroundColor(await this.category(subgenre));
-		}
-		return JSON.parse(colors)[0];
+	parents(@Root() subgenre: Subgenre) {
+		const originsPromises = subgenre.origins.map(async (origin) => {
+			const originDoc = await getDocument(SUBGENRES_COLLECTION, origin);
+			const originDocData = originDoc.data();
+			if (originDocData) {
+				return FirestoreToSubgenre(originDocData);
+			}
+			throw new GraphQLError(`somehow there was no database entry for the ${origin} subgenre (a parent of ${subgenre.names[0]}) when it's expected to exist`);
+		});
+		return Promise.all(originsPromises);
+	}
+
+	@FieldResolver()
+	childrenSubgenres(@Root() subgenre: Subgenre): Promise<Subgenre[]> {
+		console.log(`${subgenre.names} going to look up ${subgenre.children}`);
+		const originsPromises = subgenre.children.map(async (child) => {
+			console.log(`${subgenre.names[0]} going to look up ${child}`);
+			const childDoc = await getDocument(SUBGENRES_COLLECTION, child);
+			const childDocData = childDoc.data();
+			if (childDocData) {
+				return FirestoreToSubgenre(childDocData);
+			}
+			throw new GraphQLError(`somehow there was no database entry for the ${child} subgenre (a child of ${subgenre.names[0]}) when it's expected to exist`);
+		});
+		return Promise.all(originsPromises);
 	}
 
 	@FieldResolver()
 	async description(@Root() subgenre: Subgenre) {
 		// TODO: allow for descriptions to exist
-		return null;
+		return undefined;
 	}
 }

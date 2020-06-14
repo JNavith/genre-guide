@@ -16,12 +16,8 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-/* eslint-disable @typescript-eslint/camelcase */
-
 import { Request as ExpressRequest, Response as ExpressResponse } from "express";
 
-// @ts-ignore
 import { name, description } from "../globals/site";
 // @ts-ignore
 import { colors } from "../globals/design-system";

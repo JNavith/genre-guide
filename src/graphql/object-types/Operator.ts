@@ -19,28 +19,28 @@
 import { Field, ObjectType } from "type-graphql";
 
 export const symbols = {
-    "|": {
-        name: "Dual",
-    },
-    ">": {
-        name: "Transition",
-    },
-    "~": {
-        name: "Back and Forth",
-    },
+	"|": {
+		name: "Dual",
+	},
+	">": {
+		name: "Transition",
+	},
+	"~": {
+		name: "Back and Forth",
+	},
 };
 export type GenreSymbol = keyof typeof symbols;
 
 
 @ObjectType({ description: "An operator or divider between the multiple subgenres of a track" })
-export class Operator {
-    constructor(
-        readonly _symbol: GenreSymbol,
-    ) { }
+export default class Operator {
+	constructor(
+		readonly _symbol: GenreSymbol,
+	) { }
 
-    @Field((type) => String, { description: "A one-character symbol for the operator" })
-    symbol!: string;
+	@Field((type) => String, { description: "A one-character symbol for the operator" })
+	symbol!: string;
 
-    @Field((type) => String, { description: "A short, descriptive name for the operator" })
-    name!: string;
+	@Field((type) => String, { description: "A short, descriptive name for the operator" })
+	name!: string;
 }

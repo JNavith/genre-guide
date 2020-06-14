@@ -19,29 +19,32 @@
 import { Field, ObjectType } from "type-graphql";
 
 @ObjectType({ description: "A subgenre, as understood on the Genre Sheet" })
-export class Subgenre {
-    constructor(
-        readonly primaryName: string,
-    ) { }
-
+export default class Subgenre {
     @Field((type) => [String], { description: "The primary name of the subgenre, e.x. \"Brostep\", followed by alternative names for the subgenre, e.x. {\"DnB\", \"D&B\"} for Drum & Bass" })
-    names?: string[];
+    names!: string[];
 
-    @Field((type) => Subgenre, { description: "The genre category that this subgenre belongs to, which is where its color comes from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass" })
-    category?: this;
+    category!: string;
+
+    @Field((type) => Subgenre, { name: "category", description: "The genre category that this subgenre belongs to, which is where its color comes from, e.x. Vaporwave for Vaportrap, Future Bass for Future Bass" })
+    categorySubgenre?: this;
+
+    origins!: string[];
 
     @Field((type) => [Subgenre], { description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime" })
-    origins?: this[];
+    @Field((type) => [Subgenre], { name: "origins", description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime", deprecationReason: "Use releaseDate instead because it's more specific" })
+	parents?: this[];
 
-    @Field((type) => [Subgenre], { description: "The list of subgenres that originate *directly* from this subgenre, e.x. {Deathstep, Drumstep} for Dubstep, {} for Footwork, {Electro Swing, Jazzstep} for Nu-Jazz" })
-    children?: this[];
+    children!: string[];
+
+    @Field((type) => [Subgenre], { name: "children", description: "The list of subgenres that originate *directly* from this subgenre, e.x. {Deathstep, Drumstep} for Dubstep, {} for Footwork, {Electro Swing, Jazzstep} for Nu-Jazz" })
+    childrenSubgenres?: this[];
 
     @Field((type) => String, { description: "The text color this subgenre uses on the Genre Sheet, in hex, e.x. '#000000' for Ambient" })
-    textColor?: string;
+    textColor!: string;
 
     @Field((type) => String, { description: "The background color this subgenre uses on the Genre Sheet, in hex, e.x. '#009600' for Hardcore" })
-    backgroundColor?: string;
+    backgroundColor!: string;
 
-    @Field((type) => String, { nullable: true, description: "A paragraph describing of this subgenre. Currently, no descriptions are available for any subgenre, so this always returns null" })
-    description?: string | null;
+    @Field((type) => String, { nullable: true, description: "A paragraph describing of this subgenre. Currently, no descriptions are available for any subgenre, so this always returns undefined" })
+    description?: string;
 }

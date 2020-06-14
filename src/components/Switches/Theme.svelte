@@ -18,14 +18,14 @@
 
 
 <script lang="typescript">
-	import { indexOf } from "lodash-es";
-
 	const states: ["light", "dark"] = ["light", "dark"];
+	const [firstState, lastState] = states;
+
 	export let state: "light" | "dark" | undefined;
 	export let disabled: boolean | undefined;
 
 	const toggle = () => {
-		const nextState = (indexOf(states, state) + 1) % states.length;
+		const nextState = state ? (states.indexOf(state) + 1) % states.length : 1;
 		state = states[nextState]; 
 	}
 </script>
@@ -42,13 +42,14 @@
 			class="rounded-full w-10 h-5 transition-opacity absolute inset-0
 			{state == outer ? 'opacity-100' : 'opacity-0'}
 			{disabled ? 'cursor-not-allowed' : 'cursor-pointer'}
-			{outer === 'dark' ? 'bg-gradient-t-indigo-700-purple-900' : 'bg-gradient-t-teal-300-blue-400'}">
+			{outer === lastState ? 'bg-gradient-t-indigo-700-purple-900' : 'bg-gradient-t-teal-300-blue-400'}">
 
 			{#each states as inner}
 				<div
 					class="block w-3 h-3 ml-1 mt-1 rounded-full absolute inset-0
-					left-0 top-0 transition-all {inner === 'dark' ? 'bg-radial-gray-100-gray-200' : 'bg-radial-yellow-300-orange-300'}
-					{state === 'dark' ? 'ml-6' : 'mr-6'}
+					left-0 top-0 transition-all 
+					{inner === lastState ? 'bg-radial-gray-100-gray-200' : 'bg-radial-yellow-300-orange-300'}
+					{state === lastState ? 'ml-6' : 'mr-6'}
 					{state === inner ? 'opacity-100' : 'opacity-0'}" />
 			{/each}
 

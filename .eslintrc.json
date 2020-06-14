@@ -15,6 +15,7 @@
 	},
 	"rules": {
 		"class-methods-use-this": "off",
+		"max-classes-per-file": "off",
 		"import/extensions": [
 			"error",
 			"ignorePackages",
@@ -30,6 +31,7 @@
 			"tab"
 		],
 		"no-console": "off",
+		"no-return-await": "off",
 		"no-tabs": [
 			"error",
 			{
@@ -63,10 +65,11 @@
 			],
 			"rules": {
 				"@typescript-eslint/ban-ts-comment": "off",
+				"@typescript-eslint/explicit-module-boundary-types": "off",
 				"@typescript-eslint/no-unused-vars": [
 					"warn",
 					{
-						"argsIgnorePattern": "(^_)|(^of$)|(^type$)"
+						"argsIgnorePattern": "(^_)|(^of$)|(^returns$)|(^type$)"
 					}
 				],
 				"no-unused-vars": "off"

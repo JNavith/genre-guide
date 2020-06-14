@@ -16,9 +16,11 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FieldResolver, Resolver, ResolverInterface, Root } from "type-graphql";
+import {
+	FieldResolver, Resolver, ResolverInterface, Root,
+} from "type-graphql";
 
-import { Operator, symbols } from "../object-types/Operator";
+import Operator, { symbols } from "../object-types/Operator";
 
 @Resolver((of) => Operator)
 export class OperatorResolver implements ResolverInterface<Operator> {
