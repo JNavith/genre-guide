@@ -17,8 +17,8 @@
 */
 
 // @ts-ignore -- generated package
-import * as sapper from "@sapper/app";
-// eslint-disable-line import/no-unresolved
+import * as sapper from "@sapper/app"; // eslint-disable-line import/no-unresolved
+
 const ONLY_GRAPHQL_SERVER = process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 
 if (!ONLY_GRAPHQL_SERVER) {
