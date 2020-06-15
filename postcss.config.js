@@ -47,7 +47,7 @@ export default {
 		!dev && postcssPurgecss({
 			content: ["./src/**/*.svelte", "./src/**/*.html"],
 			defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d-/:%.]+)/gm)].map(([_match, group, ..._rest]) => group),
-			whitelist: ["light-theme", "dark-theme"],
+			whitelist: ["data-theme"],
 		}),
 
 		!dev && cssnano({
