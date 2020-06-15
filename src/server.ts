@@ -45,20 +45,8 @@ const createSapperAndApolloServer = async (graphqlPath = "/graphql"): Promise<Ex
 
 	// Use helmet to increase security during production
 	if (!dev) {
-		app.use((req, res, next) => {
-			res.locals.nonce = uuidv4();
-			next();
-		});
-
 		app.use(helmet({
-			contentSecurityPolicy: {
-				directives: {
-					scriptSrc: [
-						"'self'",
-						(req, res) => `'nonce-${res.locals.nonce}'`,
-					],
-				},
-			},
+			contentSecurityPolicy: false,
 		}));
 	}
 

@@ -23,7 +23,6 @@ devDependencies:
   '@types/compression': 1.7.0
   '@types/express': 4.17.6
   '@types/helmet': 0.0.47
-  '@types/ioredis': 4.16.5
   '@types/node-fetch': 2.5.7
   '@types/uuid': 8.0.0
   '@typescript-eslint/eslint-plugin': 3.2.0_ac50c8aa16ddb60722eab507f8fe73f1
@@ -42,7 +41,6 @@ devDependencies:
   google-libphonenumber: 3.2.10
   graphql: 15.1.0
   helmet: 3.22.1
-  ioredis: 4.17.3
   mkdirp: 1.0.4
   ncp: 2.0.0
   npm-run-all: 4.1.5
@@ -1501,12 +1499,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-PGAK759pxyfXE78NbKxyfRcWYA/KwW17X290cNev/qAsn9eQIxkH4shoNBafH37wewhDG/0p1cHPbK6+SzZjWQ==
-  /@types/ioredis/4.16.5:
-    dependencies:
-      '@types/node': 14.0.13
-    dev: true
-    resolution:
-      integrity: sha512-jU60KcKiyFfNIz+rXbqm1tx+FqKOg8LnlSH+3o+j92IP1SQ2U9a2OZn/UkjzPoWgn0K7DtorraDsdpFgLyc9FQ==
   /@types/json-schema/7.0.5:
     dev: true
     resolution:
@@ -2710,12 +2702,6 @@ packages:
       node: '>=0.8'
     resolution:
       integrity: sha1-2jCcwmPfFZlMaIypAheco8fNfH4=
-  /cluster-key-slot/1.1.0:
-    dev: true
-    engines:
-      node: '>=0.10.0'
-    resolution:
-      integrity: sha512-2Nii8p3RwAPiFwsnZvukotvow2rIHM+yQ6ZcBXGHdniadkYGZYiGmkHJIbZPIV9nfv7m/U1IPMVVcAhoWFeklw==
   /coa/2.0.2:
     dependencies:
       '@types/q': 1.5.4
@@ -3384,12 +3370,6 @@ packages:
       node: '>=0.4.0'
     resolution:
       integrity: sha1-3zrhmayt+31ECqrgsp4icrJOxhk=
-  /denque/1.4.1:
-    dev: true
-    engines:
-      node: '>=0.10'
-    resolution:
-      integrity: sha512-OfzPuSZKGcgr96rf1oODnfjqBFmr1DVoc/TrItj3Ohe0Ah1C5WX5Baquw/9U9KovnQ88EqmJbD66rKYUQYN1tQ==
   /depd/1.1.2:
     engines:
       node: '>= 0.6'
@@ -4991,22 +4971,6 @@ packages:
     dev: true
     resolution:
       integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
-  /ioredis/4.17.3:
-    dependencies:
-      cluster-key-slot: 1.1.0
-      debug: 4.1.1
-      denque: 1.4.1
-      lodash.defaults: 4.2.0
-      lodash.flatten: 4.4.0
-      redis-commands: 1.5.0
-      redis-errors: 1.2.0
-      redis-parser: 3.0.0
-      standard-as-callback: 2.0.1
-    dev: true
-    engines:
-      node: '>=6'
-    resolution:
-      integrity: sha512-iRvq4BOYzNFkDnSyhx7cmJNOi1x/HWYe+A4VXHBu4qpwJaGT1Mp+D2bVGJntH9K/Z/GeOM/Nprb8gB3bmitz1Q==
   /ip-regex/2.1.0:
     dev: true
     engines:
@@ -7473,24 +7437,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-iYS1gV2ZyyIEacme7v/jiRPmzAs=
-  /redis-commands/1.5.0:
-    dev: true
-    resolution:
-      integrity: sha512-6KxamqpZ468MeQC3bkWmCB1fp56XL64D4Kf0zJSwDZbVLLm7KFkoIcHrgRvQ+sk8dnhySs7+yBg94yIkAK7aJg==
-  /redis-errors/1.2.0:
-    dev: true
-    engines:
-      node: '>=4'
-    resolution:
-      integrity: sha1-62LSrbFeTq9GEMBK/hUpOEJQq60=
-  /redis-parser/3.0.0:
-    dependencies:
-      redis-errors: 1.2.0
-    dev: true
-    engines:
-      node: '>=4'
-    resolution:
-      integrity: sha1-tm2CjNyv5rS4pCin3vTGvKwxyLQ=
   /reduce-css-calc/2.1.7:
     dependencies:
       css-unit-converter: 1.1.2
@@ -8043,10 +7989,6 @@ packages:
     dev: true
     resolution:
       integrity: sha1-VHxws0fo0ytOEI6hoqFZ5f3eGcA=
-  /standard-as-callback/2.0.1:
-    dev: true
-    resolution:
-      integrity: sha512-NQOxSeB8gOI5WjSaxjBgog2QFw55FV8TkS6Y07BiB3VJ8xNTvUYm0wl0s8ObgQ5NhdpnNfigMIKjgPESzgr4tg==
   /statuses/1.5.0:
     engines:
       node: '>= 0.6'
@@ -9248,7 +9190,6 @@ specifiers:
   '@types/compression': ^1.7.0
   '@types/express': ^4.17.3
   '@types/helmet': ^0.0.47
-  '@types/ioredis': ^4.16.5
   '@types/node-fetch': ^2.5.7
   '@types/uuid': ^8.0.0
   '@typescript-eslint/eslint-plugin': ^3.2.0
@@ -9272,7 +9213,6 @@ specifiers:
   google-libphonenumber: ^3.2.10
   graphql: ^15.1.0
   helmet: ^3.22.1
-  ioredis: ^4.17.3
   mkdirp: ^1.0.3
   ncp: ^2.0.0
   node-fetch: ^2.6.0

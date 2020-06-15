@@ -37,7 +37,7 @@ export const getCollection = async (collection: string, cache = true): Promise<C
 		return collectionCache[collection];
 	}
 
-	const result = await db.collection(collection).limit(collection === "subgenres" ? 9 : 40).get();
+	const result = await db.collection(collection).get();
 	// Add to the collection cache
 	collectionCache[collection] = result;
 	// Add all documents to the document cache

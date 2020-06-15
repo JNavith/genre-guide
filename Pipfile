@@ -5,17 +5,12 @@ verify_ssl = true
 
 [dev-packages]
 pytest = "*"
-yapf = "*"
 autopep8 = "==1.5.3"
 mypy = "==0.780"
 
 [packages]
-aioredis = "*"
 gspread = "*"
 gspread-formatting = "*"
-graphene = "*"
-starlette = "*"
-uvicorn = "*"
 oauth2client = "*"
 firebase-admin = "==4.3.0"
 
