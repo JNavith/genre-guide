@@ -36,6 +36,7 @@ const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 const sourcemap = dev ? "inline" : false;
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
+const ONLY_GRAPHQL_SERVER = process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 
 const warningIsIgnored = (warning) => warning.message.includes(
 	"Use of eval is strongly discouraged, as it poses security risks and may cause issues with minification",
@@ -48,7 +49,7 @@ export default {
 	client: {
 		input: config.client.input().replace(/\.js$/, ".ts"),
 		output: { ...config.client.output(), sourcemap },
-		plugins: [
+		plugins: ONLY_GRAPHQL_SERVER ? [] : [
 			replace({
 				"process.browser": true,
 				"process.env.NODE_ENV": JSON.stringify(mode),

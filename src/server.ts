@@ -23,7 +23,6 @@ import express, { Express } from "express";
 import helmet from "helmet";
 // @ts-ignore -- doesn't package its own types until 1.0.0-next.6
 import sirv from "sirv";
-import { v4 as uuidv4 } from "uuid";
 import { createApolloServer } from "./graphql";
 
 const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring
@@ -31,6 +30,7 @@ const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring
 // replaces `process.env.NODE_ENV` with `"production"` during `prod`
 const dev = process.env.NODE_ENV === "development";
 const RUN_LOCALLY = dev || process.env.RUN_LOCALLY; // eslint-disable-line prefer-destructuring
+const ONLY_GRAPHQL_SERVER = process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 
 const createSapperAndApolloServer = async (graphqlPath = "/graphql"): Promise<Express> => {
 	const app = express();
@@ -38,6 +38,8 @@ const createSapperAndApolloServer = async (graphqlPath = "/graphql"): Promise<Ex
 	const apolloServer = await createApolloServer();
 
 	apolloServer.applyMiddleware({ app, path: graphqlPath });
+
+	if (ONLY_GRAPHQL_SERVER) return app;
 
 	if (RUN_LOCALLY) {
 		app.use(sirv("static", { dev }));
