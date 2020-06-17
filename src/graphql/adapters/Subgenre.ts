@@ -59,7 +59,7 @@ export const getOne = async ({ anyName, cache = true, primaryName }: GetArgs & R
 		throw new TypeError("no subgenre name was specified");
 	}
 
-	const querySnapshot = await memoizedFindSubgenre(anyName);
+	const querySnapshot = await (cache ? memoizedFindSubgenre : findSubgenre)(anyName);
 	let document: Document | undefined;
 	querySnapshot.forEach((document_) => { document = document_; });
 	if (document) {

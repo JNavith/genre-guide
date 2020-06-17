@@ -51,6 +51,7 @@ devDependencies:
   postcss-preset-env: 6.7.0
   reflect-metadata: 0.1.13
   rimraf: 3.0.2
+  robot3: 0.2.18
   rollup: 2.16.1
   rollup-plugin-svelte: 5.2.2_rollup@2.16.1+svelte@3.23.2
   rollup-plugin-terser: 6.1.0_rollup@2.16.1
@@ -7687,6 +7688,10 @@ packages:
     hasBin: true
     resolution:
       integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==
+  /robot3/0.2.18:
+    dev: true
+    resolution:
+      integrity: sha512-0P3HfHVJfPKObpoIciglMefFYhMtdGMRjh5KE5U+NydwrheOnbA3GqlB84Wcy5h6UMseb77MpedUDyKZVIkiug==
   /rollup-plugin-svelte/5.2.2_rollup@2.16.1+svelte@3.23.2:
     dependencies:
       require-relative: 0.8.7
@@ -9274,6 +9279,7 @@ specifiers:
   postcss-preset-env: ^6.7.0
   reflect-metadata: ^0.1.13
   rimraf: ^3.0.2
+  robot3: ^0.2.18
   rollup: ^2.16.1
   rollup-plugin-svelte: ^5.2.2
   rollup-plugin-terser: ^6.1.0

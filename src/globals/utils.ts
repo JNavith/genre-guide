@@ -16,6 +16,10 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+// https://stackoverflow.com/a/57364353
+export type Await<T> = T extends {
+	then(onfulfilled?: (value: infer U) => unknown): unknown;
+} ? U : T;
 
 export const groupBy = <Element, Result>(array: Element[], func: (arg0: Element) => Result): Map<Result, Element[]> => {
 	const grouped = new Map<Result, Element[]>([]);

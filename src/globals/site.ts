@@ -16,14 +16,12 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 
 const SITE_NAME = "the genre guide";
 const REPOSITORY = "https://github.com/SirNavith/genre.guide";
 const DISCORD_INVITE_LINK = "https://discord.gg/z5W6Cpd";
-
 
 export const author = "Navith";
 export const name = SITE_NAME;

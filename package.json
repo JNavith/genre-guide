@@ -1,6 +1,6 @@
 {
 	"name": "genre.guide",
-	"version": "2020.06.15",
+	"version": "2020.06.17",
 	"description": "Learn about genres by their history, characteristics, and examples",
 	"author": "Navith",
 	"license": "AGPL-3.0",
@@ -82,6 +82,7 @@
 		"postcss-preset-env": "^6.7.0",
 		"reflect-metadata": "^0.1.13",
 		"rimraf": "^3.0.2",
+		"robot3": "^0.2.18",
 		"rollup": "^2.16.1",
 		"rollup-plugin-svelte": "^5.2.2",
 		"rollup-plugin-terser": "^6.1.0",

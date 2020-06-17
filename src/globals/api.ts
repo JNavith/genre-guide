@@ -16,7 +16,7 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Response as FetchResponse, RequestInfo, RequestInit } from "node-fetch";
+import nodeFetch from "node-fetch";
 import { ExecutionResult as GraphQLExecutionResult } from "graphql";
 
 import { domain } from "./site";
@@ -25,7 +25,9 @@ import { domain } from "./site";
 // eslint-disable-next-line global-require,import/no-unresolved
 if (!process.browser) global.AbortController = require("abort-controller");
 
-export type FetchFunction = (url: RequestInfo, init?: RequestInit) => Promise<FetchResponse>;
+export type NodeFetchFunction = typeof nodeFetch;
+export type BrowserFetchFunction = typeof fetch;
+export type FetchFunction = NodeFetchFunction | BrowserFetchFunction;
 
 export interface Variables {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,7 +37,7 @@ export interface Variables {
 export interface APIOptions {
 	fetch: FetchFunction;
 	query: string;
-	variables: Variables;
+	variables?: Variables;
 }
 
 export type APIResponse = GraphQLExecutionResult;

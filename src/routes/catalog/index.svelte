@@ -1,5 +1,5 @@
 <!--
-		genre.guide - Catalog page Svelte route
+		genre.guide - Catalog page
 		Copyright (C) 2020 Navith
 
 		This program is free software: you can redistribute it and/or modify
@@ -16,59 +16,38 @@
 		along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-
 <script context="module">
+	import { get } from "svelte/store";
 	import api from "../../globals/api";
+	import wrappedMachine, { createStateMachine, Send, State } from "./state";
 
-	const TRACK_FRAGMENT = `
-		artist
-		date
-		id
-		image
-		name
-		recordLabel
-		subgenresFlat {
-			... on Subgenre {
-				names
-				textColor
-				backgroundColor
-			}
-			... on Operator {
-				symbol
-			}
-		}
-	`;
-
-	const GET_MOST_RECENT_TRACKS = `
-		{
-			tracks {
-				${TRACK_FRAGMENT}
-			}
-		}
-	`;
-
-	const GET_TRACKS_BEFORE_ID = `
-		query getTracks($beforeId: ID!) {
-			tracks(before_id: $beforeId) {
-				${TRACK_FRAGMENT}
-			}
-		}
-	`;
-	
-	const loadTracks = async ({ fetch: fetch_ }) => {
-		const { data: { tracks } } = await api({ fetch: fetch_, query: GET_MOST_RECENT_TRACKS });
-
-		tracks.forEach((track, loadIndex) => {
-			track.loadIndex = loadIndex;
-		});
-
-		return tracks;
-	};
+	const mode = process.env.NODE_ENV;
+	const dev = mode === "development";
 
 	export async function preload() {
-		if (process.browser) return;
+		if (dev) console.log("I'm starting preload");
+		if (!process.browser) {
+			if (dev) console.log("I'm about to destructure the wrapped machine");
+			if (dev) console.log({ wrappedMachine });
+			const { context, send, state } = get(wrappedMachine);
+			if (dev) console.log("I destructured the wrapped machine");
 
-		return { tracks: await loadTracks({ fetch: this.fetch }) };
+			send(Send.Load);
+
+			// Stall until loaded on the server
+			await new Promise((resolve, reject) => {
+				const unsubscribe = state.subscribe(($state) => {
+					if ($state == State.Loaded) {
+						unsubscribe();
+						resolve();
+					}
+				});
+			});
+
+			if (dev) console.log("I'm ending preload on the server");
+			return { initialContext: get(context), initialState: get(state) };
+		}
+		if (dev) console.log("I'm ending preload");
 	}
 </script>
 
@@ -84,31 +63,35 @@
 
 	const { catalog } = routes;
 
-	export let tracks = [];
+	if (dev) console.log("catalog.svelte before props");
+	export let initialContext = undefined;
+	export let initialState = undefined;
+	if (initialContext && initialState) {
+		$wrappedMachine = createStateMachine(initialContext, initialState);
+	}
+	if (dev) console.log("catalog.svelte after optional machine creation");
 
-	onMount(async() => {
-		if (tracks.length === 0) tracks = await loadTracks({ fetch });
-	});
-
-	// TODO: robot3 finite state machine
-	let isLoadingTracks = false;
+	if (dev) console.log("catalog.svelte before extracting from machine");
+	let { context, state, send } = $wrappedMachine;
+	$: ({ context, state, send } = $wrappedMachine);
+	if (dev) console.log("catalog.svelte after extracting from machine");
 </script>
 
 <svelte:window
-	on:scroll|passive={async () => {
-		if (isLoadingTracks) return;
-
-		isLoadingTracks = false;
-	}} />
+  on:scroll|passive={(event) => {
+    console.log(event);
+  }} />
 
 <Metadata {...catalog} />
 
 <AccentBar />
 
+<button on:click={() => send(Send.Load)}>{$state === State.Loading ? "Wait" : "Load"}</button>
+
 <NavigationBarTopLevel />
 
 <main class="flex-1 flex flex-col items-center px-8">
-	<TrackCatalog {tracks} />
+  <TrackCatalog tracks={$context ? $context.tracks : []} />
 </main>
 
 <AccentBar />
