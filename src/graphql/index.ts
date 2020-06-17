@@ -20,14 +20,13 @@ import "reflect-metadata";
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from "type-graphql";
 
-import { OperatorResolver } from "./resolvers/Operator";
 import { SubgenreResolver } from "./resolvers/Subgenre";
 import { TrackResolver } from "./resolvers/Track";
 
 export const createApolloServer = async (): Promise<ApolloServer> => {
 	const schema = await buildSchema({
 		dateScalarMode: "isoDate",
-		resolvers: [OperatorResolver, SubgenreResolver, TrackResolver],
+		resolvers: [SubgenreResolver, TrackResolver],
 	});
 
 	const apolloServer = new ApolloServer({

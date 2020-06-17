@@ -29,18 +29,16 @@ export const symbols = {
 		name: "Back and Forth",
 	},
 };
-export type GenreSymbol = keyof typeof symbols;
 
+export type GenreSymbol = keyof typeof symbols;
 
 @ObjectType({ description: "An operator or divider between the multiple subgenres of a track" })
 export default class Operator {
-	constructor(
-		readonly _symbol: GenreSymbol,
-	) { }
-
 	@Field((type) => String, { description: "A one-character symbol for the operator" })
-	symbol!: string;
+	symbol!: GenreSymbol;
 
 	@Field((type) => String, { description: "A short, descriptive name for the operator" })
-	name!: string;
+	get name(): string {
+		return symbols[this.symbol].name;
+	}
 }

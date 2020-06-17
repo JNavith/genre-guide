@@ -26,45 +26,61 @@ admin.initializeApp({
 export const db = admin.firestore();
 
 export type Document = admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>;
-const documentCache: { [collectionAndID: string]: Document } = {};
+const documentCache: Map<[string, string], Document> = new Map();
 
 export type Collection = admin.firestore.QuerySnapshot<admin.firestore.DocumentData>;
-const collectionCache: { [collection: string]: Collection } = {};
+const collectionCache: Map<string, Collection> = new Map();
 
 export const getCollection = async (collection: string, cache = true): Promise<Collection> => {
-	if (cache && Object.prototype.hasOwnProperty.call(collectionCache, collection)) {
-		console.log(`I found the collection ${collection} in the cache!!!`);
-		return collectionCache[collection];
+	if (cache) {
+		const cachedCollection = collectionCache.get(collection);
+		if (cachedCollection) {
+			console.log(`I found the collection ${collection} in the cache!!!`);
+			return cachedCollection;
+		}
 	}
 
 	const result = await db.collection(collection).get();
 	// Add to the collection cache
-	collectionCache[collection] = result;
+	collectionCache.set(collection, result);
 	// Add all documents to the document cache
 	result.forEach((document: Document) => {
-		const key = [collection, document.ref.id];
-		documentCache[JSON.stringify(key)] = document;
+		documentCache.set([collection, document.ref.id], document);
 	});
 
 	return result;
 };
 
-// eslint-disable-next-line max-len
 export const getDocument = async (collection: string, document: string, cache = true): Promise<Document> => {
-	const key = [collection, document];
-	const keyString = JSON.stringify(key);
+	const key: [string, string] = [collection, document];
 
 	// Return the document from the cache if possible
-	if (cache && Object.prototype.hasOwnProperty.call(documentCache, keyString)) {
-		console.log(`I found the document ${collection}.${document} in the cache!!!`);
-		return documentCache[keyString];
+	if (cache) {
+		const cachedDocument = documentCache.get(key);
+		if (cachedDocument) {
+			console.log(`I found the document ${collection}.${document} in the cache!!!`);
+			return cachedDocument;
+		}
 	}
 
 	const docRef = db.collection(collection).doc(document);
 	const result = await docRef.get();
 	// Add the document to the document cache if it exists
 	if (result.exists) {
-		documentCache[keyString] = result;
+		documentCache.set(key, result);
 	}
 	return result;
+};
+
+export const memoize = <Return, Func extends (...args: any[]) => Return>(fn: Func): Func => {
+	const cache = new Map<any[], Return>();
+
+	return ((...args: any[]) => {
+		if (cache.has(args)) {
+			return cache.get(args);
+		}
+		const result = fn(...args);
+		cache.set(args, result);
+		return result;
+	}) as Func;
 };

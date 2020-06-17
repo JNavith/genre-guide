@@ -31,7 +31,7 @@ export default class Subgenre {
     origins!: string[];
 
     @Field((type) => [Subgenre], { description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime" })
-    @Field((type) => [Subgenre], { name: "origins", description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime", deprecationReason: "Use releaseDate instead because it's more specific" })
+    @Field((type) => [Subgenre], { name: "origins", description: "The list of subgenres that this subgenre comes *directly* from, e.x. {Detroit Techno,} for Big Room Techno, {UK Hip Hop, 2-Step Garage} for Grime", deprecationReason: "Use parents instead because it's a more specific name" })
 	parents?: this[];
 
     children!: string[];

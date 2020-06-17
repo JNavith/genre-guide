@@ -16,94 +16,62 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as admin from "firebase-admin";
-import { plainToClass } from "class-transformer";
-import {
-	FieldResolver, Query, Resolver, ResolverInterface, Root,
-} from "type-graphql";
-
 import { GraphQLError } from "graphql";
-import { Document, getCollection, getDocument } from "../firestore";
+import {
+	Arg, FieldResolver, Query, Resolver, ResolverInterface, Root,
+} from "type-graphql";
+import { getAll as getAllSubgenres, getOne as getOneSubgenre } from "../adapters/Subgenre";
 import Subgenre from "../object-types/Subgenre";
-
-export const SUBGENRES_COLLECTION = "subgenres";
-
-export const FirestoreToSubgenre = (documentData: admin.firestore.DocumentData): Subgenre => plainToClass(Subgenre, documentData);
 
 @Resolver(Subgenre)
 export class SubgenreResolver implements ResolverInterface<Subgenre> {
+	@Query((returns) => Subgenre, { description: "Get information about a subgenre from (one of its) exact name(s)" })
+	subgenre(@Arg("name") name: string) {
+		return getOneSubgenre({ anyName: name });
+	}
+
 	@Query((returns) => [Subgenre], { description: "Retrieve all subgenres from the sheet (database)" })
-	async allSubgenres() {
-		const subgenres = await getCollection(SUBGENRES_COLLECTION);
-		const allSubgenres: Subgenre[] = [];
-
-		subgenres.forEach((document: Document) => {
-			const documentData = document.data();
-			if (documentData) {
-				const subgenre = FirestoreToSubgenre(documentData);
-				allSubgenres.push(subgenre);
-			}
-		});
-
-		return allSubgenres;
+	allSubgenres() {
+		return getAllSubgenres();
 	}
 
 	@Query((returns) => [Subgenre], { description: "Retrieve all categories (genres) from the sheet (database)" })
 	async allCategories() {
-		const subgenres = await getCollection(SUBGENRES_COLLECTION);
-		const allCategories: Subgenre[] = [];
-
-		subgenres.forEach((document: Document) => {
-			const documentData = document.data();
-			if (documentData?.category === document.ref.id) {
-				const subgenre = FirestoreToSubgenre(documentData);
-				allCategories.push(subgenre);
-			}
-		});
-
-		return allCategories;
+		const subgenres = await getAllSubgenres();
+		return subgenres.filter((subgenre) => subgenre.names.includes(subgenre.category));
 	}
 
 	@FieldResolver()
 	async categorySubgenre(@Root() subgenre: Subgenre) {
-		const doc = await getDocument(SUBGENRES_COLLECTION, subgenre.category);
-		const docData = doc.data();
-		if (docData) {
-			return FirestoreToSubgenre(docData);
+		try {
+			return await getOneSubgenre({ primaryName: subgenre.category });
+		} catch (e) {
+			throw new GraphQLError(`there was no database entry for the ${subgenre.category} subgenre (${subgenre.names[0]}'s category)`);
 		}
-		throw new GraphQLError(`somehow there was no database entry for the ${subgenre.category} subgenre (${subgenre.names[0]}'s category) when it's expected to exist`);
 	}
 
 	@FieldResolver()
 	parents(@Root() subgenre: Subgenre) {
-		const originsPromises = subgenre.origins.map(async (origin) => {
-			const originDoc = await getDocument(SUBGENRES_COLLECTION, origin);
-			const originDocData = originDoc.data();
-			if (originDocData) {
-				return FirestoreToSubgenre(originDocData);
-			}
-			throw new GraphQLError(`somehow there was no database entry for the ${origin} subgenre (a parent of ${subgenre.names[0]}) when it's expected to exist`);
-		});
-		return Promise.all(originsPromises);
+		const originsPromises = subgenre.origins.map(async (origin) => getOneSubgenre({ primaryName: origin }));
+		try {
+			return Promise.all(originsPromises);
+		} catch (e) {
+			throw new GraphQLError(`somehow there was no database entry for one of ${subgenre.names[0]}'s parent subgenres`);
+		}
 	}
 
 	@FieldResolver()
 	childrenSubgenres(@Root() subgenre: Subgenre): Promise<Subgenre[]> {
-		console.log(`${subgenre.names} going to look up ${subgenre.children}`);
-		const originsPromises = subgenre.children.map(async (child) => {
-			console.log(`${subgenre.names[0]} going to look up ${child}`);
-			const childDoc = await getDocument(SUBGENRES_COLLECTION, child);
-			const childDocData = childDoc.data();
-			if (childDocData) {
-				return FirestoreToSubgenre(childDocData);
-			}
-			throw new GraphQLError(`somehow there was no database entry for the ${child} subgenre (a child of ${subgenre.names[0]}) when it's expected to exist`);
-		});
-		return Promise.all(originsPromises);
+		const childrenPromises = subgenre.children.map(async (child) => getOneSubgenre({ primaryName: child }));
+		try {
+			return Promise.all(childrenPromises);
+		} catch (e) {
+			throw new GraphQLError(`somehow there was no database entry for one of ${subgenre.names[0]}'s children subgenres`);
+		}
 	}
 
 	@FieldResolver()
-	async description(@Root() subgenre: Subgenre) {
+	async description(@Root() _subgenre: Subgenre) {
 		// TODO: allow for descriptions to exist
 		return undefined;
 	}

@@ -16,38 +16,16 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-// @ts-ignore
-import blake from "blakejs";
-import * as admin from "firebase-admin";
-import { plainToClass } from "class-transformer";
+import { GraphQLError } from "graphql";
 import {
 	Arg, Args, ArgsType, Field, FieldResolver, ID, Int, Query, Resolver, ResolverInterface, Root,
 } from "type-graphql";
-
-import { GraphQLError } from "graphql";
-import SubgenreGroup, { convertNestedStrings, NestedStrings } from "../object-types/SubgenreGroup";
-import Track from "../object-types/Track";
-import { getDocument, db } from "../firestore";
+import { createTrackID, FirestoreToTrack, tracksCollectionRef } from "../adapters/Track";
+import { getDocument } from "../firestore";
 import Operator from "../object-types/Operator";
 import Subgenre from "../object-types/Subgenre";
-
-const TRACKS_COLLECTION = "tracks";
-const tracksCollectionRef = db.collection(TRACKS_COLLECTION);
-
-const blake2b = (item: string): string => blake.blake2bHex(item);
-
-const createTrackID = ({ artist, title, releaseDate }: { artist: string, title: string, releaseDate: string }): string => {
-	// Probably the best traits to form a unique ID from
-	const key = [artist, title, releaseDate];
-	const joined = key.join("\n");
-	return blake2b(joined);
-};
-
-const FirestoreToTrack = (documentData: admin.firestore.DocumentData): Track => {
-	const clone = { ...documentData };
-	clone.releaseDate = clone.releaseDate.toDate();
-	return plainToClass(Track, clone);
-};
+import SubgenreGroup, { convertNestedStrings, NestedStrings } from "../object-types/SubgenreGroup";
+import Track from "../object-types/Track";
 
 @ArgsType()
 class TracksArguments {
@@ -106,10 +84,7 @@ export class TrackResolver implements ResolverInterface<Track> {
 
 	@FieldResolver()
 	async id(@Root() track: Track) {
-		const isoDate = track.releaseDate.toISOString();
-		const [date, _time] = isoDate.split("T");
-		const key = { artist: track.artist, title: track.title, releaseDate: date };
-		return createTrackID(key);
+		return createTrackID(track);
 	}
 
 	@FieldResolver()

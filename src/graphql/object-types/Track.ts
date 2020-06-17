@@ -16,8 +16,6 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as admin from "firebase-admin";
-import { Transform, Type } from "class-transformer";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import SubgenreGroup, { SubgenreOrOperator } from "./SubgenreGroup";
@@ -38,7 +36,7 @@ export default class Track {
 	@Field({ description: "The record label(s) or copyright owner(s) who released and/or own the rights to the track" })
 	recordLabel!: string;
 
-	@Field({ name: "date", description: "The date the track was released", deprecationReason: "Use releaseDate instead because it's more specific" })
+	@Field({ name: "date", description: "The date the track was released", deprecationReason: "Use releaseDate instead because it's a more specific name" })
 	@Field({ description: "The date the track was released" })
 	releaseDate!: Date;
 

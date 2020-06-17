@@ -16,16 +16,16 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { plainToClass } from "class-transformer";
 import {
 	createUnionType, Field, ObjectType, Root,
 } from "type-graphql";
 
 import Subgenre from "./Subgenre";
 import Operator, { GenreSymbol, symbols } from "./Operator";
-import { getDocument } from "../firestore";
-import { FirestoreToSubgenre, SUBGENRES_COLLECTION } from "../resolvers/Subgenre";
+import { getOne as getOneSubgenre } from "../adapters/Subgenre";
 
-@ObjectType({ description: "A (recursive) group of subgenres and operators" })
+@ObjectType({ description: "A recursive group of subgenres and operators" })
 export default class SubgenreGroup {
 	constructor(
 		readonly _elements: NestedTypes[],
@@ -45,7 +45,7 @@ export const SubgenreOrOperator = createUnionType({
 	name: "SubgenreOrOperator",
 	types: () => [Subgenre, Operator],
 	resolveType: (element) => {
-		if ("_symbol" in element) return Operator;
+		if ("symbol" in element) return Operator;
 		return Subgenre;
 	},
 });
@@ -54,7 +54,7 @@ export const SubgenreOrOperatorOrGroup = createUnionType({
 	name: "SubgenreOrOperatorOrGroup",
 	types: () => [Subgenre, Operator, SubgenreGroup],
 	resolveType: (element) => {
-		if ("_symbol" in element) return Operator;
+		if ("symbol" in element) return Operator;
 		if ("_elements" in element) return SubgenreGroup;
 		return Subgenre;
 	},
@@ -80,24 +80,18 @@ export const convertNestedStrings = async (nestedStrings: NestedStrings): Promis
 	}
 
 	if (Object.prototype.hasOwnProperty.call(symbols, nestedStrings)) {
-		return new Operator(nestedStrings as GenreSymbol);
+		return plainToClass(Operator, { symbol: nestedStrings as GenreSymbol });
 	}
 
 	// Look up Genre in place of ? (Genre)
 	const [wasUnknown, knownSubgenre] = makeSubgenreKnown(nestedStrings);
 	// TODO: not have to workaround ambiguous Trap
-	const subgenre = knownSubgenre === "Trap" ? "Trap (EDM)" : knownSubgenre;
+	const primaryName = knownSubgenre === "Trap" ? "Trap (EDM)" : knownSubgenre;
 
-	const subgenreDoc = await getDocument(SUBGENRES_COLLECTION, subgenre);
-	const subgenreDocData = subgenreDoc.data();
-	if (subgenreDocData) {
-		const objectType = FirestoreToSubgenre(subgenreDocData);
-		if (wasUnknown) {
-			// Reinstate the ? (Genre) name
-			objectType.names = [`? (${objectType.names[0]})`];
-		}
-		return objectType;
+	const subgenre = await getOneSubgenre({ primaryName });
+	if (wasUnknown) {
+		// Reinstate the ? (Genre) name(s)
+		subgenre.names = subgenre.names.map((name) => `? (${name})`);
 	}
-
-	throw new TypeError(`somehow there was no database entry for the ${subgenre} subgenre when it's expected to exist`);
+	return subgenre;
 };
