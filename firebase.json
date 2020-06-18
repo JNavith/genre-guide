@@ -8,10 +8,16 @@
 		],
 		"rewrites": [
 			{
+				"source": "/graphql",
+				"function": "graphqlServer"
+			},
+			{
 				"source": "**",
 				"function": "ssr"
 			}
 		]
 	},
-	"functions": {}
+	"functions": {
+		"source": "."
+	}
 }

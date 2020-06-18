@@ -36,7 +36,6 @@ const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 const sourcemap = dev ? "inline" : false;
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
-const RUN_LOCALLY = dev || !!process.env.RUN_LOCALLY; // eslint-disable-line prefer-destructuring
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 
 const warningIsIgnored = (warning) => warning.message.includes(
@@ -54,7 +53,6 @@ export default {
 			replace({
 				"process.browser": true,
 				"process.env.NODE_ENV": JSON.stringify(mode),
-				"process.env.RUN_LOCALLY": JSON.stringify(RUN_LOCALLY),
 				"process.env.ONLY_GRAPHQL_SERVER": JSON.stringify(ONLY_GRAPHQL_SERVER),
 			}),
 			svelte({
@@ -104,7 +102,6 @@ export default {
 			replace({
 				"process.browser": false,
 				"process.env.NODE_ENV": JSON.stringify(mode),
-				"process.env.RUN_LOCALLY": JSON.stringify(RUN_LOCALLY),
 				"process.env.ONLY_GRAPHQL_SERVER": JSON.stringify(ONLY_GRAPHQL_SERVER),
 				"module.require": "require",
 			}),

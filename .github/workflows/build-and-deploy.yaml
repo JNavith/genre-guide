@@ -7,14 +7,12 @@ on:
 jobs:
   build:
     name: Build and Deploy
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
       - name: "Install Dependencies: Main"
         run: "npm install"
-      - name: "Install Dependencies: Functions"
-        run: "cd functions && npm install && cd .."
       - name: Build and Deploy
         run: "npm run deploy"
         env:
