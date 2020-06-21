@@ -39,6 +39,7 @@
 		"express": "^4.17.1",
 		"firebase-admin": "^8.12.1",
 		"firebase-functions": "^3.7.0",
+		"firebase-tools": "^8.4.3",
 		"node-fetch": "^2.6.0",
 		"websocket-extensions": "^0.1.4"
 	},
@@ -73,7 +74,6 @@
 		"eslint-config-airbnb-base": "^14.2.0",
 		"eslint-plugin-import": "^2.21.2",
 		"eslint-plugin-svelte3": "^2.7.3",
-		"firebase-tools": "^8.4.2",
 		"google-fonts-complete": "github:crswll/google-fonts-complete#rerun-font-fetch",
 		"google-libphonenumber": "^3.2.10",
 		"graphql": "^15.1.0",

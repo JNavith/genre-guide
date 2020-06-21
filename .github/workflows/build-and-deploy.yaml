@@ -11,9 +11,15 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
-      - name: "Install Dependencies: Main"
-        run: "npm install --only prod"
-      - name: Build and Deploy
-        run: "npm run deploy"
+      - name: "Install Development Dependencies"
+        run: "pnpm install"
+      - name: "Build"
+        run: "npm run prod"
+      - name: "Remove node_modules"
+        run: "rm -rf node_modules"
+      - name: "Install Production Dependencies"
+        run: "pnpm install --only prod"
+      - name: "Deploy"
+        run: "pnpm run firebase:deploy"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
