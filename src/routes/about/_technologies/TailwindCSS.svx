@@ -1,0 +1,14 @@
+---
+title: Tailwind CSS
+background: "#38B2AC"
+foreground: "#FFFFFF"
+---
+
+<script>
+    import image from "./tailwindcss.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+We use [Tailwind CSS](https://tailwindcss.com/), and a set of other PostCSS plugins, to design and implement this website's layout and appearance.

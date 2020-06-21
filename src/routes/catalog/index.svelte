@@ -28,7 +28,6 @@
 		if (dev) console.log("I'm starting preload");
 		if (!process.browser) {
 			if (dev) console.log("I'm about to destructure the wrapped machine");
-			if (dev) console.log({ wrappedMachine });
 			const { context, send, state } = get(wrappedMachine);
 			if (dev) console.log("I destructured the wrapped machine");
 
@@ -84,14 +83,16 @@
 
 <Metadata {...catalog} />
 
-<AccentBar />
+<div class="absolute w-full min-h-screen flex flex-col">
+	<AccentBar />
+	<NavigationBarTopLevel />
 
-<button on:click={() => send(Send.Load)}>{$state === State.Loading ? "Wait" : "Load"}</button>
+	<button on:click={() => send(Send.Load)}>{$state === State.Loading ? "Wait" : "Load"}</button>
 
-<NavigationBarTopLevel />
 
-<main class="flex-1 flex flex-col items-center px-8">
-  <TrackCatalog tracks={$context ? $context.tracks : []} />
-</main>
+	<main class="flex-1 flex flex-col items-center px-8">
+		<TrackCatalog tracks={$context ? $context.tracks : []} />
+	</main>
 
-<AccentBar />
+	<AccentBar />
+</div>

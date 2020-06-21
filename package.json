@@ -1,6 +1,6 @@
 {
 	"name": "genre.guide",
-	"version": "2020.06.17",
+	"version": "2020.06.21",
 	"description": "Learn about genres by their history, characteristics, and examples",
 	"author": "Navith",
 	"license": "AGPL-3.0",
@@ -18,12 +18,19 @@
 		"cross-env": "cross-env",
 		"firebase": "firebase",
 		"firebase:deploy": "firebase deploy",
+		"firebase:deploy:export": "firebase deploy --only hosting",
 		"sapper": "sapper",
-		"sapper:build": "cross-env NODE_ENV=production sapper build --legacy",
+		"sapper:build": "cross-env NODE_ENV=production sapper build",
+		"sapper:export": "cross-env NODE_ENV=production sapper export",
+		"static:rmdir": "rimraf - __sapper__/export",
+		"static:mkdir": "mkdirp __sapper__/export",
+		"static:cp": "ncp static __sapper__/export",
 		"dev": "sapper dev",
-		"prod": "run-s sapper:build",
+		"prod": "run-s sapper:build static:rmdir static:mkdir static:cp",
 		"start": "node __sapper__/build",
-		"deploy": "run-s prod firebase:deploy"
+		"deploy": "run-s prod firebase:deploy",
+		"export": "run-s sapper:export",
+		"deploy:export": "run-s export firebase:deploy:export"
 	},
 	"dependencies": {
 		"blakejs": "^1.1.0",
@@ -71,6 +78,7 @@
 		"google-libphonenumber": "^3.2.10",
 		"graphql": "^15.1.0",
 		"helmet": "^3.23.0",
+		"mdsvex": "^0.8.2",
 		"mkdirp": "^1.0.3",
 		"ncp": "^2.0.0",
 		"npm-run-all": "^4.1.5",
@@ -80,9 +88,11 @@
 		"postcss-load-config": "^2.1.0",
 		"postcss-preset-env": "^6.7.0",
 		"reflect-metadata": "^0.1.13",
+		"remark-abbr": "^1.4.0",
 		"rimraf": "^3.0.2",
 		"robot3": "^0.2.18",
 		"rollup": "^2.16.1",
+		"rollup-plugin-smart-asset": "^2.0.7",
 		"rollup-plugin-svelte": "^5.2.2",
 		"rollup-plugin-terser": "^6.1.0",
 		"sapper": "^0.27.15",
@@ -100,7 +110,7 @@
 		"utf-8-validate": "^5.0.2",
 		"uuid": "^8.1.0"
 	},
-  	"engines": {
+	"engines": {
 		"node": "10"
 	}
 }

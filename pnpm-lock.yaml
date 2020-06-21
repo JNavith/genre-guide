@@ -43,6 +43,7 @@ devDependencies:
   google-libphonenumber: 3.2.10
   graphql: 15.1.0
   helmet: 3.23.0
+  mdsvex: 0.8.2_svelte@3.23.2
   mkdirp: 1.0.4
   ncp: 2.0.0
   npm-run-all: 4.1.5
@@ -52,9 +53,11 @@ devDependencies:
   postcss-load-config: 2.1.0
   postcss-preset-env: 6.7.0
   reflect-metadata: 0.1.13
+  remark-abbr: 1.4.0
   rimraf: 3.0.2
   robot3: 0.2.18
   rollup: 2.16.1
+  rollup-plugin-smart-asset: 2.0.7_rollup@2.16.1
   rollup-plugin-svelte: 5.2.2_rollup@2.16.1+svelte@3.23.2
   rollup-plugin-terser: 6.1.0_rollup@2.16.1
   sapper: 0.27.15_svelte@3.23.2
@@ -1619,6 +1622,10 @@ packages:
       '@types/mime': 2.0.2
     resolution:
       integrity: sha512-jTDt0o/YbpNwZbQmE/+2e+lfjJEJJR0I3OFaKQKPWkASkCoW3i6fsUnqudSMcNAfbtmADGu8f4MV4q+GqULmug==
+  /@types/unist/2.0.3:
+    dev: true
+    resolution:
+      integrity: sha512-FvUupuM3rlRsRtCN+fDudtmytGO6iHJuuRKS1Ss0pG5z8oX0diNEw94UEL7hgDbpN94rgaK5R7sWm6RrSkZuAQ==
   /@types/uuid/8.0.0:
     dev: true
     resolution:
@@ -2290,6 +2297,10 @@ packages:
       node: '>=0.6'
     resolution:
       integrity: sha512-j51egjPa7/i+RdiRuJbPdJ2FIUYYPhvYLjzoYbcMMm62ooO6F94fETG4MTs46zPAF9Brs04OajboA/qTGuz78w==
+  /big.js/5.2.2:
+    dev: true
+    resolution:
+      integrity: sha512-vyL2OymJxmarO8gxMr0mhChsO9QGwhynfuu4+MHTAW6czfq9humCB7rKpUjDd9YUiDPU4mzpyupFSvOClAwbmQ==
   /bignumber.js/7.2.1:
     resolution:
       integrity: sha512-S4XzBk5sMB+Rcb/LNcpzXr57VRTxgAvaAEDAl1AwRx27j00hT84O6OkteE7u8UB3NuaaygCRrEpqox4uDOrbdQ==
@@ -2709,6 +2720,15 @@ packages:
     dev: true
     resolution:
       integrity: sha512-GRMWDxpOB6Dgk2E5Uo+3eEBvtOOlimMmpbFiKuLFnQzYDavtLFY3K5ona41jgN/WdRZtG7utuVSVTL4HbZHGkw==
+  /clipboard/2.0.6:
+    dependencies:
+      good-listener: 1.2.2
+      select: 1.1.2
+      tiny-emitter: 2.1.0
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha512-g5zbiixBRk/wyKakSwCKd7vQXDjFnAMGHoEyBogG/bw9kTD9GvdAvaoRR1ALcEzt3pVKxZR0pViekPMIS0QyGg==
   /clone/1.0.4:
     dev: true
     engines:
@@ -3386,6 +3406,11 @@ packages:
       node: '>=0.4.0'
     resolution:
       integrity: sha1-3zrhmayt+31ECqrgsp4icrJOxhk=
+  /delegate/3.2.0:
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha512-IofjkYBZaZivn0V8nnsMJGBr4jVLxHDheKSW88PyxS5QC4Vo9ZbZVvhzlSxY87fVq3STR6r+4cGepyHkcWOQSw==
   /depd/1.1.2:
     engines:
       node: '>= 0.6'
@@ -4459,6 +4484,13 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-BWICuzzDvDoH54NHKCseDanAhE3CeDorgDL5MT6LMXXj2WCnd9UC2szdk4AWLfjdgNBCXLUanXYcpBBKOSWGwg==
+  /good-listener/1.2.2:
+    dependencies:
+      delegate: 3.2.0
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha1-1TswzfkxPf+33JoNR3CWqm0UXFA=
   /google-auth-library/5.10.1:
     dependencies:
       arrify: 2.0.1
@@ -5872,6 +5904,15 @@ packages:
     dev: true
     resolution:
       integrity: sha512-rQvjv71olwNHgiTbfPZFkJtjNMciWgswYeciZhtvWLO8bmX3TnhyA62I6sTWOyZssWHJJjY6/KiWwqQsWWsqOA==
+  /mdsvex/0.8.2_svelte@3.23.2:
+    dependencies:
+      prismjs: 1.20.0
+      svelte: 3.23.2
+    dev: true
+    peerDependencies:
+      svelte: 3.x
+    resolution:
+      integrity: sha512-aCgAVzJvsphSgi77128le8t7rfG5yUJ1w/KHs+QrBK0JkAYC5GeEwi/yogm7jeTRI7SxXz3iCttj8gzOtTASMA==
   /media-typer/0.3.0:
     engines:
       node: '>= 0.6'
@@ -7250,6 +7291,12 @@ packages:
       node: '>= 0.8'
     resolution:
       integrity: sha1-t+PqQkNaTJsnWdmeDyAesZWALuE=
+  /prismjs/1.20.0:
+    dev: true
+    optionalDependencies:
+      clipboard: 2.0.6
+    resolution:
+      integrity: sha512-AEDjSrVNkynnw6A+B1DsFkd6AVdTnp+/WoUixFRULlCLZVRZlVQMVWio/16jv7G1FscUxQxOQhWwApgbnxr6kQ==
   /private/0.1.8:
     dev: true
     engines:
@@ -7585,6 +7632,14 @@ packages:
       node: '>= 0.10'
     resolution:
       integrity: sha1-VNvzd+UUQKypCkzSdGANP/LYiKk=
+  /remark-abbr/1.4.0:
+    dependencies:
+      unist-util-visit: 2.0.2
+    dev: true
+    engines:
+      node: '>=4'
+    resolution:
+      integrity: sha512-BNxNWicpYvaQUL/ozF+cPTIUPeFFfLnYTjnVxZvqYE4Eu5ns9rIxDac4+Y71cDCqQmFf9/Gdkyj6n2uc9hfB/Q==
   /request/2.88.2:
     dependencies:
       aws-sign2: 0.7.0
@@ -7700,6 +7755,19 @@ packages:
     dev: true
     resolution:
       integrity: sha512-0P3HfHVJfPKObpoIciglMefFYhMtdGMRjh5KE5U+NydwrheOnbA3GqlB84Wcy5h6UMseb77MpedUDyKZVIkiug==
+  /rollup-plugin-smart-asset/2.0.7_rollup@2.16.1:
+    dependencies:
+      big.js: 5.2.2
+      magic-string: 0.25.7
+      mime: 2.4.6
+      mkdirp: 0.5.5
+      rollup: 2.16.1
+      rollup-pluginutils: 2.8.2
+    dev: true
+    peerDependencies:
+      rollup: '>0.60'
+    resolution:
+      integrity: sha512-QluNFq+3+rIsagRiFa8RXqWFV3xxP2m2ZTP+leTCIq7/RcMj+k7Aaq5eglbM/mCZGlGk6N0YVaeLmZdY5zgTbg==
   /rollup-plugin-svelte/5.2.2_rollup@2.16.1+svelte@3.23.2:
     dependencies:
       require-relative: 0.8.7
@@ -7801,6 +7869,11 @@ packages:
     dev: true
     resolution:
       integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
+  /select/1.1.2:
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha1-DnNQrN7ICxEIUoeG7B1EGNEbOW0=
   /semver-diff/2.1.0:
     dependencies:
       semver: 5.7.1
@@ -8581,6 +8654,11 @@ packages:
     dev: true
     resolution:
       integrity: sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=
+  /tiny-emitter/2.1.0:
+    dev: true
+    optional: true
+    resolution:
+      integrity: sha512-NB6Dk1A9xgQPMoGqC5CVXn123gWyte215ONT5Pp5a0yt4nlEoO1ZWeCwpncaekPHXO60i47ihFnZPiRPjRMq4Q==
   /tmp/0.0.33:
     dependencies:
       os-tmpdir: 1.0.2
@@ -8825,6 +8903,25 @@ packages:
       node: '>=8'
     resolution:
       integrity: sha512-uNaeirEPvpZWSgzwsPGtU2zVSTrn/8L5q/IexZmH0eH6SA73CmAA5U4GwORTxQAZs95TAXLNqeLoPPNO5gZfWg==
+  /unist-util-is/4.0.2:
+    dev: true
+    resolution:
+      integrity: sha512-Ofx8uf6haexJwI1gxWMGg6I/dLnF2yE+KibhD3/diOqY2TinLcqHXCV6OI5gFVn3xQqDH+u0M625pfKwIwgBKQ==
+  /unist-util-visit-parents/3.0.2:
+    dependencies:
+      '@types/unist': 2.0.3
+      unist-util-is: 4.0.2
+    dev: true
+    resolution:
+      integrity: sha512-yJEfuZtzFpQmg1OSCyS9M5NJRrln/9FbYosH3iW0MG402QbdbaB8ZESwUv9RO6nRfLAKvWcMxCwdLWOov36x/g==
+  /unist-util-visit/2.0.2:
+    dependencies:
+      '@types/unist': 2.0.3
+      unist-util-is: 4.0.2
+      unist-util-visit-parents: 3.0.2
+    dev: true
+    resolution:
+      integrity: sha512-HoHNhGnKj6y+Sq+7ASo2zpVdfdRifhTgX2KTU3B/sO/TTlZchp7E3S4vjRzDJ7L60KmrCPsQkVK3lEF3cz36XQ==
   /universal-analytics/0.4.20:
     dependencies:
       debug: 3.2.6
@@ -9277,6 +9374,7 @@ specifiers:
   google-libphonenumber: ^3.2.10
   graphql: ^15.1.0
   helmet: ^3.23.0
+  mdsvex: ^0.8.2
   mkdirp: ^1.0.3
   ncp: ^2.0.0
   node-fetch: ^2.6.0
@@ -9287,9 +9385,11 @@ specifiers:
   postcss-load-config: ^2.1.0
   postcss-preset-env: ^6.7.0
   reflect-metadata: ^0.1.13
+  remark-abbr: ^1.4.0
   rimraf: ^3.0.2
   robot3: ^0.2.18
   rollup: ^2.16.1
+  rollup-plugin-smart-asset: ^2.0.7
   rollup-plugin-svelte: ^5.2.2
   rollup-plugin-terser: ^6.1.0
   sapper: ^0.27.15

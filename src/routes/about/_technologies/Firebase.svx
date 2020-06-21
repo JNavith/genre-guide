@@ -1,0 +1,16 @@
+---
+title: Firebase
+background: "#FFA000"
+foreground: "#FFFFFF"
+---
+
+<script context="module">
+    import image from "./firebase.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+This site is Built with [Firebase](https://firebase.google.com/), and deployed with [Hosting](https://firebase.google.com/products/hosting/) for static assets and [Cloud Functions](https://firebase.google.com/products/functions/) for server side rendering. 
+
+The [free tier](https://firebase.google.com/pricing) is enough for our needs.

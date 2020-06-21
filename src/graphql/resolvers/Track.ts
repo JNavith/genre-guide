@@ -103,7 +103,7 @@ export class TrackResolver implements ResolverInterface<Track> {
 			}
 			return new SubgenreGroup([typed]);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 			console.log(track);
 			return new SubgenreGroup([]);
 		}

@@ -1,9 +1,10 @@
 {
 	"hosting": {
-		"public": "static",
+		"public": "__sapper__/export",
 		"ignore": [
 			"firebase.json",
 			"**/.*",
+			"**/.DS_Store",
 			"**/node_modules/**"
 		],
 		"rewrites": [

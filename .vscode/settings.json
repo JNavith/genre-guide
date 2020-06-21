@@ -3,6 +3,9 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": true
     },
+    "files.associations": {
+        "*.svx": "markdown"
+    },
     "[javascript]": {
         "editor.formatOnSave": false
     },

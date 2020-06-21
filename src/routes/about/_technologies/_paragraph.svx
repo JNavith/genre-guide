@@ -1,0 +1,7 @@
+---
+layout: false
+---
+
+<p class="font-body font-light text-xl leading-relaxed">
+	<slot />
+</p>

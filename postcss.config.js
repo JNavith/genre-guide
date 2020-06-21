@@ -45,8 +45,8 @@ export default {
 		postcssFontMagician(fontMagicianConfig),
 
 		!dev && postcssPurgecss({
-			content: ["./src/**/*.svelte", "./src/**/*.html"],
-			defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d-/:%.]+)/gm)].map(([_match, group, ..._rest]) => group),
+			content: ["./src/**/*.svelte", "./src/**/*.svx", "./src/**/*.html"],
+			defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d!-/:%.]+)/gm)].map(([_match, group, ..._rest]) => group),
 			whitelist: ["data-theme"],
 		}),
 

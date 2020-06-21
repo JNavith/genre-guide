@@ -1,0 +1,8 @@
+---
+layout: false
+# TODO: set a monospaced class with font magician
+---
+
+<code class="font-mono">
+	<slot />
+</code>

@@ -1,0 +1,16 @@
+---
+title: The Genre Sheet
+background: "#23A566"
+foreground: "#FFFFFF"
+---
+
+<script>
+    import image from "./sheets.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+All subgenre identifications and history come from years of work by the team working on the [Genre Sheet](https://docs.google.com/spreadsheets/d/1xZUWWnll7HzDVmNj_W7cBfz9TTkl-fMMqHZ8derG-Dg), a publicly accessible Google Sheets spreadsheet.
+
+We've also started a new (hopefully temporarily, until this site takes off!) iteration called the [Subgenre Sheet](https://docs.google.com/spreadsheets/d/13reh863zpVJEnFR8vFJ7dRhaln86ETk9etbE7tFHS2g).

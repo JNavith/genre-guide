@@ -1,0 +1,7 @@
+---
+layout: false
+---
+
+<h1 class="font-heading font-normal text-3xl table border-b-4 mb-4">
+	<slot />
+</h1>

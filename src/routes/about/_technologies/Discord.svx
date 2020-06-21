@@ -1,0 +1,15 @@
+---
+title: Discord
+background: "#7289DA"
+foreground: "#FFFFFF"
+---
+
+<script context="module">
+    import { discord, name } from "../../../globals/site";
+    import image from "./discord.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+Join us in discussion about {name} and the Genre Sheet on [our Discord server]({discord}).

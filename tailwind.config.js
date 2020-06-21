@@ -108,7 +108,6 @@ export const variants = {
 		"dark-theme:focus",
 	],
 	boxShadow: [...defaultVariants.boxShadow, "light-theme", "dark-theme"],
-	cursor: [...defaultVariants.cursor, "hover"],
 	textColor: [
 		...defaultVariants.textColor,
 		"selection",

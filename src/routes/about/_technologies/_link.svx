@@ -1,0 +1,12 @@
+---
+layout: false
+# TODO: focus style
+---
+
+<script>
+    export let href;
+</script>
+
+<a class="font-medium border-b-2 border-transparent hover:border-current focus:border-current" {...$$restProps} {href} rel="noopener">
+	<slot />
+</a>

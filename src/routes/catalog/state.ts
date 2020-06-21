@@ -62,7 +62,6 @@ const GET_TRACKS_BEFORE_ID = `
 
 const loadTracks = async ({ fetch: fetch_ }: { fetch: FetchFunction }) => {
 	const result = await api({ fetch: fetch_, query: GET_MOST_RECENT_TRACKS });
-	console.log({ result });
 	const tracks: Track[] = result.data?.tracks;
 
 	tracks.forEach((track, loadIndex) => {

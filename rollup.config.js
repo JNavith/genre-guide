@@ -23,20 +23,35 @@ import json from "@rollup/plugin-json";
 import typescript from "@rollup/plugin-typescript";
 import svelte from "rollup-plugin-svelte";
 import babel from "@rollup/plugin-babel";
+import smartAsset from "rollup-plugin-smart-asset";
 import { terser } from "rollup-plugin-terser";
+import { mdsvex } from "mdsvex";
+import remarkAbbr from "remark-abbr";
 import config from "sapper/config/rollup";
 import pkg from "./package.json";
 import { preprocess as sveltePreprocessConfig } from "./svelte.config";
-
-const preprocess = [
-	sveltePreprocessConfig,
-];
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 const sourcemap = dev ? "inline" : false;
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
+
+const preprocess = [
+	sveltePreprocessConfig,
+	mdsvex({
+		layout: {
+			_technologies: "./src/routes/about/_technologies/_layout.svx",
+		},
+		remarkPlugins: [remarkAbbr],
+	}),
+];
+
+const smartAssetConfig = {
+	url: "inline",
+	sourceMap: sourcemap,
+	publicPath: "/",
+};
 
 const warningIsIgnored = (warning) => warning.message.includes(
 	"Use of eval is strongly discouraged, as it poses security risks and may cause issues with minification",
@@ -59,6 +74,10 @@ export default {
 				dev,
 				hydratable: true,
 				emitCss: true,
+				extensions: [
+					".svelte",
+					".svx",
+				],
 				preprocess,
 			}),
 			resolve({
@@ -68,9 +87,10 @@ export default {
 			commonjs(),
 			typescript(),
 			json(),
+			smartAsset(smartAssetConfig),
 
 			legacy && babel({
-				extensions: [".js", ".mjs", ".html", ".svelte"],
+				extensions: [".js", ".mjs", ".html", ".svelte", ".svx"],
 				babelHelpers: "runtime",
 				exclude: ["node_modules/@babel/**"],
 				presets: [
@@ -108,6 +128,10 @@ export default {
 			svelte({
 				generate: "ssr",
 				dev,
+				extensions: [
+					".svelte",
+					".svx",
+				],
 				preprocess,
 			}),
 			resolve({
@@ -116,6 +140,7 @@ export default {
 			commonjs(),
 			typescript(),
 			json(),
+			smartAsset(smartAssetConfig),
 		],
 		external: Object.keys(pkg.dependencies).concat(
 			require("module").builtinModules || Object.keys(process.binding("natives")), // eslint-disable-line global-require

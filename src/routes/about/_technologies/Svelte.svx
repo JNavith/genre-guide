@@ -1,0 +1,14 @@
+---
+title: Svelte
+background: "#FF3E00"
+foreground: "#FFFFFF"
+---
+
+<script>
+    import image from "./svelte.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+The site, which you're enjoying right now, has been rewritten from Jinja to Vue to [Svelte](https://svelte.dev/) (with [Sapper](https://sapper.svelte.dev/) as the backend) across its lifetime.

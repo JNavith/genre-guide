@@ -1,0 +1,20 @@
+---
+title: GitHub
+background: "#DCEEFE"
+foreground: "#4A5568"
+# TODO: find an abbreviation plugin to use on AGPL below
+---
+
+<script context="module">
+    import { name, repository } from "../../../globals/site";
+    import image from "./github.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+The code that powers {name} is available in a [GitHub repository]({repository}), where contributions are welcome! 
+
+It’s also [AGPL 3](https://tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)) licensed, with modification instructions provided in the `README`.
+
+*[AGPL]: Affero General Public License

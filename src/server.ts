@@ -33,7 +33,7 @@ const dev = process.env.NODE_ENV === "development";
 const main = require.main === module || require.main?.filename.match(/__sapper__\/build\/index.js$/);
 const local = dev || main;
 
-const ONLY_GRAPHQL_SERVER = process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
+const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 
 export const sapperify = (app: Express): void => {
 	if (local) {

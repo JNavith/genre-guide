@@ -54,7 +54,7 @@
 
 <button
 	title="Settings"
-	class="block mr-3 sm:mr-4 md:mr-6 h-4 w-4 flex-shrink-0 hover:cursor-pointer
+	class="block mr-3 sm:mr-4 md:mr-6 h-4 w-4 flex-shrink-0 cursor-pointer
 	light-theme:text-green-500 light-theme:hover:text-green-600
 	dark-theme:text-green-400 dark-theme:hover:text-green-300"
 	on:click|stopPropagation={() => open = !open}

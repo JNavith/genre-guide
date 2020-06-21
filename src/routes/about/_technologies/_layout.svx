@@ -1,0 +1,58 @@
+---
+layout: false
+---
+
+<script context="module">
+	import Code from "./_code.svx";
+	import Link from "./_link.svx";
+	import Paragraph from "./_paragraph.svx";
+	import Title from "./_title.svx";
+
+	export { Code as code, Link as a, Title as h1, Paragraph as p };
+</script>
+
+<script>
+	import { onMount } from "svelte";
+
+	import {
+		easingFunctions,
+		transitionDurations,
+		transitionFunctions,
+	} from "../../../globals/design-system";
+
+	const { smoother: { out } } = easingFunctions;
+	const { medium: { default: defaultMedium } } = transitionDurations;
+	const { fade } = transitionFunctions;
+
+	export let title;
+	export let background;
+	export let foreground;
+	export let image;
+
+	let mounted = !process.browser;
+	
+	onMount(() => {
+		mounted = true;
+
+		return () => {
+			mounted = false;
+		};
+	});
+</script>
+
+{#if mounted}
+	<li
+		in:fade={{ duration: defaultMedium, easing: out }}
+		out:fade={{ duration: defaultMedium, easing: out }}
+		style="color: {foreground}; background-color: {background}"
+		class="w-full flex-1 flex justify-center">
+
+		<div class="flex max-w-5xl flex-1 p-8">
+			<img class="w-32 h-32 flex-shrink-0 object-contain" alt={title} src={image} />
+
+			<div class="ml-10 space-y-4">
+				<slot />
+			</div>
+		</div>
+	</li>
+{/if}

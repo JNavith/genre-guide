@@ -6,8 +6,6 @@ export default <S, C>(machine: Machine<S, C>) => {
 	const { set: setContext, ...context } = writable((machine.context as any as () => C)());
 
 	const { send } = interpret(machine, (service) => {
-		console.log({ state: service.machine.current, context: service.context });
-
 		setState(service.machine.current);
 		setContext(service.context);
 	});

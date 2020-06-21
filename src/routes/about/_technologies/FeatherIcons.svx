@@ -1,0 +1,14 @@
+---
+title: Feather Icons
+background: "#0066FF"
+foreground: "#FFFFFF"
+---
+
+<script context="module">
+    import image from "./feather.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+We use icons from the [Feather](https://feathericons.com/) pack (through [this Svelte library](https://npmjs.com/package/svelte-feather-icons)) in a few places, like subgenre operators and for the settings menu.

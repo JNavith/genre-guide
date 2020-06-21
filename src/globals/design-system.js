@@ -16,8 +16,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-import { sineIn, sineInOut, sineOut } from "svelte/easing";
+import { quartIn, quartInOut, quartOut, sineIn, sineInOut, sineOut } from "svelte/easing";
+import { fade } from "svelte/transition";
 
 export const colors = {
 	green: {
@@ -36,6 +36,11 @@ export const easingFunctions = {
 	smoothIn: sineIn,
 	smoothOut: sineOut,
 	smoothInOut: sineInOut,
+	smoother: {
+		in: quartIn,
+		out: quartOut,
+		inOut: quartInOut,
+	},
 };
 
 export const fontFamily = {
@@ -56,9 +61,14 @@ export const transitionDurations = {
 		opacity: 250,
 		transform: 120,
 	},
+	medium: {
+		default: 300,
+	},
 };
 
 export const transitionFunctions = {
+	fade,
+
 	fadeSlide(
 		node,
 		{

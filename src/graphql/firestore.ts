@@ -35,7 +35,6 @@ export const getCollection = async (collection: string, cache = true): Promise<C
 	if (cache) {
 		const cachedCollection = collectionCache.get(collection);
 		if (cachedCollection) {
-			console.log(`I found the collection ${collection} in the cache!!!`);
 			return cachedCollection;
 		}
 	}
@@ -58,7 +57,6 @@ export const getDocument = async (collection: string, document: string, cache = 
 	if (cache) {
 		const cachedDocument = documentCache.get(key);
 		if (cachedDocument) {
-			console.log(`I found the document ${collection}.${document} in the cache!!!`);
 			return cachedDocument;
 		}
 	}
