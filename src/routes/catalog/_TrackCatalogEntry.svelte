@@ -18,6 +18,7 @@
 
 <script lang="typescript">
 	import { onMount } from "svelte";
+	// @ts-ignore
 	import { ArrowRightIcon, PlusIcon, RepeatIcon } from "svelte-feather-icons";
 
 	import TrackMissingArt from "./_TrackMissingArt.svelte";
@@ -26,17 +27,16 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
+		// @ts-ignore
 	} from "../../globals/design-system";
 	import { zip } from "../../globals/utils";
 
 	const { short } = transitionDurations;
-	const {
-		opacity: shortOpacityDuration,
-		transform: shortTransformDuration,
-	} = short;
 
-	const { fadeSlide } = transitionFunctions;
-	const { smoothIn, smoothOut } = easingFunctions;
+	const { fade } = transitionFunctions;
+
+	const { smooth } = easingFunctions;
+	const { out: smoothOut } = smooth;
 
 	export let index: number;
 	export let transitionIndex: number;
@@ -44,8 +44,8 @@
 	export let name: string;
 	export let artist: string;
 	export let recordLabel: string;
-	export let image: string | null;
-	export let date: string;
+	export let image: string | undefined;
+	export let date: string | undefined = undefined;
 
 	let dateAsDate: Date;
 	let year: number;
@@ -74,7 +74,7 @@
 
 {#if mounted}
 	<tr
-		in:fadeSlide={{ delay: Math.sqrt(transitionIndex) * 100, opacityDuration: shortOpacityDuration, opacityEasing: smoothIn, translateYPercent: -100, transformDuration: shortTransformDuration, transformEasing: smoothOut }}>
+		in:fade={{ delay: Math.sqrt(transitionIndex) * 100, duration: short, easing: smoothOut }}>
 		<!-- Date -->
 		<td
 			class={index === 0 ? 'font-heading font-light transition-all sticky top-0 light-theme:bg-white light-theme:shadow-white-glow dark-theme:bg-gray-900 dark-theme:shadow-gray-900-glow' : ''}>

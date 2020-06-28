@@ -18,21 +18,17 @@
 
 <script context="module">
 	import { get } from "svelte/store";
-	import api from "../../globals/api";
 	import wrappedMachine, { createStateMachine, Send, State } from "./state";
 
 	const mode = process.env.NODE_ENV;
 	const dev = mode === "development";
 
 	export async function preload() {
-		if (dev) console.log("I'm starting preload");
+		const { context, send, state } = get(wrappedMachine);
+		
+		send(Send.Load);
+
 		if (!process.browser) {
-			if (dev) console.log("I'm about to destructure the wrapped machine");
-			const { context, send, state } = get(wrappedMachine);
-			if (dev) console.log("I destructured the wrapped machine");
-
-			send(Send.Load);
-
 			// Stall until loaded on the server
 			await new Promise((resolve, reject) => {
 				const unsubscribe = state.subscribe(($state) => {
@@ -42,17 +38,21 @@
 					}
 				});
 			});
-
-			if (dev) console.log("I'm ending preload on the server");
-			return { initialContext: get(context), initialState: get(state) };
 		}
-		if (dev) console.log("I'm ending preload");
+
+		return { initialContext: get(context), initialState: get(state) };
 	}
 </script>
 
 <script>
 	import { onMount } from "svelte";
 
+	import {
+		easingFunctions,
+		transitionDurations,
+		transitionFunctions,
+		// @ts-ignore
+	} from "../../globals/design-system";
 	import { routes } from "../../globals/site";
 
 	import Metadata from "../../components/Renderless/Metadata.svelte";
@@ -60,39 +60,57 @@
 	import TrackCatalog from "./_TrackCatalog.svelte";
 	import AccentBar from "../_AccentBar.svelte";
 
+	const { short } = transitionDurations;
+	const { fade } = transitionFunctions;
+	const { smooth } = easingFunctions;
+	const { out: smoothOut } = smooth;
+
 	const { catalog } = routes;
 
-	if (dev) console.log("catalog.svelte before props");
 	export let initialContext = undefined;
 	export let initialState = undefined;
-	if (initialContext && initialState) {
-		$wrappedMachine = createStateMachine(initialContext, initialState);
-	}
-	if (dev) console.log("catalog.svelte after optional machine creation");
-
-	if (dev) console.log("catalog.svelte before extracting from machine");
+	$wrappedMachine = createStateMachine(initialContext, initialState);
 	let { context, state, send } = $wrappedMachine;
-	$: ({ context, state, send } = $wrappedMachine);
-	if (dev) console.log("catalog.svelte after extracting from machine");
+
+	let mounted = !process.browser;
+
+	onMount(() => {
+		mounted = true;
+
+		return () => {
+			mounted = false;
+		};
+	});
 </script>
 
 <svelte:window
-  on:scroll|passive={(event) => {
-    console.log(event);
-  }} />
+	on:scroll|passive={(event) => {
+		const pixelsToBottom = (document.documentElement.scrollHeight - window.scrollY);
+		const closeToBottom = pixelsToBottom < window.innerHeight * 3;
+		
+		if (closeToBottom) {
+			console.log("you're close!!! let's load more tracks!");
+			send(Send.Load);
+		}
+	}} />
 
 <Metadata {...catalog} />
 
-<div class="absolute w-full min-h-screen flex flex-col">
-	<AccentBar />
-	<NavigationBarTopLevel />
+{#if mounted}
+	<div 
+		class="absolute w-full min-h-screen flex flex-col"
+		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
 
-	<button on:click={() => send(Send.Load)}>{$state === State.Loading ? "Wait" : "Load"}</button>
+		<AccentBar />
+		<NavigationBarTopLevel />
+
+		<button on:click={() => send(Send.Load)}>{$state === State.Loading ? "Wait" : "Load"}</button>
 
 
-	<main class="flex-1 flex flex-col items-center px-8">
-		<TrackCatalog tracks={$context ? $context.tracks : []} />
-	</main>
+		<main class="flex-1 flex flex-col items-center px-8">
+			<TrackCatalog tracks={$context ? $context.tracks : []} />
+		</main>
 
-	<AccentBar />
-</div>
+		<AccentBar />
+	</div>
+{/if}

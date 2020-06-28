@@ -16,26 +16,32 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { quartIn, quartInOut, quartOut, sineIn, sineInOut, sineOut } from "svelte/easing";
+import {
+	quartIn, quartInOut, quartOut, sineIn, sineInOut, sineOut,
+} from "svelte/easing";
 import { fade } from "svelte/transition";
 
 export const colors = {
 	green: {
-		100: "#E7F8E6",
-		200: "#CFF1CC",
-		300: "#87DD80",
-		400: "#57CF4D",
-		500: "#0FBB00",
-		600: "#009802",
-		700: "#007808",
-		800: "#00570E",
+		 50: "lch(98 7.243 143.882)",
+		100: "lch(95 11.066 142.581)",
+		200: "lch(91 22.792 141.398)",
+		300: "lch(83 57.966 139.523)",
+		400: "lch(71 78.851 137.606)",
+		500: "lch(58 94.427 135.673)",
+		600: "lch(45 81.143 136.151)",
+		700: "lch(40 67.126 136.907)",
+		800: "lch(31 50.851 139.065)",
+		900: "lch(26 36.111 140.584)",
 	},
 };
 
 export const easingFunctions = {
-	smoothIn: sineIn,
-	smoothOut: sineOut,
-	smoothInOut: sineInOut,
+	smooth: {
+		in: sineIn,
+		out: sineOut,
+		inOut: sineInOut,
+	},
 	smoother: {
 		in: quartIn,
 		out: quartOut,
@@ -56,48 +62,10 @@ export const fontMagicianConfig = {
 };
 
 export const transitionDurations = {
-	short: {
-		default: 200,
-		opacity: 250,
-		transform: 120,
-	},
-	medium: {
-		default: 300,
-	},
+	short: 200,
+	medium: 300,
 };
 
 export const transitionFunctions = {
 	fade,
-
-	fadeSlide(
-		node,
-		{
-			delay = 0,
-			opacityDuration = 500,
-			opacityEasing = (t) => t,
-			translateXPercent = 0,
-			translateYPercent = 100,
-			transformDuration = 500,
-			transformEasing = (t) => t,
-		},
-	) {
-		const opacity = Number(getComputedStyle(node).opacity);
-
-		const maxDuration = Math.max(opacityDuration, transformDuration);
-
-		return {
-			delay,
-			duration: maxDuration,
-			css: (t) => {
-				const opacityTime = Math.min(t * (maxDuration / opacityDuration), 1);
-				const opacityTimeEased = opacityEasing(opacityTime);
-
-				const transformTime = Math.min(t * (maxDuration / transformDuration), 1);
-				const transformTimeEased = transformEasing(transformTime);
-
-				return `opacity: ${opacityTimeEased * opacity};
-						transform: translate(${translateXPercent * (1 - transformTimeEased)}%, ${translateYPercent * (1 - transformTimeEased)}%)`;
-			},
-		};
-	},
 };

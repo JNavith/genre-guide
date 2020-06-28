@@ -27,37 +27,52 @@
 
 */
 
-import tailwindui from "@tailwindcss/ui";
+import tailwinduiColors from "@tailwindcss/ui/colors";
+import { lch } from "d3-color";
 import tailwindcssCustomNative from "tailwindcss-custom-native";
 import tailwindcssGradients from "tailwindcss-gradients";
-
 import defaultConfig from "tailwindcss/defaultConfig";
 import tailwindcssThemeVariants, {
 	active, focus, hover, prefersDark, prefersLight,
 } from "tailwindcss-theme-variants";
+
 import { colors, fontFamily } from "./src/globals/design-system";
 
 const { theme: defaultTheme, variants: defaultVariants } = defaultConfig;
 
 export const purge = false;
-export const theme = {
-	extend: {
-		borderColor: { default: "currentColor" },
 
+const [_, l, c, h] = colors.green[400].match(/lch\(([.\d]+) ([.\d]+) ([.\d]+)\)/);
+// eslint-disable-next-line camelcase
+const green_400_55 = lch(l, c, h, 0.55);
+// eslint-disable-next-line camelcase
+const shadowOutlineGreen = `0 0 0 3px ${green_400_55}`;
+
+export const theme = {
+	colors: {
+		transparent: "transparent",
+		current: "currentColor",
+		inherit: "inherit",
+		black: tailwinduiColors.black,
+		white: tailwinduiColors.white,
+		gray: tailwinduiColors.gray,
+		...colors,
+	},
+
+	borderColor: {
+		transparent: "transparent",
+		current: "currentColor",
+		gray: tailwinduiColors.gray,
+	},
+
+	extend: {
 		borderSpacing: { 4: "1rem" },
 
-		boxShadow: (theme_) => ({
-			outline: "0 0 0 3px hsla(121, 100%, 30%, 0.625)",
-			"outline-with-lg": `${defaultTheme.boxShadow.lg}, 0 0 0 3px hsla(121, 100%, 30%, 0.625)`,
-			"white-glow": `0 0 8px 4px ${theme_("colors.white")}`,
-			"gray-900-glow": `0 0 8px 4px ${theme_("colors.gray.900")}`,
-		}),
-
-		colors: {
-			transparent: "transparent",
-			current: "currentColor",
-			inherit: "inherit",
-			...colors,
+		boxShadow: {
+			outline: shadowOutlineGreen,
+			"outline-with-lg": `${defaultTheme.boxShadow.lg}, ${shadowOutlineGreen}`,
+			"white-glow": `0 0 8px 4px ${tailwinduiColors.white}`,
+			"gray-900-glow": `0 0 8px 4px ${tailwinduiColors.gray[900]}`,
 		},
 
 		customUtilities: {
@@ -80,19 +95,29 @@ export const theme = {
 		body: [...fontFamily.body, ...defaultTheme.fontFamily.sans],
 	},
 
-	linearGradientColors: (theme_) => ({
-		"teal-300-blue-400": [theme_("colors.teal.300"), theme_("colors.blue.400")],
-		"indigo-700-purple-900": [theme_("colors.indigo.700"), theme_("colors.purple.900")],
-	}),
+	linearGradientColors: {
+		"teal-300-blue-400": [tailwinduiColors.teal[300], tailwinduiColors.blue[400]],
+		"indigo-700-purple-900": [tailwinduiColors.indigo[700], tailwinduiColors.purple[900]],
+	},
 
-	radialGradientColors: (theme_) => ({
-		"yellow-300-orange-300": [theme_("colors.yellow.300"), theme_("colors.orange.300")],
-		"gray-100-gray-200": [theme_("colors.gray.100"), theme_("colors.gray.200")],
-	}),
+	radialGradientColors: {
+		"yellow-300-orange-300": [tailwinduiColors.yellow[300], tailwinduiColors.orange[300]],
+		"gray-100-gray-200": [tailwinduiColors.gray[100], tailwinduiColors.gray[200]],
+	},
 };
 
 export const corePlugins = {
+	backgroundOpacity: false,
+	borderOpacity: false,
+	divideColor: false,
+	divideOpacity: false,
+	divideWidth: false,
 	placeholderColor: false,
+	placeholderOpacity: false,
+	skew: false,
+	textOpacity: false,
+	transformOrigin: false,
+	transitionDelay: false,
 };
 
 export const variants = {
@@ -122,7 +147,6 @@ export const variants = {
 };
 
 export const plugins = [
-	tailwindui,
 	tailwindcssCustomNative,
 	tailwindcssGradients,
 

@@ -28,18 +28,16 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
+		// @ts-ignore
 	} from "../globals/design-system";
 
 	import { theme, systemTheme, systemThemeSupported } from "../globals/theme-logic";
 
 	const { short } = transitionDurations;
-	const { fadeSlide } = transitionFunctions;
-	const { smoothIn, smoothOut } = easingFunctions;
-	
-	const {
-		opacity: shortOpacityDuration,
-		transform: shortTransformDuration,
-	} = short;
+	const { fade } = transitionFunctions;
+	const { smooth } = easingFunctions;
+
+	const { out: smoothOut } = smooth;
 	
 	let open = false;
 </script>
@@ -60,13 +58,13 @@
 	on:click|stopPropagation={() => open = !open}
 	aria-haspopup="true"
 	aria-expanded={open}>
+
 	<SettingsIcon />
 </button>
 
 {#if open}
 	<ul
-		in:fadeSlide={{ opacityDuration: shortOpacityDuration, opacityEasing: smoothIn, translateYPercent: -200, transformDuration: shortTransformDuration, transformEasing: smoothOut }}
-		out:fadeSlide={{ opacityDuration: shortOpacityDuration, opacityEasing: smoothOut, translateYPercent: -100, transformDuration: shortTransformDuration, transformEasing: smoothOut }}
+		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}
 		class="absolute top-0 right-0 z-10 whitespace-no-wrap mr-3 sm:mr-4 md:mr-6
 		mt-6 px-3 py-2 light-theme:bg-gray-100 light-theme:text-gray-700
 		dark-theme:bg-gray-800 dark-theme:text-gray-400 font-body font-light

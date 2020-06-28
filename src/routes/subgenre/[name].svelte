@@ -16,18 +16,42 @@
 		along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-<script lang="typescript" context="module">
+<script context="module">
 	export async function preload(page) {
 		console.log(page.params);
 		return { subgenreName: page.params.name };
 	}
 </script>
 
-<script lang="typescript">
+<script>
+	import { onMount } from "svelte";
+
+	import {
+		easingFunctions,
+		transitionDurations,
+		transitionFunctions,
+		// @ts-ignore
+	} from "../../globals/design-system";
+
 	import Metadata from "../../components/Renderless/Metadata.svelte";
 	import AccentBar from "../_AccentBar.svelte";
 
 	export let subgenreName = "fix!!!!";
+
+	const { short } = transitionDurations;
+	const { fade } = transitionFunctions;
+	const { smooth } = easingFunctions;
+	const { out: smoothOut } = smooth;
+
+	let mounted = !process.browser;
+
+	onMount(() => {
+		mounted = true;
+
+		return () => {
+			mounted = false;
+		};
+	});
 </script>
 
 <Metadata
@@ -36,25 +60,30 @@
 
 <AccentBar />
 
-<main class="flex-1 flex flex-col items-center justify-center text-center">
-	<h1
-		class="font-medium font-heading text-4xl sm:text-5xl md:text-6xl
-		light-theme:text-green-700 dark-theme:text-green-300 uppercase">
-		page not available yet
-	</h1>
-	<p
-		class="font-medium text-3xl sm:text-4xl md:text-5xl
-		light-theme:text-green-600 dark-theme:text-green-400">
-		subgenre pages are being worked on and are not usable yet
-	</p>
+{#if mounted}
+	<main 
+		class="flex-1 flex flex-col items-center justify-center text-center"
+		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
 
-	<a
-		class="mt-16 text-xl sm:text-2xl md:text-3xl light-theme:text-green-400
-		light-theme:hover:text-green-500 dark-theme:text-green-600
-		dark-theme:hover:text-green-500"
-		href="/">
-		return to the homepage
-	</a>
-</main>
+		<h1
+			class="font-medium font-heading text-4xl sm:text-5xl md:text-6xl
+			light-theme:text-green-700 dark-theme:text-green-300 uppercase">
+			page not available yet
+		</h1>
+		<p
+			class="font-medium text-3xl sm:text-4xl md:text-5xl
+			light-theme:text-green-600 dark-theme:text-green-400">
+			subgenre pages are being worked on and are not usable yet
+		</p>
+
+		<a
+			class="mt-16 text-xl sm:text-2xl md:text-3xl light-theme:text-green-400
+			light-theme:hover:text-green-500 dark-theme:text-green-600
+			dark-theme:hover:text-green-500"
+			href="/">
+			return to the homepage
+		</a>
+	</main>
+{/if}
 
 <AccentBar />

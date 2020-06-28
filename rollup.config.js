@@ -36,6 +36,7 @@ const dev = mode === "development";
 const sourcemap = dev ? "inline" : false;
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
+const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring
 
 const preprocess = [
 	sveltePreprocessConfig,
@@ -55,7 +56,8 @@ const smartAssetConfig = {
 
 const warningIsIgnored = (warning) => warning.message.includes(
 	"Use of eval is strongly discouraged, as it poses security risks and may cause issues with minification",
-) || warning.message.includes("Circular dependency: node_modules");
+) || warning.message.includes("Circular dependency: node_modules")
+  || warning.message.includes("The 'this' keyword is equivalent to 'undefined' at the top level of an ES module, and has been rewritten");
 
 // Workaround for https://github.com/sveltejs/sapper/issues/1221
 const onwarn = (warning, _onwarn) => (warning.code === "CIRCULAR_DEPENDENCY" && /[/\\]@sapper[/\\]/.test(warning.message)) || warningIsIgnored(warning) || console.warn(warning.toString());
@@ -69,6 +71,7 @@ export default {
 				"process.browser": true,
 				"process.env.NODE_ENV": JSON.stringify(mode),
 				"process.env.ONLY_GRAPHQL_SERVER": JSON.stringify(ONLY_GRAPHQL_SERVER),
+				"process.env.PORT": JSON.stringify(PORT),
 			}),
 			svelte({
 				dev,
@@ -123,6 +126,7 @@ export default {
 				"process.browser": false,
 				"process.env.NODE_ENV": JSON.stringify(mode),
 				"process.env.ONLY_GRAPHQL_SERVER": JSON.stringify(ONLY_GRAPHQL_SERVER),
+				"process.env.PORT": JSON.stringify(PORT),
 				"module.require": "require",
 			}),
 			svelte({

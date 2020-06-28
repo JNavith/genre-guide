@@ -47,6 +47,7 @@ if (process.browser) {
 		removeMatchesDarkListener,
 		removeThemeListener,
 		removeSystemThemeListener,
+
 		computedTheme.subscribe(($computedTheme) => {
 			systemThemeSupported.set($computedTheme !== undefined);
 

@@ -25,16 +25,44 @@
 	import technologies from "./_technologies";
 
 	import { routes } from "../../globals/site";
+
+	import {
+		easingFunctions,
+		transitionDurations,
+		transitionFunctions,
+		// @ts-ignore
+	} from "../../globals/design-system";
+
+	const { short } = transitionDurations;
+	const { fade } = transitionFunctions;
+	const { smooth } = easingFunctions;
+	const { out: smoothOut } = smooth;
+
+	// @ts-ignore
+	let mounted: boolean = !process.browser;
+
+	onMount(() => {
+		mounted = true;
+
+		return () => {
+			mounted = false;
+		};
+	});
 </script>
 
 <Metadata title={routes.about.title} description={routes.about.description} />
 
-<div class="absolute w-full min-h-screen flex flex-col selection:!text-white selection:!bg-black">
-	<NavigationBar />
+{#if mounted}
+	<div 
+		class="absolute w-full min-h-screen flex flex-col selection:!text-white selection:!bg-black"
+		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
 
-	<ul class="flex-1 flex flex-col">
-		{#each technologies as Technology}
-			<Technology />
-		{/each}
-	</ul>
-</div>
+		<NavigationBar />
+
+		<ul class="flex-1 flex flex-col">
+			{#each technologies as Technology}
+				<Technology />
+			{/each}
+		</ul>
+	</div>
+{/if}

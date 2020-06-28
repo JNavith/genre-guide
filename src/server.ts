@@ -30,13 +30,12 @@ const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring
 // replaces `process.env.NODE_ENV` with `"production"` during `prod`
 const dev = process.env.NODE_ENV === "development";
 
-const main = require.main === module || require.main?.filename.match(/__sapper__\/build\/index.js$/);
-const local = dev || main;
+const main = require.main === module || !!(require.main?.filename.match(/__sapper__\/build\/index.js$/));
 
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 
 export const sapperify = (app: Express): void => {
-	if (local) {
+	if (main) {
 		app.use(sirv("static", { dev }));
 	}
 
@@ -72,7 +71,7 @@ export const createSapperAndApolloServer = async (graphqlPath = "/graphql"): Pro
 	return app;
 };
 
-if (local) {
+if (main) {
 	createSapperAndApolloServer("/graphql").then((app) => {
 		app.listen(PORT, (err?: any): void => { // eslint-disable-line
 			if (err) console.log("error", err);

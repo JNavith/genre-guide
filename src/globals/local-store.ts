@@ -1,4 +1,3 @@
-
 import { writable, Writable } from "svelte/store";
 
 // https://higsch.me/2019/06/22/2019-06-21-svelte-local-storage/

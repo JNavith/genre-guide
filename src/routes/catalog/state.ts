@@ -101,25 +101,23 @@ export enum Send {
 	Retry = "retry",
 }
 
-export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => {
-	return svelteRobot(createMachine(initialState ?? State.Empty, {
-		[State.Empty]: state(
-			transition(Send.Load, State.Loading),
-		),
-		// TODO use @beyonk/sapper-httpclient
-		// @ts-ignore
-		[State.Loading]: invoke(() => loadTracks({ fetch: (process.browser ? fetch : nodeFetch) }),
-			transition("done", State.Loaded,
-				reduce((ctx: Partial<Context>, { data }: { data: Await<ReturnType<typeof loadTracks>> }) => ({ ...ctx, tracks: data }))),
-			transition("error", "error",
-				reduce((ctx: Partial<Context>, { error }: { error: Error }) => ({ ...ctx, error })))),
-		[State.Loaded]: state(
-			transition(Send.Load, State.Loading),
-		),
-		[State.Error]: state(
-			transition(Send.Retry, State.Loading),
-		),
-	}, () => initialContext));
-};
+export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => svelteRobot(createMachine(initialState ?? State.Empty, {
+	[State.Empty]: state(
+		transition(Send.Load, State.Loading),
+	),
+	// TODO use @beyonk/sapper-httpclient
+	// @ts-ignore
+	[State.Loading]: invoke(() => loadTracks({ fetch: (process.browser ? fetch : nodeFetch) }),
+		transition("done", State.Loaded,
+			reduce((ctx: Partial<Context>, { data }: { data: Await<ReturnType<typeof loadTracks>> }) => ({ ...ctx, tracks: data }))),
+		transition("error", "error",
+			reduce((ctx: Partial<Context>, { error }: { error: Error }) => ({ ...ctx, error })))),
+	[State.Loaded]: state(
+		transition(Send.Load, State.Loading),
+	),
+	[State.Error]: state(
+		transition(Send.Retry, State.Loading),
+	),
+}, () => initialContext));
 
 export default writable(createStateMachine({ tracks: [] }));

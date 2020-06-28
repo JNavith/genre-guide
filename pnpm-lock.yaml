@@ -35,6 +35,7 @@ devDependencies:
   class-transformer: 0.2.3
   cross-env: 7.0.2
   cssnano: 4.1.10
+  d3-color: 1.4.1
   eslint: 7.2.0
   eslint-config-airbnb-base: 14.2.0_de95e1aa46988508c408ca16decdb537
   eslint-plugin-import: 2.21.2_eslint@7.2.0
@@ -3295,6 +3296,10 @@ packages:
     dev: false
     resolution:
       integrity: sha512-m62ShEObQ39CfralilEQRjH6oAMtNCV1xJyEx5LpRYUVN+EviphDgUc/F3hnYbADmkiNs67Y+3ylmlG7Lnu+FA==
+  /d3-color/1.4.1:
+    dev: true
+    resolution:
+      integrity: sha512-p2sTHSLCJI2QKunbGb7ocOh7DgTAn8IrLx21QRc/BSnodXM4sv6aLQlnfpvehFMLZEfBc6g9pH9SWQccFYfJ9Q==
   /dashdash/1.14.1:
     dependencies:
       assert-plus: 1.0.0
@@ -9321,6 +9326,7 @@ specifiers:
   compression: ^1.7.4
   cross-env: ^7.0.2
   cssnano: ^4.1.10
+  d3-color: ^1.4.1
   eslint: ^7.2.0
   eslint-config-airbnb-base: ^14.2.0
   eslint-plugin-import: ^2.21.2

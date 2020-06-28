@@ -1,13 +1,3 @@
-<script lang="typescript">
-	// @ts-ignore
-	import { routes, name as siteName } from "../../globals/site";
-
-	import { send, receive } from "../_navigation-bar-crossfade";
-
-	// @ts-ignore
-	import AccentBar from "./_AccentBar.svelte";
-</script>
-
 <!--
 		genre.guide - About page navigation bar Svelte component
 		Copyright (C) 2020 Navith
@@ -25,6 +15,17 @@
 		You should have received a copy of the GNU Affero General Public License
 		along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
+
+<script lang="typescript">
+	// @ts-ignore
+	import { routes, name as siteName } from "../../globals/site";
+
+	import { send, receive } from "../_navigation-bar-crossfade";
+
+	// @ts-ignore
+	import AccentBar from "./_AccentBar.svelte";
+</script>
+
 <nav
 	style="background-color: #23A566"
 	in:receive={{ key: 'nav' }}

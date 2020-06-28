@@ -21,10 +21,6 @@ import { ExecutionResult as GraphQLExecutionResult } from "graphql";
 
 import { domain } from "./site";
 
-// @ts-ignore
-// eslint-disable-next-line global-require,import/no-unresolved
-if (!process.browser) global.AbortController = require("abort-controller");
-
 export type NodeFetchFunction = typeof nodeFetch;
 export type BrowserFetchFunction = typeof fetch;
 export type FetchFunction = NodeFetchFunction | BrowserFetchFunction;

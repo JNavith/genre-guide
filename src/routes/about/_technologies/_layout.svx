@@ -21,7 +21,7 @@ layout: false
 	} from "../../../globals/design-system";
 
 	const { smoother: { out } } = easingFunctions;
-	const { medium: { default: defaultMedium } } = transitionDurations;
+	const { medium } = transitionDurations;
 	const { fade } = transitionFunctions;
 
 	export let title;
@@ -42,8 +42,8 @@ layout: false
 
 {#if mounted}
 	<li
-		in:fade={{ duration: defaultMedium, easing: out }}
-		out:fade={{ duration: defaultMedium, easing: out }}
+		in:fade={{ duration: medium, easing: out }}
+		out:fade={{ duration: medium, easing: out }}
 		style="color: {foreground}; background-color: {background}"
 		class="w-full flex-1 flex justify-center">
 

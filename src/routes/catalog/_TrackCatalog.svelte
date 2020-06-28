@@ -26,7 +26,7 @@
 </script>
 
 <table class="border-separate border-spacing-4 text-left overflow-x-auto">
-  <thead class="text-xl light-theme:text-gray-500 dark-theme:text-gray-400">
+  <thead class="text-xl light-theme:text-gray-600 dark-theme:text-gray-400">
     <tr>
       <th class="font-light w-40">Release Date</th>
       <th />

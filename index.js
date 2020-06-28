@@ -19,16 +19,24 @@
 const express = require("express");
 const { https: { onRequest } } = require("firebase-functions");
 
-const { createApolloServerExpress, sapperify } = require("./__sapper__/build/server/server");
+const { createApolloServerExpress, createSapperAndApolloServer, sapperify } = require("./__sapper__/build/server/server");
 
-const apolloServerExpressPromise = createApolloServerExpress();
+// const apolloServerExpressPromise = createApolloServerExpress();
 
-exports.graphqlServer = onRequest(async (...args) => {
-	const apolloServerExpress = await apolloServerExpressPromise;
+// exports.graphqlServer = onRequest(async (...args) => {
+// 	const apolloServerExpress = await apolloServerExpressPromise;
 
-	return apolloServerExpress(...args);
+// 	return apolloServerExpress(...args);
+// });
+
+// const sapperApp = express();
+// sapperify(sapperApp);
+// exports.ssr = onRequest(sapperApp);
+
+const appPromise = createSapperAndApolloServer();
+
+exports.ssr = onRequest(async (...args) => {
+	const app = await appPromise;
+
+	return app(...args);
 });
-
-const sapperApp = express();
-sapperify(sapperApp);
-exports.ssr = onRequest(sapperApp);

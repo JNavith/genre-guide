@@ -8,12 +8,12 @@ import {
 } from "../globals/design-system";
 
 const { smoother: { inOut } } = easingFunctions;
-const { medium: { default: defaultMedium } } = transitionDurations;
+const { medium } = transitionDurations;
 const { fade } = transitionFunctions;
 
 export const [send, receive] = crossfade({
 	delay: 0,
-	duration: defaultMedium,
+	duration: medium,
 	easing: inOut,
 	fallback: fade,
 });
