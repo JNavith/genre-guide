@@ -22,7 +22,6 @@ import {
 } from "robot3";
 import { writable } from "svelte/store";
 import api, { FetchFunction } from "../../globals/api";
-import svelteRobot from "../../globals/svelte-robot";
 import { Await } from "../../globals/utils";
 
 const TRACK_FRAGMENT = `
@@ -62,7 +61,9 @@ const GET_TRACKS_BEFORE_ID = `
 
 const loadTracks = async ({ fetch: fetch_ }: { fetch: FetchFunction }) => {
 	const result = await api({ fetch: fetch_, query: GET_MOST_RECENT_TRACKS });
-	const tracks: Track[] = result.data?.tracks;
+	console.log({ result });
+	const tracks: Track[] = result.data?.tracks ?? [];
+	console.log({ tracks });
 
 	tracks.forEach((track, loadIndex) => {
 		// eslint-disable-next-line no-param-reassign
@@ -101,7 +102,7 @@ export enum Send {
 	Retry = "retry",
 }
 
-export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => svelteRobot(createMachine(initialState ?? State.Empty, {
+export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => createMachine(initialState ?? State.Empty, {
 	[State.Empty]: state(
 		transition(Send.Load, State.Loading),
 	),
@@ -118,6 +119,6 @@ export const createStateMachine = (initialContext: Partial<Context>, initialStat
 	[State.Error]: state(
 		transition(Send.Retry, State.Loading),
 	),
-}, () => initialContext));
+}, () => initialContext);
 
 export default writable(createStateMachine({ tracks: [] }));

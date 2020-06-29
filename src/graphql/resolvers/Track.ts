@@ -54,11 +54,14 @@ export class TrackResolver implements ResolverInterface<Track> {
 	async tracks(@Args() {
 		beforeDate, afterDate, beforeID, afterID, newestFirst = true, limit: passedLimit = 50,
 	}: TracksArguments) {
+		console.log("looking for tracks");
 		const tracks: Track[] = [];
 		const limit = Math.max(0, Math.min(passedLimit, 500));
 
+		console.log("querying for tracks");
 		const trackQuery = tracksCollectionRef.orderBy("releaseDate", "desc").limit(limit);
 		const trackDocs = await trackQuery.get();
+		console.log("queried the tracks");
 
 		trackDocs.forEach((trackDoc) => {
 			const trackDocData = trackDoc.data();
@@ -68,6 +71,7 @@ export class TrackResolver implements ResolverInterface<Track> {
 				throw new GraphQLError("somehow there was no database entry for a track that was expected to exist");
 			}
 		});
+		console.log(`got the ${tracks.length} tracks`);
 
 		return tracks;
 	}

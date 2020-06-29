@@ -18,13 +18,15 @@
 
 <script context="module">
 	import { get } from "svelte/store";
+
+	import svelteRobot from "../../globals/svelte-robot";
 	import wrappedMachine, { createStateMachine, Send, State } from "./state";
 
 	const mode = process.env.NODE_ENV;
 	const dev = mode === "development";
 
 	export async function preload() {
-		const { context, send, state } = get(wrappedMachine);
+		const { context, send, state } = svelteRobot(get(wrappedMachine));
 		
 		send(Send.Load);
 
@@ -70,7 +72,11 @@
 	export let initialContext = undefined;
 	export let initialState = undefined;
 	$wrappedMachine = createStateMachine(initialContext, initialState);
-	let { context, state, send } = $wrappedMachine;
+	let { context, state, send } = svelteRobot($wrappedMachine);
+
+	$: console.log({ $context });
+	$: console.log({ $state });
+	$: console.log({ send });
 
 	let mounted = !process.browser;
 
