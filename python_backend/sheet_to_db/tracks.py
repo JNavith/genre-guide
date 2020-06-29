@@ -91,7 +91,8 @@ def genre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab:
 def subgenre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str) -> Track:
 	return {
 		"genre": record["Genre Color"],
-		"subgenre": record["Subgenres"],
+		# They use / in place of ~
+		"subgenre": record["Subgenres"].replace("/", "~"),
 
 		"artist": record["Artists"],
 		"title": record["Song Title"],
