@@ -9,10 +9,11 @@ autopep8 = "==1.5.3"
 mypy = "==0.780"
 
 [packages]
-gspread = "*"
-gspread-formatting = "*"
-oauth2client = "*"
+gspread = "==3.6.0"
+gspread-formatting = "==0.2.4"
 firebase-admin = "==4.3.0"
+parse = "==1.15.0"
+pytest = "==5.4.3"
 
 [requires]
 python_version = "3.8"

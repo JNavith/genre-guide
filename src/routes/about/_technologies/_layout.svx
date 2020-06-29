@@ -28,31 +28,17 @@ layout: false
 	export let background;
 	export let foreground;
 	export let image;
-
-	let mounted = !process.browser;
-	
-	onMount(() => {
-		mounted = true;
-
-		return () => {
-			mounted = false;
-		};
-	});
 </script>
 
-{#if mounted}
-	<li
-		in:fade={{ duration: medium, easing: out }}
-		out:fade={{ duration: medium, easing: out }}
-		style="color: {foreground}; background-color: {background}"
-		class="w-full flex-1 flex justify-center">
+<li
+	style="color: {foreground}; background-color: {background}"
+	class="w-full flex-1 flex justify-center">
 
-		<div class="flex max-w-5xl flex-1 p-8">
-			<img class="w-32 h-32 flex-shrink-0 object-contain" alt={title} src={image} />
+	<div class="flex max-w-5xl flex-1 p-8">
+		<img class="w-32 h-32 flex-shrink-0 object-contain" alt={title} src={image} />
 
-			<div class="ml-10 space-y-4">
-				<slot />
-			</div>
+		<div class="ml-10 space-y-4">
+			<slot />
 		</div>
-	</li>
-{/if}
+	</div>
+</li>

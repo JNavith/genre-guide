@@ -15,7 +15,6 @@
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from os import getenv
 from typing import Dict, Generator, List
 
 from gspread import Spreadsheet, Worksheet
@@ -54,10 +53,10 @@ def get_notes(worksheet: Worksheet, row_start: int, col_start: int,
 
 
 if __name__ == "__main__":
-    from . import open_google_sheet
+    from . import GENRES_SHEET_NAME, get_genre_sheet
 
-    genre_sheet: Spreadsheet = open_google_sheet()
-    genres_tab: Worksheet = genre_sheet.worksheet(getenv("GENRES_SHEET_NAME"))
+    genre_sheet = get_genre_sheet()
+    genres_tab = genre_sheet.worksheet(GENRES_SHEET_NAME)
 
     for row_num, row in enumerate(get_notes(genres_tab,
                                             row_start=1,

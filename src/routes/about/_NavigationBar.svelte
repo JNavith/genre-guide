@@ -17,12 +17,10 @@
 -->
 
 <script lang="typescript">
-	// @ts-ignore
 	import { routes, name as siteName } from "../../globals/site";
 
 	import { send, receive } from "../_navigation-bar-crossfade";
 
-	// @ts-ignore
 	import AccentBar from "./_AccentBar.svelte";
 </script>
 

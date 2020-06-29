@@ -19,24 +19,37 @@ from pathlib import Path
 
 from firebase_admin import credentials, firestore, initialize_app
 from google.cloud.firestore_v1.client import Client as FirestoreClient
-from gspread import Client, Spreadsheet, authorize
-from oauth2client.service_account import ServiceAccountCredentials
+from gspread import service_account, Spreadsheet
 
 
-def get_google_sheet() -> Spreadsheet:
-	scope: List[str] = ["https://www.googleapis.com/auth/drive.readonly"]
-	keyfile = Path(__file__).parent.parent.parent / "config" / "sheet_secret.json"
-	credentials: ServiceAccountCredentials = ServiceAccountCredentials.from_json_keyfile_name(str(keyfile), scope)
-	client: Client = authorize(credentials)
+CURRENT_DIRECTORY = Path(__file__).parent
+CONFIG_DIRECTORY = CURRENT_DIRECTORY.parent.parent / "config"
+SHEET_SECRET_PATH = CONFIG_DIRECTORY / "sheet_secret.json"
+FIREBASE_SECRET_PATH = CONFIG_DIRECTORY / "firebase_admin_secret.json"
 
-	return client.open_by_key(getenv("SHEET_KEY"))
+GENRE_INFO_SHEET_NAME = getenv("GENRE_INFO_SHEET_NAME")
+GENRE_SHEET_CATALOG_SHEET_NAME = getenv("CATALOG_SHEET_NAME")
+GENRE_SHEET_KEY = getenv("GENRE_SHEET_KEY", "")
+GENRES_SHEET_NAME = getenv("GENRES_SHEET_NAME")
+SUBGENRE_SHEET_KEY = getenv("SUBGENRE_SHEET_KEY", "")
+
+
+def get_genre_sheet() -> Spreadsheet:
+    client = service_account(filename=str(SHEET_SECRET_PATH))
+
+    return client.open_by_key(GENRE_SHEET_KEY)
+
+
+def get_subgenre_sheet() -> Spreadsheet:
+    client = service_account(filename=str(SHEET_SECRET_PATH))
+
+    return client.open_by_key(SUBGENRE_SHEET_KEY)
 
 
 def get_firestore() -> FirestoreClient:
-	# Use the application default credentials
-	keyfile = Path(__file__).parent.parent.parent / "config" / "firebase_admin_secret.json"
-	cred = credentials.Certificate(str(keyfile))
-	initialize_app(cred)
+    # Use the application default credentials
+    cred = credentials.Certificate(str(FIREBASE_SECRET_PATH))
+    initialize_app(cred)
 
-	db = firestore.client()
-	return db
+    db = firestore.client()
+    return db

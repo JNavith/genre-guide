@@ -14,101 +14,262 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from collections import defaultdict, namedtuple
-from datetime import datetime
+from bisect import bisect_left, bisect_right
+from collections import defaultdict
+from collections.abc import Sequence
+from datetime import date, datetime
+from itertools import chain, groupby
 from json import dumps
-from os import getenv
-from typing import Awaitable, DefaultDict, Dict, Iterable, Iterator, List, Set, Tuple, cast
+from operator import itemgetter
+from parse import parse
+from typing import Awaitable, DefaultDict, Dict, Generator, Iterable, Iterator, List, Optional, Set, Tuple, TypedDict, cast
 from warnings import warn
 
 from gspread import Spreadsheet, Worksheet
 
-from ..genre_utils import parse_genre
+from ..genre_utils import flatten_subgenres, parse_genre, unordered_subgenres_and_operators
 from ..track_utils import id_for_track
-from . import FirestoreClient, get_firestore, get_google_sheet
-
-def build_up_track_information(genre_sheet: Spreadsheet, row_start: int, row_end: int) -> "Iterator[Track]":
-	catalog: Worksheet = genre_sheet.worksheet(getenv("CATALOG_SHEET_NAME"))
-
-	fields: List[str] = [field.casefold() for field in catalog.row_values(1)]
-	Track = namedtuple("Track", fields)
-
-	for entry in catalog.get_all_values()[row_start-1:row_end]:
-		track = Track._make(entry)
-
-		if track.genre == "Trap":
-			track = track._replace(genre="Trap (EDM)")
-
-		# If the first subgenre in the list is unknown,
-		if track.subgenre.startswith("?"):
-			# And there is a genre specified,
-			if track.genre != "?":
-				# Replace the bare ? with ? (Genre)
-				track = track._replace(subgenre=cast(
-					str, track.subgenre).replace("?", f"? ({track.genre})", 1))
-		# Ambiguity for Trap as well
-		# todo: make this happen on any subgenre in the tree
-		elif track.subgenre.startswith("Trap"):
-			if track.genre == "Hip Hop":
-				track = track._replace(subgenre=cast(
-					str, track.subgenre).replace("Trap", "Trap (Hip Hop)", 1))
-			elif track.genre in {"Trap", "Trap (EDM)"}:
-				track = track._replace(subgenre=cast(
-					str, track.subgenre).replace("Trap", "Trap (EDM)", 1))
-
-		# Replace the textual subgenre with the parsed one
-		track = track._replace(subgenre=parse_genre(track.subgenre))
-
-		yield track
+from . import FirestoreClient, GENRE_SHEET_CATALOG_SHEET_NAME, GENRE_SHEET_KEY, get_firestore, get_genre_sheet, get_subgenre_sheet, SUBGENRE_SHEET_KEY
 
 
-def seed_firestore_with_track_data(firestore: FirestoreClient, row_start: int, tracks: "Iterable[Tracks]") -> None:
+class Track(TypedDict):
+	genre: str
+	subgenre: str
+
+	artist: str
+	title: str
+	record_label: str
+	
+	release_date: str
+
+	length: Optional[str]
+	bpm: Optional[str]
+	key: Optional[str]
+
+	source_key: str
+	source_name: str
+	source_tab: str
+	source_row: int
+
+
+# https://stackoverflow.com/a/35857036
+class LazyBisectable(Sequence):
+	def __init__(self, data, key, reversed: bool = False):
+		self.data = data
+		self.key = key
+		self.reversed = reversed
+	
+	def __len__(self):
+		return len(self.data)
+	
+	def __getitem__(self, i):
+		return self.key(self.data[len(self.data) - i - 1 if self.reversed else i])
+
+
+def genre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str) -> Track:
+	return {
+		"genre": record["Genre"],
+		"subgenre": record["Subgenre"],
+
+		"artist": record["Artist"],
+		"title": record["Track"],
+		"record_label": record["Label"],
+
+		"release_date": record["Release"],
+
+		"length": None,
+		"bpm": None,
+		"key": None,
+
+		"source_key": GENRE_SHEET_KEY,
+		"source_name": "Genre Sheet",
+		"source_tab": source_tab,
+		"source_row": row,
+	}
+
+
+def subgenre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str) -> Track:
+	return {
+		"genre": record["Genre Color"],
+		"subgenre": record["Subgenres"],
+
+		"artist": record["Artists"],
+		"title": record["Song Title"],
+		"record_label": record["Primary Label"],
+
+		"release_date": record["Date"],
+
+		"length": record["Length"] or None,
+		"bpm": record["BPM"] or None,
+		"key": record["Key"] or None,
+
+		"source_key": SUBGENRE_SHEET_KEY,
+		"source_name": "Subgenre Sheet",
+		"source_tab": source_tab,
+		"source_row": row,
+	}
+
+
+def clean_up_track(track: Track) -> None:
+	if track["genre"] == "Trap":
+		track["genre"] = "Trap (EDM)"
+
+	# If the first subgenre in the list is unknown,
+	if track["subgenre"].startswith("?"):
+		# And there is a genre specified,
+		if track["genre"] != "?":
+			# Replace the bare ? with ? (Genre)
+			track["subgenre"] = track["subgenre"].replace("?", f"? ({track['genre']})", 1)
+	# Ambiguity for Trap as well
+	# todo: make this happen on any subgenre in the tree
+	elif track["subgenre"].startswith("Trap"):
+		if track["genre"] == "Hip Hop":
+			track["subgenre"] = track["subgenre"].replace("Trap", "Trap (Hip Hop)", 1)
+		elif track["genre"] in {"Trap", "Trap (EDM)"}:
+			track["subgenre"] = track["subgenre"].replace("Trap", "Trap (EDM)", 1)
+
+
+def build_up_track_information(genre_sheet: Spreadsheet, subgenre_sheet: Spreadsheet, start: date, end: date) -> List[Track]:
+	if GENRE_SHEET_CATALOG_SHEET_NAME is None:
+		raise ValueError("the GENRE_SHEET_CATALOG_SHEET_NAME environment variable needs a value, like Main")
+	genre_sheet_catalog = genre_sheet.worksheet(GENRE_SHEET_CATALOG_SHEET_NAME)
+
+	subgenre_sheet_tabs = subgenre_sheet.worksheets()
+
+	# The naming scheme of tabs on the Subgenre Sheet is 2020-2024, 2015-2019, ..., Pre-2010s
+	relevant_tabs: List[Worksheet] = []
+	for tab in subgenre_sheet_tabs:
+		years = parse("{min}-{max}", tab.title)
+		if years is None:
+			continue
+		
+		if years["min"] == "Pre":
+			# Since the tab is called Pre-2010s, we have to fix that by chopping off the last character
+			# We are also treating year 0 as the earliest someone would ever make music
+			year_range = range(0, int(years["max"][:-1]))
+		else:
+			year_range = range(int(years["min"]), int(years["max"]) + 1)
+
+		# For instance, 2013-2020 needs 2010-2014, 2015-2019, and 2020-2024
+		if any(year in year_range for year in range(end.year, start.year + 1)):
+			relevant_tabs.append(tab)
+
+	print(f"about to start hunting tracks from {start} to {end} down (this could take a while)")
+	# 1 for skipping the header row, + 1 for arrays starting at 0 = 2
+	genre_sheet_tracks = [genre_sheet_record_to_track(record=record, row=row + 2, source_tab=GENRE_SHEET_CATALOG_SHEET_NAME) for row, record in enumerate(genre_sheet_catalog.get_all_records())]
+	subgenre_sheet_tracks = [[subgenre_sheet_record_to_track(record=record, row=row + 2, source_tab=subgenre_sheet_tab.title) for row, record in enumerate(subgenre_sheet_tab.get_all_records())] for subgenre_sheet_tab in relevant_tabs]
+	
+	chunks_of_rows = []
+	for track_catalog in [genre_sheet_tracks, *subgenre_sheet_tracks]:
+		track_list = list(track_catalog)
+		searchable_track_list = LazyBisectable(track_list, reversed=True, key=lambda track: datetime.strptime(track["release_date"], "%Y-%m-%d").date())
+		# Double reverse
+		newest_index_inclusive = len(track_list) - bisect_right(searchable_track_list, start)
+		oldest_index_exclusive = len(track_list) - bisect_left(searchable_track_list, end)
+		oldest_index_inclusive = oldest_index_exclusive - 1
+
+		print(f"--- {track_list[newest_index_inclusive]['source_name']}: {track_list[newest_index_inclusive]['source_tab']} ---")
+		print(f"{track_list[newest_index_inclusive]['title']} ({track_list[newest_index_inclusive]['release_date']}) — {track_list[oldest_index_inclusive]['title']} ({track_list[oldest_index_inclusive]['release_date']})")
+		print()
+
+		chunks_of_rows.append(track_list[newest_index_inclusive:oldest_index_exclusive])
+
+	return list(chain(*chunks_of_rows))
+
+
+def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: List[Track]) -> None:
 	tracks_collection_ref = firestore.collection("tracks")
-	warnings = []
-	for i, track in enumerate(tracks, start=row_start):
-		artist = track.artist
-		title = track.track
-		release = track.release
+	warnings: List[str] = []
 
-		id_ = id_for_track(artist=artist, title=title, release_date=release)
-
+	list_tracks = list(tracks)
+	# Sort and group by release date
+	by_release = itemgetter("release_date")
+	list_tracks.sort(key=by_release, reverse=True)
+	for release_date_string, tracks_released_on_this_date in groupby(tracks, key=by_release):
 		try:
-			release_date = datetime.strptime(track.release, "%Y-%m-%d")
+			release_date = datetime.strptime(release_date_string, "%Y-%m-%d")
 		except ValueError:
-			warning_message = f"{artist} - {title} is being skipped because it doesn't have a valid release date: {release}"
+			warning_message = f"{release_date_string} is being skipped because it doesn't have a valid release date, but it has these tracks: {list(tracks_released_on_this_date)}"
 			warn(warning_message)
 			warnings.append(warning_message)
 
-		document = {
-			"artist": artist,
-			"title": title,
-			# TODO: album
-			"releaseDate": release_date,
-			"recordLabel": track.label,
-			# Has to be represented as a string :(
-			"subgenresNested": dumps(track.subgenre),
-		}
+		by_label = itemgetter("record_label")
+		
+		tracks_released_on_this_date_sorted_by_label = list(
+			tracks_released_on_this_date)
+		tracks_released_on_this_date_sorted_by_label.sort(key=by_label)
+		for record_label, row_tracks in groupby(tracks_released_on_this_date_sorted_by_label, key=by_label):
+			track: Track
+			for i, track in enumerate(row_tracks):
+				artist = str(track["artist"])
+				title = str(track["title"])
 
-		print(f"row {i} ({id_}):", document)
-		# breakpoint()
+				track_id = id_for_track(artist=artist, title=title, release_date=release_date_string)
 
-		document_ref = tracks_collection_ref.document(id_)
-		document_ref.set(document)
-	
+				subgenres_nested = parse_genre(track["subgenre"])
+				subgenres_flat = flatten_subgenres(subgenres_nested)
+
+				subgenres, operators = unordered_subgenres_and_operators(subgenres_flat)
+
+				document = {
+					"artist": artist,
+					"title": title,
+					"releaseDate": release_date,
+
+					"recordLabel": record_label,
+					"indexOnLabelOnRelease": i,
+
+					# Has to be represented as a string since Firebase doesn't support nested arrays :(
+					"subgenresNested": dumps(subgenres_nested),
+
+					"unorderedSubgenres": sorted(subgenres),
+					"unorderedOperators": sorted(operators),
+
+					"length": track["length"],
+					"bpm": track["bpm"],
+					"key": track["key"],
+
+					# Whether this information came from the Subgenre Sheet or Genre Sheet
+					"sourceKey": track["source_key"],
+					"sourceName": track["source_name"],
+					# And where on it
+					"sourceTab": track["source_tab"],
+					"sourceRow": track["source_row"],
+				}
+
+				print(f"{track['source_name']}'s row {track['source_row']} ({track_id}):")
+				print(document)
+				# breakpoint()
+
+				document_ref = tracks_collection_ref.document(track_id)
+				document_ref.set(document)
+				print()
+
 	print()
 	print()
-	print("the cloning process for tracks is done")
+	print("🧬 the cloning process for tracks is done!")
 	if warnings:
-		print("it finished with these warnings: ")
+		print("⚠️ it finished with these warnings: ")
 		for warning in warnings:
 			print(warning)
 
 
 if __name__ == "__main__":
 	from sys import argv
+
+	# 2020-06-28:2020-06-10 -> 2020-06-28, 2020-06-10
+	start_string, _, end_string = argv[-1].partition(":")
+
+	# Do a single date (by specifying it as the start and end) 
+	# i.e. 2020-06-28 -> 2020-06-28, 2020-06-28
+	if end_string == "":
+		end_string = start_string
+
+	start, end = [datetime.strptime(thing, "%Y-%m-%d").date() for thing in [start_string, end_string]]
 	
-	low, _, high = argv[-1].partition(":")
 	firestore = get_firestore()
-	google_sheet = get_google_sheet()
-	tracks = build_up_track_information(google_sheet, int(low), int(high))
-	seed_firestore_with_track_data(firestore, int(low), tracks)
+	genre_sheet = get_genre_sheet()
+	subgenre_sheet = get_subgenre_sheet()
+
+	tracks = build_up_track_information(genre_sheet, subgenre_sheet, start, end)
+	seed_firestore_with_track_data(firestore, tracks)

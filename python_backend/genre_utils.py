@@ -151,6 +151,19 @@ def flatten_subgenres(subgenres: Tuple) -> List[str]:  # type: ignore
 	return list(flatten_subgenres_iter(subgenres))
 
 
+def unordered_subgenres_and_operators(subgenres_and_operators: List[str]) -> Tuple[Set[str], Set[str]]:
+	subgenres: Set[str] = set()
+	operators: Set[str] = set()
+
+	for subgenre_or_operator in subgenres_and_operators:
+		if subgenre_or_operator in OPERATORS:
+			operators.add(subgenre_or_operator)
+		else:
+			subgenres.add(subgenre_or_operator)
+	
+	return subgenres, operators
+
+
 def non_empty_lines_no_whitespace(text: str) -> Iterator[str]:
 	return map(str.strip, filter(bool, text.splitlines(keepends=False)))
 

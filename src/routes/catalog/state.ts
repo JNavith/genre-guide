@@ -92,8 +92,8 @@ interface Context {
 export enum State {
 	Empty = "empty",
 	Error = "error",
-	Loaded = "Loaded",
-	Loading = "Loading",
+	Loaded = "loaded",
+	Loading = "loading",
 }
 
 export enum Send {

@@ -16,4 +16,5 @@
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
     "python.linting.mypyEnabled": true,
+    "python.pythonPath": "~/.local/share/virtualenvs/genre.guide-dneMAC3J/bin/python",
 }
