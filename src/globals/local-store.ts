@@ -1,8 +1,27 @@
 import { writable, Writable } from "svelte/store";
 
 // https://higsch.me/2019/06/22/2019-06-21-svelte-local-storage/
-export default <Item>(key: string, initial: Item): [Writable <Item>, () => void] => {
-	const { set: setStore, ...readableStore } = writable<Item>(initial);
+export default <Item>(key: string, initial: Item): Writable<Item> => {
+	// eslint-disable-next-line consistent-return
+	const { set: setStore, ...readableStore } = writable<Item>(initial, () => {
+		// Fill it up with the current value when we get a subscriber
+		// @ts-ignore
+		if (process.browser) {
+			// eslint-disable-next-line no-use-before-define
+			getAndSetFromLocalStorage();
+		}
+
+		const updateFromStorageEvents = ({ key: eventKey }: StorageEvent): void => {
+			// eslint-disable-next-line no-use-before-define
+			if (eventKey === key) getAndSetFromLocalStorage();
+		};
+
+		// @ts-ignore
+		if (process.browser) {
+			window.addEventListener("storage", updateFromStorageEvents);
+			return () => window.removeEventListener("storage", updateFromStorageEvents);
+		}
+	});
 
 	// Set both the localStorage and this Svelte store
 	const set = (value: Item): void => {
@@ -24,16 +43,5 @@ export default <Item>(key: string, initial: Item): [Writable <Item>, () => void]
 		}
 	};
 
-	// Immediately fill it up with the current value
-	getAndSetFromLocalStorage();
-
-	const updateFromStorageEvents = ({ key: eventKey }: StorageEvent): void => {
-		if (eventKey === key) getAndSetFromLocalStorage();
-	};
-	window.addEventListener("storage", updateFromStorageEvents);
-
-	return [
-		{ ...readableStore, set },
-		() => window.removeEventListener("storage", updateFromStorageEvents),
-	];
+	return { ...readableStore, set };
 };

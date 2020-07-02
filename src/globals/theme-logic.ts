@@ -24,17 +24,15 @@ import localStore from "./local-store";
 export type Theme = "light" | "dark";
 const defaultTheme = "light";
 
-// Create dummy stores so that server rendering can work in predictable ways
-// @ts-ignore
-const [theme, removeThemeListener] = process.browser ? localStore<Theme>("theme", defaultTheme) : [writable<Theme>(defaultTheme), () => undefined];
-// @ts-ignore
-const [systemTheme, removeSystemThemeListener] = process.browser ? localStore<boolean>("system-theme", true) : [writable<boolean>(true), () => undefined];
+// Server rendering will use these default values
+const theme = localStore<Theme>("theme", defaultTheme);
+const systemTheme = localStore<boolean>("system-theme", true);
 const systemThemeSupported = writable(false);
 
 // @ts-ignore
 if (process.browser) {
-	const [light, removeMatchesLightListener] = mediaMatcher("(prefers-color-scheme: light)");
-	const [dark, removeMatchesDarkListener] = mediaMatcher("(prefers-color-scheme: dark)");
+	const light = mediaMatcher("(prefers-color-scheme: light)");
+	const dark = mediaMatcher("(prefers-color-scheme: dark)");
 
 	const computedTheme = derived([light, dark], ([$light, $dark]) => {
 		if ($light) return "light";
@@ -43,11 +41,6 @@ if (process.browser) {
 	});
 
 	const allUnsubscribes = [
-		removeMatchesLightListener,
-		removeMatchesDarkListener,
-		removeThemeListener,
-		removeSystemThemeListener,
-
 		computedTheme.subscribe(($computedTheme) => {
 			systemThemeSupported.set($computedTheme !== undefined);
 

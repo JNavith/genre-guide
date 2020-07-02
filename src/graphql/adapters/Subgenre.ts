@@ -18,8 +18,10 @@
 
 import { plainToClass } from "class-transformer";
 import * as admin from "firebase-admin";
+
+import { memoize } from "../../globals/utils";
 import {
-	Document, getCollection, getDocument, db, memoize,
+	Document, getCollection, getDocument, db,
 } from "../firestore";
 import Subgenre from "../object-types/Subgenre";
 

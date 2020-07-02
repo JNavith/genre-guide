@@ -69,16 +69,3 @@ export const getDocument = async (collection: string, document: string, cache = 
 	}
 	return result;
 };
-
-export const memoize = <Return, Func extends (...args: any[]) => Return>(fn: Func): Func => {
-	const cache = new Map<any[], Return>();
-
-	return ((...args: any[]) => {
-		if (cache.has(args)) {
-			return cache.get(args);
-		}
-		const result = fn(...args);
-		cache.set(args, result);
-		return result;
-	}) as Func;
-};

@@ -21,6 +21,18 @@ export type Await<T> = T extends {
 	then(onfulfilled?: (value: infer U) => unknown): unknown;
 } ? U : T;
 
+export const generatorMap = function* <Item, Result>(generator: Generator<Item>, func: (arg0: Item) => Result): Generator<Result> {
+	for (const item of generator) {
+		yield func(item);
+	}
+};
+
+export const generatorFilter = function* <Item, Result>(generator: Generator<Item>, func: (arg0: Item) => Result): Generator<Item> {
+	for (const item of generator) {
+		if (func(item)) yield item;
+	}
+};
+
 export const groupBy = <Element, Result>(array: Element[], func: (arg0: Element) => Result): Map<Result, Element[]> => {
 	const grouped = new Map<Result, Element[]>([]);
 
@@ -35,16 +47,20 @@ export const groupBy = <Element, Result>(array: Element[], func: (arg0: Element)
 	return grouped;
 };
 
+
+
+export const memoize = <Return, Func extends (...args: any[]) => Return>(fn: Func): Func => {
+	const cache = new Map<any[], Return>();
+
+	return ((...args: any[]) => {
+		if (cache.has(args)) {
+			return cache.get(args);
+		}
+		const result = fn(...args);
+		cache.set(args, result);
+		return result;
+	}) as Func;
+};
+
+
 export const zip = <T1, T2>(array1: T1[], array2: T2[]): [T1, T2][] => array1.map((element, index) => [element, array2[index]]);
-
-export const generatorMap = function* <Item, Result>(generator: Generator<Item>, func: (arg0: Item) => Result): Generator<Result> {
-	for (const item of generator) {
-		yield func(item);
-	}
-};
-
-export const generatorFilter = function* <Item, Result>(generator: Generator<Item>, func: (arg0: Item) => Result): Generator<Item> {
-	for (const item of generator) {
-		if (func(item)) yield item;
-	}
-};

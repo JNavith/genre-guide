@@ -22,20 +22,27 @@
 	import svelteRobot from "../../globals/svelte-robot";
 	import wrappedMachine, { createStateMachine, Send, State } from "./state";
 
-	const mode = process.env.NODE_ENV;
-	const dev = mode === "development";
-
 	export async function preload() {
 		const { context, send, state } = svelteRobot(get(wrappedMachine));
 		
-		send(Send.Load);
+		send({ type: Send.SetFetch, fetch: this.fetch });
+		
+		if (get(state) === State.Empty) send(Send.Load);
 
 		if (!process.browser) {
-			// Stall until loaded on the server
+			// Stall until loaded (or failed to load) on the server
 			await new Promise((resolve, reject) => {
 				const unsubscribe = state.subscribe(($state) => {
-					if ($state == State.Loaded) {
-						unsubscribe();
+					// if ($state === State.Loaded) {
+					// 	unsubscribe();
+					// 	resolve();
+					// }
+
+					// if ($state === State.Error) {
+					// 	unsubscribe();
+					// 	reject(get(context).error);
+					// }
+					if ($state !== State.Empty && $state !== State.Loading) {
 						resolve();
 					}
 				});
@@ -69,14 +76,14 @@
 
 	const { catalog } = routes;
 
-	export let initialContext = undefined;
+	export let initialContext = {};
 	export let initialState = undefined;
 	$wrappedMachine = createStateMachine(initialContext, initialState);
 	let { context, state, send } = svelteRobot($wrappedMachine);
 
-	$: console.log({ $context });
-	$: console.log({ $state });
-	$: console.log({ send });
+	if (process.browser && !$context.fetch) {
+		send({ type: Send.SetFetch, fetch });
+	}
 
 	let mounted = !process.browser;
 
@@ -94,10 +101,7 @@
 		const pixelsToBottom = (document.documentElement.scrollHeight - window.scrollY);
 		const closeToBottom = pixelsToBottom < window.innerHeight * 3;
 		
-		if (closeToBottom) {
-			console.log("you're close!!! let's load more tracks!");
-			send(Send.Load);
-		}
+		if (closeToBottom) send(Send.Load);
 	}} />
 
 <Metadata {...catalog} />
@@ -110,11 +114,15 @@
 		<AccentBar />
 		<NavigationBarTopLevel />
 
-		<button on:click={() => send(Send.Load)}>{$state === State.Loading ? "Wait" : "Load"}</button>
-
-
 		<main class="flex-1 flex flex-col items-center px-8">
-			<TrackCatalog tracks={$context ? $context.tracks : []} />
+			{#if $state === State.Error}
+				error time
+				{$context.error}
+				{JSON.stringify($context.error)}
+				{console.log($context.error)}
+			{:else}
+				<TrackCatalog state={$state} tracks={$context.tracks} />
+			{/if}
 		</main>
 
 		<AccentBar />

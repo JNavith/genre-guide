@@ -1,14 +1,17 @@
+import { readable, Readable } from "svelte/store";
 
-import { writable, Readable } from "svelte/store";
+// eslint-disable-next-line consistent-return
+export default (query: string): Readable<boolean> => readable<boolean>(false, (set) => {
+	// @ts-ignore
+	if (process.browser) {
+		const mediaQueryList: MediaQueryList = window.matchMedia(query);
+		set(mediaQueryList.matches);
 
-export default (query: string): [Readable<boolean>, () => void] => {
-	const mediaQueryList: MediaQueryList = window.matchMedia(query);
-	const { set: setMatches, ...matches } = writable(mediaQueryList.matches);
+		const handler = (options: { matches: boolean }): void => {
+			set(options.matches);
+		};
 
-	const handler = (options: { matches: boolean }): void => {
-		setMatches(options.matches);
-	};
-	mediaQueryList.addListener(handler);
-
-	return [matches, () => mediaQueryList.removeListener(handler)];
-};
+		mediaQueryList.addListener(handler);
+		return () => mediaQueryList.removeListener(handler);
+	}
+});

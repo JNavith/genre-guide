@@ -16,12 +16,11 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import nodeFetch from "node-fetch";
-import { ExecutionResult as GraphQLExecutionResult } from "graphql";
+import { GraphQLFormattedError } from "graphql";
 
 import { domain } from "./site";
 
-export type NodeFetchFunction = typeof nodeFetch;
+export type NodeFetchFunction = typeof import("node-fetch").default;
 export type BrowserFetchFunction = typeof fetch;
 export type FetchFunction = NodeFetchFunction | BrowserFetchFunction;
 
@@ -36,10 +35,24 @@ export interface APIOptions {
 	variables?: Variables;
 }
 
-export type APIResponse = GraphQLExecutionResult;
+export type APIResponse = {
+	data: any;
+};
 
-export default async ({ fetch: fetch_, query, variables }: APIOptions): Promise<APIResponse> => {
-	const response = await fetch_(
+export class APIError extends Error {
+	errors: GraphQLFormattedError[];
+
+	constructor(errors: GraphQLFormattedError[]) {
+		const messages = JSON.stringify(errors.map(({ message }) => message));
+		super(`There's at least one error: ${messages}`);
+		this.name = "APIError";
+		this.errors = errors;
+		Object.setPrototypeOf(this, APIError.prototype);
+	}
+}
+
+export default async ({ fetch, query, variables }: APIOptions): Promise<APIResponse> => {
+	const response = await fetch(
 		`${domain}/graphql`,
 		{
 			method: "POST",
@@ -52,5 +65,8 @@ export default async ({ fetch: fetch_, query, variables }: APIOptions): Promise<
 	);
 
 	const { data, errors } = await response.json();
-	return { data, errors };
+	if (errors) {
+		throw new APIError(errors);
+	}
+	return { data };
 };

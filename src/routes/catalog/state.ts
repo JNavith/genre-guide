@@ -16,7 +16,6 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import nodeFetch from "node-fetch";
 import {
 	createMachine, invoke, state, transition, reduce,
 } from "robot3";
@@ -59,11 +58,9 @@ const GET_TRACKS_BEFORE_ID = `
 	}
 `;
 
-const loadTracks = async ({ fetch: fetch_ }: { fetch: FetchFunction }) => {
-	const result = await api({ fetch: fetch_, query: GET_MOST_RECENT_TRACKS });
-	console.log({ result });
-	const tracks: Track[] = result.data?.tracks ?? [];
-	console.log({ tracks });
+const loadTracks = async ({ fetch }: { fetch: FetchFunction }) => {
+	const { data } = await api({ fetch, query: GET_MOST_RECENT_TRACKS });
+	const tracks: Track[] = data?.tracks ?? [];
 
 	tracks.forEach((track, loadIndex) => {
 		// eslint-disable-next-line no-param-reassign
@@ -73,6 +70,7 @@ const loadTracks = async ({ fetch: fetch_ }: { fetch: FetchFunction }) => {
 	return tracks;
 };
 
+// TODO: just import the object type?
 interface Track {
 	artist: string;
 	date: string;
@@ -88,6 +86,7 @@ interface Track {
 interface Context {
 	error: Error;
 	tracks: Track[];
+	fetch: FetchFunction;
 }
 
 export enum State {
@@ -100,21 +99,23 @@ export enum State {
 export enum Send {
 	Load = "load",
 	Retry = "retry",
+	SetFetch = "set_fetch",
 }
 
 export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => createMachine(initialState ?? State.Empty, {
 	[State.Empty]: state(
 		transition(Send.Load, State.Loading),
+		transition(Send.SetFetch, State.Empty, reduce((ctx: Partial <Context>, { fetch }: { fetch: FetchFunction }) => ({ ...ctx, fetch }))),
 	),
 	// TODO use @beyonk/sapper-httpclient
-	// @ts-ignore
-	[State.Loading]: invoke(() => loadTracks({ fetch: (process.browser ? fetch : nodeFetch) }),
+	[State.Loading]: invoke(loadTracks,
 		transition("done", State.Loaded,
-			reduce((ctx: Partial<Context>, { data }: { data: Await<ReturnType<typeof loadTracks>> }) => ({ ...ctx, tracks: data }))),
-		transition("error", "error",
-			reduce((ctx: Partial<Context>, { error }: { error: Error }) => ({ ...ctx, error })))),
+			reduce((ctx: Partial<Context>, { data }: { data: Await<ReturnType<typeof loadTracks>> }): Partial<Context> & Pick<Context, "tracks"> => ({ ...ctx, tracks: data }))),
+		transition("error", State.Error,
+			reduce((ctx: Partial<Context>, { error }: { error: Error }): Partial<Context> & Pick<Context, "error"> => ({ ...ctx, error })))),
 	[State.Loaded]: state(
 		transition(Send.Load, State.Loading),
+		transition(Send.SetFetch, State.Loaded, reduce((ctx: Partial<Context>, { fetch }: { fetch: FetchFunction }): Partial<Context> & Pick<Context, "fetch"> => ({ ...ctx, fetch }))),
 	),
 	[State.Error]: state(
 		transition(Send.Retry, State.Loading),

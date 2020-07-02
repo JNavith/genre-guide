@@ -20,6 +20,8 @@ import { GraphQLError } from "graphql";
 import {
 	Arg, Args, ArgsType, Field, FieldResolver, ID, Int, Query, Resolver, ResolverInterface, Root,
 } from "type-graphql";
+
+import { memoize } from "../../globals/utils";
 import { createTrackID, FirestoreToTrack, tracksCollectionRef } from "../adapters/Track";
 import { getDocument } from "../firestore";
 import Operator from "../object-types/Operator";
@@ -48,6 +50,13 @@ class TracksArguments {
 	limit?: number;
 }
 
+const queryLatestUncached = async (limit: number) => {
+	const query = tracksCollectionRef.orderBy("releaseDate", "desc").limit(limit);
+	return query.get();
+};
+
+const queryLatest = memoize(queryLatestUncached);
+
 @Resolver((of) => Track)
 export class TrackResolver implements ResolverInterface<Track> {
 	@Query((returns) => [Track], { description: "Retrieve a range of tracks from the sheet (database)" })
@@ -58,10 +67,7 @@ export class TrackResolver implements ResolverInterface<Track> {
 		const tracks: Track[] = [];
 		const limit = Math.max(0, Math.min(passedLimit, 500));
 
-		console.log("querying for tracks");
-		const trackQuery = tracksCollectionRef.orderBy("releaseDate", "desc").limit(limit);
-		const trackDocs = await trackQuery.get();
-		console.log("queried the tracks");
+		const trackDocs = await queryLatest(limit);
 
 		trackDocs.forEach((trackDoc) => {
 			const trackDocData = trackDoc.data();
