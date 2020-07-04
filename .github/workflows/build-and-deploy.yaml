@@ -15,21 +15,12 @@ jobs:
       - name: "Install Production and Development Dependencies"
         run: "npm install"
       
-      - name: "Export a Static Build"
-        run: "npm run export"
-      - name: "Delete the Unexportable GraphQL Page"
-        run: "rm __sapper__/export/graphql"
-      - name: "Deploy Hosting"
-        run: "npm run firebase:deploy:hosting"
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-      
       - name: "Build for Production"
         run: "npm run prod"
       - name: "Remove all but Production Dependencies"
         run: "npm install --only prod"
       - name: "Deploy Functions"
-        run: "npm run firebase:deploy:functions"
+        run: "npm run firebase:deploy"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
