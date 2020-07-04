@@ -38,7 +38,7 @@
 	const { smooth } = easingFunctions;
 	const { out: smoothOut } = smooth;
 
-	// @ts-ignore
+	// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 	let mounted: boolean = !process.browser;
 
 	onMount(() => {

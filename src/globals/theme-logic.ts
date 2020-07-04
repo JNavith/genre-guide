@@ -29,7 +29,7 @@ const theme = localStore<Theme>("theme", defaultTheme);
 const systemTheme = localStore<boolean>("system-theme", true);
 const systemThemeSupported = writable(false);
 
-// @ts-ignore
+// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 if (process.browser) {
 	const light = mediaMatcher("(prefers-color-scheme: light)");
 	const dark = mediaMatcher("(prefers-color-scheme: dark)");

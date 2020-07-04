@@ -2,7 +2,7 @@ import { readable, Readable } from "svelte/store";
 
 // eslint-disable-next-line consistent-return
 export default (query: string): Readable<boolean> => readable<boolean>(false, (set) => {
-	// @ts-ignore
+	// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 	if (process.browser) {
 		const mediaQueryList: MediaQueryList = window.matchMedia(query);
 		set(mediaQueryList.matches);

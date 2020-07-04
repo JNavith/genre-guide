@@ -26,9 +26,8 @@ import sirv from "sirv";
 import { createApolloServer } from "./graphql";
 
 const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring
-// @ts-ignore -- creates a warning after `rollup-plugin-replace` (set up in `rollup.config.js`)
-// replaces `process.env.NODE_ENV` with `"production"` during `prod`
-const dev = process.env.NODE_ENV === "development";
+const mode = process.env.NODE_ENV;
+const dev = mode === "development";
 
 const main = require.main === module || !!(require.main?.filename.match(/__sapper__\/build\/index.js$/));
 

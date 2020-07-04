@@ -60,7 +60,7 @@
 
 	export let subgenresFlat: any;
 
-	// @ts-ignore
+	// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 	let mounted: boolean = !process.browser;
 
 	onMount(() => {

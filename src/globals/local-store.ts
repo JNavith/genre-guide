@@ -5,7 +5,7 @@ export default <Item>(key: string, initial: Item): Writable<Item> => {
 	// eslint-disable-next-line consistent-return
 	const { set: setStore, ...readableStore } = writable<Item>(initial, () => {
 		// Fill it up with the current value when we get a subscriber
-		// @ts-ignore
+		// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 		if (process.browser) {
 			// eslint-disable-next-line no-use-before-define
 			getAndSetFromLocalStorage();
@@ -16,7 +16,7 @@ export default <Item>(key: string, initial: Item): Writable<Item> => {
 			if (eventKey === key) getAndSetFromLocalStorage();
 		};
 
-		// @ts-ignore
+		// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 		if (process.browser) {
 			window.addEventListener("storage", updateFromStorageEvents);
 			return () => window.removeEventListener("storage", updateFromStorageEvents);

@@ -30,7 +30,6 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
-		// @ts-ignore
 	} from "../../globals/design-system";
 
 	import Metadata from "../../components/Renderless/Metadata.svelte";
