@@ -18,7 +18,8 @@
 		"cross-env": "cross-env",
 		"firebase": "firebase",
 		"firebase:deploy": "firebase deploy",
-		"firebase:deploy:export": "firebase deploy --only hosting",
+		"firebase:deploy:hosting": "firebase deploy --only hosting",
+		"firebase:deploy:functions": "firebase deploy --only functions",
 		"sapper:build": "cross-env NODE_ENV=production sapper build",
 		"sapper:export": "cross-env NODE_ENV=production sapper export",
 		"static:rmdir": "rimraf - __sapper__/export",
@@ -29,7 +30,7 @@
 		"start": "node __sapper__/build",
 		"deploy": "run-s prod firebase:deploy",
 		"export": "run-s sapper:export",
-		"deploy:export": "run-s export firebase:deploy:export"
+		"deploy:export": "run-s export firebase:deploy:hosting"
 	},
 	"dependencies": {
 		"blakejs": "^1.1.0",
