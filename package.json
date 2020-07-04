@@ -19,7 +19,6 @@
 		"firebase": "firebase",
 		"firebase:deploy": "firebase deploy",
 		"firebase:deploy:export": "firebase deploy --only hosting",
-		"sapper": "sapper",
 		"sapper:build": "cross-env NODE_ENV=production sapper build",
 		"sapper:export": "cross-env NODE_ENV=production sapper export",
 		"static:rmdir": "rimraf - __sapper__/export",
