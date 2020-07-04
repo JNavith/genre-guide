@@ -43,6 +43,7 @@
 					// 	reject(get(context).error);
 					// }
 					if ($state !== State.Empty && $state !== State.Loading) {
+						unsubscribe();
 						resolve();
 					}
 				});
@@ -60,7 +61,6 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
-		// @ts-ignore
 	} from "../../globals/design-system";
 	import { routes } from "../../globals/site";
 
@@ -115,7 +115,9 @@
 		<NavigationBarTopLevel />
 
 		<main class="flex-1 flex flex-col items-center px-8">
-			{#if $state === State.Error}
+			{#if $state === State.Loading}
+				loading
+			{:else if $state === State.Error}
 				error time
 				{$context.error}
 				{JSON.stringify($context.error)}
