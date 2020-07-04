@@ -2,6 +2,7 @@ name: Build and Deploy
 on:
   push:
     branches:
+      - main
       - master
 
 jobs:
@@ -9,21 +10,37 @@ jobs:
     name: Build and Deploy
     runs-on: ubuntu-20.04
     steps:
-      - uses: pnpm/action-setup@v1.2.0
-        with:
-          version: 5.2.2
-      
-      - name: Checkout Repo
+      - name: "Checkout Repo"
         uses: actions/checkout@master
-      - name: "Install Development Dependencies"
-        run: "pnpm install"
-      - name: "Build"
-        run: "pnpm run prod"
+      - name: "Install Production and Development Dependencies"
+        run: "npm install"
       
-      - name: "Remove all but Production Dependencies"
-        run: "pnpm install --only prod"
-
-      - name: "Deploy"
-        run: "pnpm run firebase:deploy"
+      - name: "Export a Static Build"
+        run: "npm run export"
+      - name: "Delete the Unexportable GraphQL Page"
+        run: "rm __sapper__/export/graphql"
+      - name: "Deploy Hosting"
+        run: "npm run firebase:deploy:hosting"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+      
+      - name: "Build for Production"
+        run: "npm run prod"
+      - name: "Remove all but Production Dependencies"
+        run: "npm install --only prod"
+      - name: "Deploy Functions"
+        run: "npm run firebase:deploy:functions"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      - name: Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@7eb7233
+        with:
+          args: |-
+            oh fuck
+            what the fuck
+            
+            a new update for {{ EVENT_PAYLOAD.repository.full_name }}?
+            fuck that, probably got no games
