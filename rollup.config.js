@@ -71,7 +71,7 @@ export default {
 				"process.browser": true,
 				"process.env.NODE_ENV": JSON.stringify(mode),
 				"process.env.ONLY_GRAPHQL_SERVER": JSON.stringify(ONLY_GRAPHQL_SERVER),
-				"process.env.PORT": JSON.stringify(PORT),
+				"process.env.PORT": JSON.stringify(dev ? PORT : undefined),
 			}),
 			svelte({
 				dev,
@@ -126,7 +126,6 @@ export default {
 				"process.browser": false,
 				"process.env.NODE_ENV": JSON.stringify(mode),
 				"process.env.ONLY_GRAPHQL_SERVER": JSON.stringify(ONLY_GRAPHQL_SERVER),
-				"process.env.PORT": JSON.stringify(PORT),
 				"module.require": "require",
 			}),
 			svelte({
