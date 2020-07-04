@@ -36,7 +36,7 @@ const dev = mode === "development";
 const sourcemap = dev ? "inline" : false;
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
-const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring
+const PORT = process.env.PORT ?? 3000; // eslint-disable-line prefer-destructuring
 
 const preprocess = [
 	sveltePreprocessConfig,
