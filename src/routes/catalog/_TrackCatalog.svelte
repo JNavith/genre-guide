@@ -49,7 +49,7 @@
 		<!-- Border between different dates -->
 		<tr
 			class="h-1 transition-bg light-theme:bg-gray-300 dark-theme:bg-gray-700">
-			<td colspan="5" />
+			<td colspan={5} />
 		</tr>
 
 		{#each tracksOnThisDate as { loadIndex, id, ...track }, index (id)}

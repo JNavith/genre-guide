@@ -16,26 +16,9 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-
-<script lang="typescript" context="module">
-	export async function preload() {
-		// @ts-ignore
-		return (this as any).redirect(302, "/catalog");
-	}
+<script context="module">
+    import Catalog, { preload } from "./catalog/index.svelte";
+    export { preload };
 </script>
 
-<script lang="typescript">
-	import { onMount } from "svelte";
-	// @ts-ignore
-	import { goto } from "@sapper/app";
-
-	// @ts-ignore
-	import { description } from "../globals/site";
-
-	// @ts-ignore
-	import Metadata from "../components/Renderless/Metadata.svelte";
-
-	onMount(() => goto("/catalog"));
-</script>
-
-<Metadata {description} />
+<Catalog {...$$props} />

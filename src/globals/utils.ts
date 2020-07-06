@@ -48,7 +48,7 @@ export const groupBy = <Element, Result>(array: Element[], func: (arg0: Element)
 };
 
 
-
+// TODO: doesn't actually work??? lol
 export const memoize = <Return, Func extends (...args: any[]) => Return>(fn: Func): Func => {
 	const cache = new Map<any[], Return>();
 

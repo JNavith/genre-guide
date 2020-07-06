@@ -30,6 +30,7 @@ const TRACK_FRAGMENT = `
 	image
 	name
 	recordLabel
+	source
 	subgenresFlat {
 		... on Subgenre {
 			names
@@ -100,6 +101,7 @@ export enum Send {
 	Load = "load",
 	Retry = "retry",
 	SetFetch = "set_fetch",
+	ClearFetch = "clear_fetch",
 }
 
 export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => createMachine(initialState ?? State.Empty, {
@@ -116,9 +118,11 @@ export const createStateMachine = (initialContext: Partial<Context>, initialStat
 	[State.Loaded]: state(
 		transition(Send.Load, State.Loading),
 		transition(Send.SetFetch, State.Loaded, reduce((ctx: Partial<Context>, { fetch }: { fetch: FetchFunction }): Partial<Context> & Pick<Context, "fetch"> => ({ ...ctx, fetch }))),
+		transition(Send.ClearFetch, State.Loaded, reduce(({ fetch = undefined, ...ctx }: Partial<Context>): Partial<Context> => (ctx))),
 	),
 	[State.Error]: state(
 		transition(Send.Retry, State.Loading),
+		transition(Send.ClearFetch, State.Error, reduce(({ fetch = undefined, ...ctx }: Partial<Context>): Partial<Context> => (ctx))),
 	),
 }, () => initialContext);
 

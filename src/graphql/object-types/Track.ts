@@ -16,7 +16,7 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ID, ObjectType, Int } from "type-graphql";
 
 import SubgenreGroup, { SubgenreOrOperator } from "./SubgenreGroup";
 import Subgenre from "./Subgenre";
@@ -27,26 +27,55 @@ export default class Track {
 	@Field((type) => ID, { description: "The unique ID associated with this track, for lookup purposes" })
 	id?: string;
 
-	@Field({ name: "name", description: "The name of the track" })
-	title!: string;
-
 	@Field({ description: "The artist(s) of the track" })
 	artist!: string;
 
-	@Field({ description: "The record label(s) or copyright owner(s) who released and/or own the rights to the track" })
-	recordLabel!: string;
+	@Field({ name: "name", description: "The name of the track" })
+	title!: string;
 
 	@Field({ name: "date", description: "The date the track was released", deprecationReason: "Use releaseDate instead because it's a more specific name" })
 	@Field({ description: "The date the track was released" })
 	releaseDate!: Date;
 
+
+	@Field({ description: "The record label(s) or copyright owner(s) who released and/or own the rights to the track" })
+	recordLabel!: string;
+
+	indexOnLabelOnRelease!: number;
+
+
 	subgenresNested!: string;
 
-	@Field((type) => SubgenreGroup, { name: "subgenresNested", description: "The subgenres and dividers that make up this song, but recursive and hard to work with (though fully accurate and reflective of entries on the Genre Sheet)" })
+	@Field((type) => SubgenreGroup, { name: "subgenresNested", description: "The subgenres and operators that make up this song, but recursive and hard to work with (though fully accurate and reflective of entries on the Genre Sheet and Subgenre Sheet)" })
 	subgenresNestedAsSubgenres?: SubgenreGroup;
 
-	@Field((type) => [SubgenreOrOperator], { description: "The subgenres and dividers that make up this song, flattened out for simplicity (but with loss of information)" })
+	@Field((type) => [SubgenreOrOperator], { description: "The subgenres and operators that make up this song, flattened out for simplicity (but with loss of information)" })
 	subgenresFlat?: (Subgenre | Operator)[];
+
+
+	length!: string | undefined;
+
+	@Field((type) => Int, { nullable: true, name: "length", description: "The length of the track in seconds" })
+	lengthSeconds?: number;
+
+	// TODO: reuse parse_genre logic
+	@Field((type) => String, { nullable: true, description: "The tempo in beats per minute (BPM), which may change throughout the track runtime (signified with >)" })
+	bpm!: string | undefined;
+
+	// TODO: reuse parse_genre logic
+	@Field((type) => String, { nullable: true, description: "The key, which may change throughout the track runtime (signified with > or /)" })
+	key!: string | undefined;
+	
+	sourceSheetName!: string;
+	sourceSheetID!: string;
+
+	sourceTabName!: string;
+	sourceTabID!: number;
+
+	sourceRow!: number;
+
+	@Field((type) => String, { description: "A direct link to the source of all the information we have for this track" })
+	source?: string;
 
 	@Field((type) => String, { nullable: true, description: "The link to the cover artwork for the track, or null if none is known (currently all tracks return null)" })
 	image?: string;

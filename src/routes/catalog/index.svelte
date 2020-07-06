@@ -49,6 +49,10 @@
 				});
 			});
 		}
+		
+		// Remove fetch so we don't get a serialization error preventing
+		// preloaded information from being transmitted from the server to the browser
+		send(Send.ClearFetch);
 
 		return { initialContext: get(context), initialState: get(state) };
 	}
@@ -81,7 +85,7 @@
 	$wrappedMachine = createStateMachine(initialContext, initialState);
 	let { context, state, send } = svelteRobot($wrappedMachine);
 
-	if (process.browser && !$context.fetch) {
+	if (process.browser) {
 		send({ type: Send.SetFetch, fetch });
 	}
 
@@ -101,7 +105,7 @@
 		const pixelsToBottom = (document.documentElement.scrollHeight - window.scrollY);
 		const closeToBottom = pixelsToBottom < window.innerHeight * 3;
 		
-		if (closeToBottom) send(Send.Load);
+		if (false && closeToBottom) send(Send.Load);
 	}} />
 
 <Metadata {...catalog} />
@@ -117,7 +121,7 @@
 		<main class="flex-1 flex flex-col items-center px-8">
 			{#if $state === State.Loading}
 				loading
-			{:else if $state === State.Error}
+			{:else if $state === State.InitialLoadError || $state === State.AfterLoadedError}
 				error time
 				{$context.error}
 				{JSON.stringify($context.error)}

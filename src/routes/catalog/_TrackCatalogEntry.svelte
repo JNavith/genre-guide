@@ -44,6 +44,8 @@
 	export let name: string;
 	export let artist: string;
 	export let recordLabel: string;
+
+	export let source: string;
 	export let image: string | undefined;
 	export let date: string | undefined = undefined;
 
@@ -110,7 +112,8 @@
 			<p
 				class="text-lg font-light light-theme:text-gray-900
 				dark-theme:text-white leading-tight">
-				{name}
+
+				<a class="border-b border-transparent hover:border-current focus:border-current" href={source}>{name}</a>
 			</p>
 			<p
 				class="text-md font-light light-theme:text-gray-700

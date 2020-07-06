@@ -44,9 +44,9 @@ export const purge = false;
 
 const [_, l, c, h] = colors.green[400].match(/lch\(([.\d]+) ([.\d]+) ([.\d]+)\)/);
 // eslint-disable-next-line camelcase
-const green_400_55 = lch(l, c, h, 0.55);
+const green_400_70 = lch(l, c, h, 0.70);
 // eslint-disable-next-line camelcase
-const shadowOutlineGreen = `0 0 0 3px ${green_400_55}`;
+const shadowOutlineGreen = `0 0 0 3px ${green_400_70}`;
 
 export const theme = {
 	colors: {

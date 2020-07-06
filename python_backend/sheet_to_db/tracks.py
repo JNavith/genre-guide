@@ -49,7 +49,38 @@ class Track(TypedDict):
 	source_key: str
 	source_name: str
 	source_tab: str
+	source_tab_id: int
 	source_row: int
+
+
+class TrackDocumentData(TypedDict):
+	artist: str
+	title: str
+	releaseDate: datetime
+
+	recordLabel: str
+	indexOnLabelOnRelease: int
+
+	# Has to be represented as a string since Firebase doesn't support nested arrays :(
+	subgenresNested: str
+
+	unorderedSubgenres: List[str]
+	unorderedOperators: List[str]
+
+	length: Optional[str]
+	bpm: Optional[str]
+	key: Optional[str]
+	
+	# Whether this information came from the Subgenre Sheet or Genre Sheet
+	sourceSheetName: str
+	sourceSheetID: str
+
+	# And where on it
+	sourceTabName: str
+	sourceTabID: int
+
+	sourceRow: int
+
 
 
 # https://stackoverflow.com/a/35857036
@@ -66,7 +97,7 @@ class LazyBisectable(Sequence):
 		return self.key(self.data[len(self.data) - i - 1 if self.reversed else i])
 
 
-def genre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str) -> Track:
+def genre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str, source_tab_id: int) -> Track:
 	return {
 		"genre": record["Genre"],
 		"subgenre": record["Subgenre"],
@@ -84,11 +115,12 @@ def genre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab:
 		"source_key": GENRE_SHEET_KEY,
 		"source_name": "Genre Sheet",
 		"source_tab": source_tab,
+		"source_tab_id": source_tab_id,
 		"source_row": row,
 	}
 
 
-def subgenre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str) -> Track:
+def subgenre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_tab: str, source_tab_id: int) -> Track:
 	return {
 		"genre": record["Genre Color"],
 		# They use / in place of ~
@@ -107,6 +139,7 @@ def subgenre_sheet_record_to_track(*, record: Dict[str, str], row: int, source_t
 		"source_key": SUBGENRE_SHEET_KEY,
 		"source_name": "Subgenre Sheet",
 		"source_tab": source_tab,
+		"source_tab_id": source_tab_id,
 		"source_row": row,
 	}
 
@@ -157,8 +190,9 @@ def build_up_track_information(genre_sheet: Spreadsheet, subgenre_sheet: Spreads
 
 	print(f"about to start hunting tracks from {start} to {end} down (this could take a while)")
 	# 1 for skipping the header row, + 1 for arrays starting at 0 = 2
-	genre_sheet_tracks = [genre_sheet_record_to_track(record=record, row=row + 2, source_tab=GENRE_SHEET_CATALOG_SHEET_NAME) for row, record in enumerate(genre_sheet_catalog.get_all_records())]
-	subgenre_sheet_tracks = [[subgenre_sheet_record_to_track(record=record, row=row + 2, source_tab=subgenre_sheet_tab.title) for row, record in enumerate(subgenre_sheet_tab.get_all_records())] for subgenre_sheet_tab in relevant_tabs]
+	genre_sheet_tracks = [genre_sheet_record_to_track(record=record, row=row + 2, source_tab=GENRE_SHEET_CATALOG_SHEET_NAME,
+	                                                  source_tab_id=genre_sheet_catalog.id) for row, record in enumerate(genre_sheet_catalog.get_all_records())]
+	subgenre_sheet_tracks = [[subgenre_sheet_record_to_track(record=record, row=row + 2, source_tab=subgenre_sheet_tab.title, source_tab_id=subgenre_sheet_tab.id) for row, record in enumerate(subgenre_sheet_tab.get_all_records())] for subgenre_sheet_tab in relevant_tabs]
 	
 	chunks_of_rows = []
 	for track_catalog in [genre_sheet_tracks, *subgenre_sheet_tracks]:
@@ -212,7 +246,7 @@ def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: List[Trac
 
 				subgenres, operators = unordered_subgenres_and_operators(subgenres_flat)
 
-				document = {
+				document: TrackDocumentData = {
 					"artist": artist,
 					"title": title,
 					"releaseDate": release_date,
@@ -220,7 +254,6 @@ def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: List[Trac
 					"recordLabel": record_label,
 					"indexOnLabelOnRelease": i,
 
-					# Has to be represented as a string since Firebase doesn't support nested arrays :(
 					"subgenresNested": dumps(subgenres_nested),
 
 					"unorderedSubgenres": sorted(subgenres),
@@ -230,11 +263,12 @@ def seed_firestore_with_track_data(firestore: FirestoreClient, tracks: List[Trac
 					"bpm": track["bpm"],
 					"key": track["key"],
 
-					# Whether this information came from the Subgenre Sheet or Genre Sheet
-					"sourceKey": track["source_key"],
-					"sourceName": track["source_name"],
-					# And where on it
-					"sourceTab": track["source_tab"],
+					"sourceSheetName": track["source_name"],
+					"sourceSheetID": track["source_key"],
+
+					"sourceTabName": track["source_tab"],
+					"sourceTabID": track["source_tab_id"],
+
 					"sourceRow": track["source_row"],
 				}
 

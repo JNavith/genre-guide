@@ -17,6 +17,7 @@
 */
 
 import { GraphQLError } from "graphql";
+import { sortBy, zip } from "lodash-es";
 import {
 	Arg, Args, ArgsType, Field, FieldResolver, ID, Int, Query, Resolver, ResolverInterface, Root,
 } from "type-graphql";
@@ -50,12 +51,22 @@ class TracksArguments {
 	limit?: number;
 }
 
-const queryLatestUncached = async (limit: number) => {
-	const query = tracksCollectionRef.orderBy("releaseDate", "desc").limit(limit);
+const queryLatestUncached = async (limit: number, newestFirst: boolean) => {
+	const query = tracksCollectionRef.orderBy("releaseDate", newestFirst ? "desc" : "asc").limit(limit);
 	return query.get();
 };
 
 const queryLatest = memoize(queryLatestUncached);
+
+// https://stackoverflow.com/a/9640417
+const hmsToSeconds = (hms: string): number => {
+	const parts = hms.split(':').reverse().map((n) => parseInt(n, 10));
+	const conversions = [1, 60, 3600];
+
+	const partWithConversionFactor = zip(parts, conversions);
+	const secondses = partWithConversionFactor.map(([part, factor]) => (part ?? 0) * (factor ?? 0));
+	return secondses.reduce((left, right) => left + right, 0);
+}
 
 @Resolver((of) => Track)
 export class TrackResolver implements ResolverInterface<Track> {
@@ -63,11 +74,10 @@ export class TrackResolver implements ResolverInterface<Track> {
 	async tracks(@Args() {
 		beforeDate, afterDate, beforeID, afterID, newestFirst = true, limit: passedLimit = 50,
 	}: TracksArguments) {
-		console.log("looking for tracks");
 		const tracks: Track[] = [];
 		const limit = Math.max(0, Math.min(passedLimit, 500));
 
-		const trackDocs = await queryLatest(limit);
+		const trackDocs = await queryLatest(limit, newestFirst);
 
 		trackDocs.forEach((trackDoc) => {
 			const trackDocData = trackDoc.data();
@@ -77,9 +87,15 @@ export class TrackResolver implements ResolverInterface<Track> {
 				throw new GraphQLError("somehow there was no database entry for a track that was expected to exist");
 			}
 		});
-		console.log(`got the ${tracks.length} tracks`);
 
-		return tracks;
+		let sorted = tracks;
+		sorted = sortBy(sorted, "indexOnLabelOnRelease");
+		sorted = sortBy(sorted, (track) => track.recordLabel.toLowerCase());
+		sorted = sortBy(sorted, (track) => {
+			const time = track.releaseDate.getTime();
+			return newestFirst ? -time : time;
+		});
+		return sorted;
 	}
 
 	@Query((returns) => Track, { nullable: true, description: "Retrieve a particular track from the sheet (database), or null if it cannot be found" })
@@ -100,7 +116,6 @@ export class TrackResolver implements ResolverInterface<Track> {
 	@FieldResolver()
 	async subgenresNestedAsSubgenres(@Root() track: Track) {
 		try {
-			console.log(track.subgenresNested);
 			const nested: NestedStrings = JSON.parse(track.subgenresNested);
 			if (Array.isArray(nested)) {
 				const promises = nested.map(convertNestedStrings);
@@ -128,8 +143,18 @@ export class TrackResolver implements ResolverInterface<Track> {
 	}
 
 	@FieldResolver()
+	lengthSeconds(@Root() track: Track) {
+		return track.length ? hmsToSeconds(track.length) : undefined;
+	}
+
+	@FieldResolver()
+	source(@Root() track: Track) {
+		return `https://docs.google.com/spreadsheets/d/${track.sourceSheetID}/edit#gid=${track.sourceTabID}&range=A${track.sourceRow}`;
+	}
+
+	@FieldResolver()
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async image(@Root() track: Track) {
+	image(@Root() track: Track) {
 		// TODO: Find an external API that would let us query them for artwork
 		return undefined;
 	}
