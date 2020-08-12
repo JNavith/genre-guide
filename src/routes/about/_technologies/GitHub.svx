@@ -6,7 +6,7 @@ foreground: "#4A5568"
 ---
 
 <script context="module">
-    import { name, repository } from "../../../globals/site";
+    import { name, repository } from "site";
     import image from "./github.svg";
     metadata.image = image;
 </script>

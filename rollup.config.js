@@ -28,18 +28,21 @@ import { terser } from "rollup-plugin-terser";
 import { mdsvex } from "mdsvex";
 import remarkAbbr from "remark-abbr";
 import config from "sapper/config/rollup";
+import sveltePreprocess from "svelte-preprocess";
 import pkg from "./package.json";
-import { preprocess as sveltePreprocessConfig } from "./svelte.config";
+import * as postcss from "./postcss.config";
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 const sourcemap = dev ? "inline" : false;
 const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
-const PORT = process.env.PORT ?? 3000; // eslint-disable-line prefer-destructuring
+const PORT = process.env.PORT || 3000; // eslint-disable-line prefer-destructuring
+
+const { defaults } = require("./svelte.config.js");
 
 const preprocess = [
-	sveltePreprocessConfig,
+	sveltePreprocess({ defaults, postcss }),
 	mdsvex({
 		layout: {
 			_technologies: "./src/routes/about/_technologies/_layout.svx",

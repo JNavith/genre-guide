@@ -17,4 +17,4 @@
 -->
 
 
-<div class="h-1" />
+<div class="h-1" aria-hidden="true" />

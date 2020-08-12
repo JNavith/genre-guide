@@ -33,7 +33,7 @@ export const symbols = {
 export type GenreSymbol = keyof typeof symbols;
 
 @ObjectType({ description: "An operator or divider between the multiple subgenres of a track" })
-export default class Operator {
+export class Operator {
 	@Field((type) => String, { description: "A one-character symbol for the operator" })
 	symbol!: GenreSymbol;
 

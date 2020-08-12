@@ -1,18 +1,18 @@
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import Discord from "./Discord.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import FeatherIcons from "./FeatherIcons.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import Firebase from "./Firebase.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import GitHub from "./GitHub.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import GraphQL from "./GraphQL.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import Svelte from "./Svelte.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import TailwindCSS from "./TailwindCSS.svx";
-// @ts-ignore
+// @ts-ignore -- not possible to type
 import TheGenreSheet from "./TheGenreSheet.svx";
 
-export default [TheGenreSheet, TailwindCSS, FeatherIcons, Discord, GraphQL, Svelte, Firebase, GitHub];
+export const technologies = [TheGenreSheet, TailwindCSS, FeatherIcons, Discord, GraphQL, Svelte, Firebase, GitHub];

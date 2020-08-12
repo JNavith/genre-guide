@@ -21,7 +21,7 @@ import {
 	Arg, FieldResolver, Query, Resolver, ResolverInterface, Root,
 } from "type-graphql";
 import { getAll as getAllSubgenres, getOne as getOneSubgenre } from "../adapters/Subgenre";
-import Subgenre from "../object-types/Subgenre";
+import { Subgenre } from "../object-types/Subgenre";
 
 @Resolver(Subgenre)
 export class SubgenreResolver implements ResolverInterface<Subgenre> {

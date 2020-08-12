@@ -21,12 +21,13 @@ import {
 	createUnionType, Field, ObjectType, Root,
 } from "type-graphql";
 
-import Subgenre from "./Subgenre";
-import Operator, { GenreSymbol, symbols } from "./Operator";
+import { Subgenre } from "./Subgenre";
+import { GenreSymbol, Operator, symbols } from "./Operator";
 import { getOne as getOneSubgenre } from "../adapters/Subgenre";
 
 @ObjectType({ description: "A recursive group of subgenres and operators" })
-export default class SubgenreGroup {
+export class SubgenreGroup {
+	// eslint-disable-next-line no-useless-constructor
 	constructor(
 		readonly _elements: NestedTypes[],
 	) { }
@@ -34,6 +35,7 @@ export default class SubgenreGroup {
 	// eslint-disable-next-line no-use-before-define
 	@Field((type) => [SubgenreOrOperatorOrGroup], { description: "The elements of this group" })
 	async elements(@Root() subgenreGroup: SubgenreGroup): Promise<NestedTypes[]> {
+		// eslint-disable-next-line no-underscore-dangle
 		return subgenreGroup._elements;
 	}
 }
@@ -86,9 +88,9 @@ export const convertNestedStrings = async (nestedStrings: NestedStrings): Promis
 	// Look up Genre in place of ? (Genre)
 	const [wasUnknown, knownSubgenre] = makeSubgenreKnown(nestedStrings);
 	// TODO: not have to workaround ambiguous Trap
-	const primaryName = knownSubgenre === "Trap" ? "Trap (EDM)" : knownSubgenre;
+	const anyName = knownSubgenre === "Trap" ? "Trap (EDM)" : knownSubgenre;
 
-	const subgenre = await getOneSubgenre({ primaryName });
+	const subgenre = await getOneSubgenre({ anyName });
 	if (wasUnknown) {
 		// Reinstate the ? (Genre) name(s)
 		subgenre.names = subgenre.names.map((name) => `? (${name})`);

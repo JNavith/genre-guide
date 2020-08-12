@@ -5,7 +5,7 @@ foreground: "#FFFFFF"
 ---
 
 <script>
-    import { name } from "../../../globals/site";
+    import { name } from "site";
     import image from "./graphql.svg";
     metadata.image = image;
 </script>

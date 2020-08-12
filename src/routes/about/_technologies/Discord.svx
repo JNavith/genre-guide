@@ -5,7 +5,7 @@ foreground: "#FFFFFF"
 ---
 
 <script context="module">
-    import { discord, name } from "../../../globals/site";
+    import { discord, name } from "site";
     import image from "./discord.svg";
     metadata.image = image;
 </script>

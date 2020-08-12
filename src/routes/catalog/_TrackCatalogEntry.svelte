@@ -1,24 +1,6 @@
-<!--
-		genre.guide - Track catalog entry Svelte component
-		Copyright (C) 2020 Navith
-
-		This program is free software: you can redistribute it and/or modify
-		it under the terms of the GNU Affero General Public License as published by
-		the Free Software Foundation, either version 3 of the License, or
-		(at your option) any later version.
-
-		This program is distributed in the hope that it will be useful,
-		but WITHOUT ANY WARRANTY; without even the implied warranty of
-		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-		GNU Affero General Public License for more details.
-
-		You should have received a copy of the GNU Affero General Public License
-		along with this program. If not, see <https://www.gnu.org/licenses/>.
--->
-
-<script lang="typescript">
+<script>
 	import { onMount } from "svelte";
-	// @ts-ignore
+	// @ts-ignore -- doesn't package types
 	import { ArrowRightIcon, PlusIcon, RepeatIcon } from "svelte-feather-icons";
 
 	import TrackMissingArt from "./_TrackMissingArt.svelte";
@@ -27,9 +9,9 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
-		// @ts-ignore
-	} from "../../globals/design-system";
-	import { zip } from "../../globals/utils";
+		// @ts-ignore -- need to write types for it
+	} from "design-system";
+	import { zip } from "utils";
 
 	const { short } = transitionDurations;
 
@@ -47,20 +29,20 @@
 
 	export let source: string;
 	export let image: string | undefined;
-	export let date: string | undefined = undefined;
+	export let releaseDate: string | undefined = undefined;
 
-	let dateAsDate: Date;
+	let date: Date;
 	let year: number;
 	let monthName: string;
 	let day: number;
-	$: if (date !== undefined) {
-		dateAsDate = new Date(date);
-		year = dateAsDate.getFullYear();
-		monthName = dateAsDate.toLocaleString("default", { month: "long" });
-		day = dateAsDate.getDate() + 1;
+	$: if (releaseDate) {
+		date = new Date(releaseDate);
+		year = date.getFullYear();
+		monthName = date.toLocaleString("default", { month: "long" });
+		day = date.getDate() + 1;
 	}
 
-	export let subgenresFlat: any;
+	export let subgenresFlat: any[];
 
 	// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 	let mounted: boolean = !process.browser;
@@ -76,22 +58,24 @@
 
 {#if mounted}
 	<tr
-		in:fade={{ delay: Math.sqrt(transitionIndex) * 100, duration: short, easing: smoothOut }}>
+		in:fade={{ delay: Math.sqrt(transitionIndex) * 100, duration: short, easing: smoothOut }}
+		class="align-top">
 		<!-- Date -->
 		<td
-			class={index === 0 ? 'font-heading font-light transition-all sticky top-0 light-theme:bg-white light-theme:shadow-white-glow dark-theme:bg-gray-900 dark-theme:shadow-gray-900-glow' : ''}>
-			{#if index === 0}
-				<p
-					class="text-2xl light-theme:text-gray-600 dark-theme:text-gray-100
-					leading-tight">
-					{year}
-				</p>
-				<p
-					class="text-xl light-theme:text-gray-500 dark-theme:text-gray-400
-					leading-none">
-					{monthName} {day}
-				</p>
-			{/if}
+			class={index === 0 ? 'font-heading font-light transition-all sticky light-theme:bg-white light-theme:shadow-white-glow dark-theme:bg-gray-900 dark-theme:shadow-gray-900-glow' : ''}
+			style="top: 0.5rem">
+			<p
+				class="text-2xl leading-tight light-theme:text-gray-600
+				dark-theme:text-gray-100"
+				class:sr-only={index !== 0}>
+				{year}
+			</p>
+			<p
+				class="text-xl leading-none light-theme:text-gray-500
+				dark-theme:text-gray-400"
+				class:sr-only={index !== 0}>
+				{monthName} {day}
+			</p>
 		</td>
 
 		<!-- Artwork -->
@@ -102,7 +86,8 @@
 				{:else}
 					<TrackMissingArt
 						backgroundColor={subgenresFlat[0].backgroundColor}
-						foregroundColor={subgenresFlat[0].textColor} />
+						foregroundColor={subgenresFlat[0].textColor}
+						size={48} />
 				{/if}
 			</div>
 		</td>
@@ -110,27 +95,34 @@
 		<!-- Song name and artist -->
 		<td>
 			<p
-				class="text-lg font-light light-theme:text-gray-900
-				dark-theme:text-white leading-tight">
+				class="text-lg font-light leading-tight light-theme:text-gray-900
+				dark-theme:text-white light-theme:hover:text-black
+				dark-theme:hover:text-white">
 
-				<a class="border-b border-transparent hover:border-current focus:border-current" href={source}>{name}</a>
+				<a
+					class="border-b border-transparent hover:border-current
+					focus:border-current"
+					href={source}>
+					{name}
+				</a>
 			</p>
 			<p
-				class="text-md font-light light-theme:text-gray-700
-				dark-theme:text-gray-400 leading-none">
+				class="font-light leading-none text-md light-theme:text-gray-700
+				dark-theme:text-gray-300">
 				{artist}
 			</p>
 		</td>
 
 		<!-- Subgenres -->
 		<td>
-			<ol class="flex items-center">
+			<ol>
 				{#each subgenresFlat as item}
-					<li class="flex-shrink-0 mr-2">
+					<li class="inline-block text-center align-middle">
 						{#if item.hasOwnProperty('symbol')}
 							<div
-								class="w-6 h-6 light-theme:text-gray-500
-								dark-theme:text-gray-500">
+								class=" inline-block mx-1 light-theme:text-gray-500
+								dark-theme:text-gray-400 {item.symbol === '~' ? 'w-5 h-5 mx-2' : 'w-6 h-6'}
+								">
 								<!-- A separator of some kind -->
 								<svelte:component
 									this={{ '|': PlusIcon, '>': ArrowRightIcon, '~': RepeatIcon }[item.symbol]} />
@@ -139,11 +131,13 @@
 							<!-- Subgenre button (may need to become a component sometime) -->
 							<a
 								style="background-color: {item.backgroundColor}; color: {item.textColor}"
-								class="block rounded-full font-medium text-center text-md
-								min-w-32 px-4 py-2 transition-all shadow-md hover:shadow-lg
-								focus:shadow-outline-with-lg transform hover:scale-110 focus:scale-110"
+								class="inline-block px-4 py-2 my-2 font-medium text-center
+								transition-all transform rounded-full shadow-md text-md min-w-32
+								hover:shadow-lg focus:shadow-outline-with-lg hover:scale-110
+								focus:scale-110"
 								href="/subgenre/{encodeURIComponent(item.names[0])}"
-								title={item.names[0]}>
+								title={item.names[0]}
+								rel="prefetch">
 								{item.names[0]}
 							</a>
 						{/if}

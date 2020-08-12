@@ -1,3 +1,50 @@
+<script>
+  import { author as siteAuthor, name as siteName } from "site";
+
+  export let route: string = "/";
+  // TODO: actually use this
+  // Silence unused prop warning
+  if (route) {
+  }
+
+  export let pageTitle: string | undefined = undefined;
+  export let title: string =
+    pageTitle === undefined ? siteName : `${pageTitle} - ${siteName}`;
+
+  export let description: string | undefined = undefined;
+
+  export let author: string = siteAuthor;
+
+  export let image: string = "/logo-512.png";
+  export let imageAlt: string = siteName;
+
+  let metaTags: {
+    [property: string]: string;
+  };
+
+  $: metaTags = {
+    "twitter:site": siteName,
+
+    "og:title": title,
+    "twitter:title": title,
+
+    ...(description
+      ? {
+          "og:description": description,
+          "twitter:description": description,
+        }
+      : {}),
+
+    author: author,
+    "twitter:creator": author,
+
+    "og:image": image,
+    "twitter:image": image,
+
+    "twitter:image:alt": imageAlt,
+  };
+</script>
+
 <!--
     genre.guide - Metadata renderless Svelte component
     Copyright (C) 2020 Navith
@@ -15,57 +62,10 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
-
-<script lang="typescript">
-	import { author as siteAuthor, name as siteName } from "../../globals/site";
-
-	export let route: string = "/";
-	// TODO: actually use this
-	// Silence unused prop warning
-	if (route) {};
-
-
-	export let pageTitle: string | undefined = undefined;
-	export let title: string = pageTitle === undefined ? siteName : `${pageTitle} - ${siteName}`;
-
-	export let description: string | undefined = undefined;
-
-	export let author: string = siteAuthor;
-
-	export let image: string = "/logo-512.png";
-	export let imageAlt: string = siteName;
-
-	let metaTags: {
-		[property: string]: string;
-	};
-
-	$: metaTags = {
-		"twitter:site": siteName,
-
-		"og:title": title,
-		"twitter:title": title,
-
-		...(description
-			? {
-					"og:description": description,
-					"twitter:description": description
-			  }
-			: {}),
-
-		"author": author,
-		"twitter:creator": author,
-
-		"og:image": image,
-		"twitter:image": image,
-
-		"twitter:image:alt": imageAlt,
-	};
-</script>
-
 <svelte:head>
-	<title>{title}</title>
+  <title>{title}</title>
 
-	{#each Object.entries(metaTags) as [property, content]}
-		<meta {property} {content} />
-	{/each}
+  {#each Object.entries(metaTags) as [property, content]}
+    <meta {property} {content} />
+  {/each}
 </svelte:head>

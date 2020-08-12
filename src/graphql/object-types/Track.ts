@@ -16,14 +16,16 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Field, ID, ObjectType, Int } from "type-graphql";
+import {
+	Field, ID, ObjectType, Int,
+} from "type-graphql";
 
-import SubgenreGroup, { SubgenreOrOperator } from "./SubgenreGroup";
-import Subgenre from "./Subgenre";
-import Operator from "./Operator";
+import { SubgenreGroup, SubgenreOrOperator } from "./SubgenreGroup";
+import type { Subgenre } from "./Subgenre";
+import type { Operator } from "./Operator";
 
 @ObjectType({ description: "A track / song, as may appear on the Genre Sheet" })
-export default class Track {
+export class Track {
 	@Field((type) => ID, { description: "The unique ID associated with this track, for lookup purposes" })
 	id?: string;
 
@@ -37,12 +39,10 @@ export default class Track {
 	@Field({ description: "The date the track was released" })
 	releaseDate!: Date;
 
-
 	@Field({ description: "The record label(s) or copyright owner(s) who released and/or own the rights to the track" })
 	recordLabel!: string;
 
 	indexOnLabelOnRelease!: number;
-
 
 	subgenresNested!: string;
 
@@ -51,7 +51,6 @@ export default class Track {
 
 	@Field((type) => [SubgenreOrOperator], { description: "The subgenres and operators that make up this song, flattened out for simplicity (but with loss of information)" })
 	subgenresFlat?: (Subgenre | Operator)[];
-
 
 	length!: string | undefined;
 
@@ -65,11 +64,13 @@ export default class Track {
 	// TODO: reuse parse_genre logic
 	@Field((type) => String, { nullable: true, description: "The key, which may change throughout the track runtime (signified with > or /)" })
 	key!: string | undefined;
-	
+
 	sourceSheetName!: string;
+
 	sourceSheetID!: string;
 
 	sourceTabName!: string;
+
 	sourceTabID!: number;
 
 	sourceRow!: number;

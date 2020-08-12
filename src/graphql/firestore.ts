@@ -16,19 +16,19 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as admin from "firebase-admin";
+import { credential, firestore, initializeApp } from "firebase-admin";
 
-admin.initializeApp({
-	credential: admin.credential.applicationDefault(),
+initializeApp({
+	credential: credential.applicationDefault(),
 });
 
 // Try not to directly use this if possible because it circumvents the cache below
-export const db = admin.firestore();
+export const db = firestore();
 
-export type Document = admin.firestore.DocumentSnapshot<admin.firestore.DocumentData>;
+export type Document = firestore.DocumentSnapshot<firestore.DocumentData>;
 const documentCache: Map<[string, string], Document> = new Map();
 
-export type Collection = admin.firestore.QuerySnapshot<admin.firestore.DocumentData>;
+export type Collection = firestore.QuerySnapshot<firestore.DocumentData>;
 const collectionCache: Map<string, Collection> = new Map();
 
 export const getCollection = async (collection: string, cache = true): Promise<Collection> => {

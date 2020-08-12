@@ -14,16 +14,6 @@ layout: false
 <script>
 	import { onMount } from "svelte";
 
-	import {
-		easingFunctions,
-		transitionDurations,
-		transitionFunctions,
-	} from "../../../globals/design-system";
-
-	const { smoother: { out } } = easingFunctions;
-	const { medium } = transitionDurations;
-	const { fade } = transitionFunctions;
-
 	export let title;
 	export let background;
 	export let foreground;
@@ -32,10 +22,10 @@ layout: false
 
 <li
 	style="color: {foreground}; background-color: {background}"
-	class="w-full flex-1 flex justify-center">
+	class="flex justify-center flex-1 w-full">
 
-	<div class="flex max-w-5xl flex-1 p-8">
-		<img class="w-32 h-32 flex-shrink-0 object-contain" alt={title} src={image} />
+	<div class="flex flex-1 max-w-5xl p-8">
+		<img class="flex-shrink-0 object-contain w-32 h-32 select-none" alt={title} src={image} />
 
 		<div class="ml-10 space-y-4">
 			<slot />

@@ -1,61 +1,43 @@
-<!--
-		genre.guide - Top level settings menu Svelte component
-		Copyright (C) 2020 Navith
-
-		This program is free software: you can redistribute it and/or modify
-		it under the terms of the GNU Affero General Public License as published by
-		the Free Software Foundation, either version 3 of the License, or
-		(at your option) any later version.
-
-		This program is distributed in the hope that it will be useful,
-		but WITHOUT ANY WARRANTY; without even the implied warranty of
-		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-		GNU Affero General Public License for more details.
-
-		You should have received a copy of the GNU Affero General Public License
-		along with this program. If not, see <https://www.gnu.org/licenses/>.
--->
-
-<script lang="typescript">
-	// @ts-ignore
+<script>
+	// @ts-ignore -- doesn't package types
 	import { SettingsIcon } from "svelte-feather-icons";
 	import { writable } from "svelte/store";
-	
+
 	import StyledSwitch from "../components/Switches/Styled.svelte";
 	import ThemeSwitch from "../components/Switches/Theme.svelte";
-	
+
 	import {
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
-		// @ts-ignore
-	} from "../globals/design-system";
+		// @ts-ignore -- need to write types for it
+	} from "design-system";
 
-	import { theme, systemTheme, systemThemeSupported } from "../globals/theme-logic";
+	import { theme, systemTheme, systemThemeSupported } from "theme-logic";
 
 	const { short } = transitionDurations;
 	const { fade } = transitionFunctions;
 	const { smooth } = easingFunctions;
 
 	const { out: smoothOut } = smooth;
-	
+
 	let open = false;
 </script>
 
-<style lang="postcss">
+<style>
 	.disabled {
 		@apply cursor-not-allowed opacity-50;
 	}
 </style>
 
-<svelte:window on:click={() => open = false} />
+<svelte:window on:click={() => (open = false)} />
 
 <button
 	title="Settings"
-	class="block mr-3 sm:mr-4 md:mr-6 h-4 w-4 flex-shrink-0 cursor-pointer
+	class="flex-shrink-0 block w-4 h-4 mr-3 cursor-pointer sm:mr-4 md:mr-6
 	light-theme:text-green-500 light-theme:hover:text-green-600
 	dark-theme:text-green-400 dark-theme:hover:text-green-300"
-	on:click|stopPropagation={() => open = !open}
+	on:click|stopPropagation={() => (open = !open)}
 	aria-haspopup="true"
 	aria-expanded={open}>
 
@@ -65,14 +47,14 @@
 {#if open}
 	<ul
 		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}
-		class="absolute top-0 right-0 z-10 whitespace-no-wrap mr-3 sm:mr-4 md:mr-6
-		mt-6 px-3 py-2 light-theme:bg-gray-100 light-theme:text-gray-700
-		dark-theme:bg-gray-800 dark-theme:text-gray-400 font-body font-light
-		list-none rounded shadow-md"
+		class="absolute top-0 right-0 z-10 px-3 py-2 mt-6 mr-3 font-light
+		whitespace-no-wrap list-none rounded shadow-md sm:mr-4 md:mr-6
+		light-theme:bg-gray-100 light-theme:text-gray-700 dark-theme:bg-gray-800
+		dark-theme:text-gray-400 font-body"
 		on:click|stopPropagation>
 
 		<li
-			class="flex justify-between items-center"
+			class="flex items-center justify-between"
 			class:disabled={!$systemThemeSupported}
 			title={!$systemThemeSupported ? 'This option is disabled because your operating system or web browser does not support theming. Instead, set your theme manually with the switch below' : undefined}>
 			<span

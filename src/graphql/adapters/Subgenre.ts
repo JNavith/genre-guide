@@ -17,17 +17,17 @@
 */
 
 import { plainToClass } from "class-transformer";
-import * as admin from "firebase-admin";
+import type { firestore } from "firebase-admin";
 
-import { memoize } from "../../globals/utils";
+import { memoize } from "utils";
 import {
 	Document, getCollection, getDocument, db,
 } from "../firestore";
-import Subgenre from "../object-types/Subgenre";
+import { Subgenre } from "../object-types/Subgenre";
 
 const SUBGENRES_COLLECTION = "subgenres";
 
-export const FirestoreToSubgenre = (documentData: admin.firestore.DocumentData): Subgenre => plainToClass(Subgenre, documentData);
+export const FirestoreToSubgenre = (documentData: firestore.DocumentData): Subgenre => plainToClass(Subgenre, documentData);
 
 // https://stackoverflow.com/a/49725198
 type RequireAtLeastOne<T, Keys extends keyof T = keyof T> =

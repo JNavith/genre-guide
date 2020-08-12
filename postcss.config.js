@@ -18,43 +18,39 @@
 
 import cssnano from "cssnano";
 import postcssImport from "postcss-import";
+import postcssEasingGradients from "postcss-easing-gradients";
 import postcssFontMagician from "postcss-font-magician";
 import postcssPresetEnv from "postcss-preset-env";
 import postcssPurgecss from "@fullhuman/postcss-purgecss";
 import tailwindcss from "tailwindcss";
 import * as tailwindcssConfig from "./tailwind.config";
 
-import { fontMagicianConfig } from "./src/globals/design-system";
+import { fontMagicianConfig } from "./src/node_modules/design-system";
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
 
-export default {
-	plugins: [
-		postcssImport,
+export const plugins = [
+	postcssImport,
 
-		tailwindcss(tailwindcssConfig),
+	tailwindcss(tailwindcssConfig),
 
-		postcssPresetEnv({
-			features: {
-				// https://github.com/tailwindcss/tailwindcss/issues/1190
-				"focus-within-pseudo-class": false,
-			},
-		}),
+	postcssPresetEnv(),
 
-		postcssFontMagician(fontMagicianConfig),
+	postcssEasingGradients({ colorMode: "lch" }),
 
-		!dev && postcssPurgecss({
-			content: ["./src/**/*.svelte", "./src/**/*.svx", "./src/**/*.html"],
-			defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d-/:%.!]+)/gm)].map(([_match, group, ..._rest]) => group),
-			whitelist: ["data-theme"],
-		}),
+	postcssFontMagician(fontMagicianConfig),
 
-		!dev && cssnano({
-			preset: [
-				"default",
-				{ discardComments: { removeAll: true } },
-			],
-		}),
-	].filter(Boolean),
-};
+	!dev && postcssPurgecss({
+		content: ["./src/**/*.svelte", "./src/**/*.svx", "./src/**/*.html"],
+		defaultExtractor: (content) => [...content.matchAll(/(?:class:)*([\w\d-/:%.!]+)/gm)].map(([_match, group, ..._rest]) => group),
+		whitelist: ["data-theme"],
+	}),
+
+	!dev && cssnano({
+		preset: [
+			"default",
+			{ discardComments: { removeAll: true } },
+		],
+	}),
+].filter(Boolean);

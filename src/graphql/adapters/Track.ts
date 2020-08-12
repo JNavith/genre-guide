@@ -16,14 +16,14 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-// @ts-ignore
+// @ts-ignore -- doesn't package types
 import blake from "blakejs";
-import * as admin from "firebase-admin";
 import { plainToClass } from "class-transformer";
+import type { firestore } from "firebase-admin";
 
 import { db } from "../firestore";
 
-import Track from "../object-types/Track";
+import { Track } from "../object-types/Track";
 
 const TRACKS_COLLECTION = "tracks";
 export const tracksCollectionRef = db.collection(TRACKS_COLLECTION);
@@ -40,7 +40,7 @@ export const createTrackID = ({ artist, title, releaseDate }: Pick<Track, "artis
 	return blake2b(joined);
 };
 
-export const FirestoreToTrack = (documentData: admin.firestore.DocumentData): Track => {
+export const FirestoreToTrack = (documentData: firestore.DocumentData): Track => {
 	const clone = { ...documentData };
 	clone.releaseDate = clone.releaseDate.toDate();
 	return plainToClass(Track, clone);

@@ -22,13 +22,13 @@ import {
 	Arg, Args, ArgsType, Field, FieldResolver, ID, Int, Query, Resolver, ResolverInterface, Root,
 } from "type-graphql";
 
-import { memoize } from "../../globals/utils";
+import { memoize } from "utils";
 import { createTrackID, FirestoreToTrack, tracksCollectionRef } from "../adapters/Track";
 import { getDocument } from "../firestore";
-import Operator from "../object-types/Operator";
-import Subgenre from "../object-types/Subgenre";
-import SubgenreGroup, { convertNestedStrings, NestedStrings } from "../object-types/SubgenreGroup";
-import Track from "../object-types/Track";
+import type { Operator } from "../object-types/Operator";
+import type { Subgenre } from "../object-types/Subgenre";
+import { convertNestedStrings, NestedStrings, SubgenreGroup } from "../object-types/SubgenreGroup";
+import { Track } from "../object-types/Track";
 
 @ArgsType()
 class TracksArguments {
@@ -53,20 +53,20 @@ class TracksArguments {
 
 const queryLatestUncached = async (limit: number, newestFirst: boolean) => {
 	const query = tracksCollectionRef.orderBy("releaseDate", newestFirst ? "desc" : "asc").limit(limit);
-	return query.get();
+	return await query.get();
 };
 
 const queryLatest = memoize(queryLatestUncached);
 
 // https://stackoverflow.com/a/9640417
 const hmsToSeconds = (hms: string): number => {
-	const parts = hms.split(':').reverse().map((n) => parseInt(n, 10));
+	const parts = hms.split(":").reverse().map((n) => parseInt(n, 10));
 	const conversions = [1, 60, 3600];
 
 	const partWithConversionFactor = zip(parts, conversions);
 	const secondses = partWithConversionFactor.map(([part, factor]) => (part ?? 0) * (factor ?? 0));
 	return secondses.reduce((left, right) => left + right, 0);
-}
+};
 
 @Resolver((of) => Track)
 export class TrackResolver implements ResolverInterface<Track> {
@@ -138,13 +138,17 @@ export class TrackResolver implements ResolverInterface<Track> {
 	async subgenresFlat(@Root() track: Track) {
 		const nested = JSON.parse(track.subgenresNested);
 		const flat = nested.flat(Infinity);
-		const typed = await convertNestedStrings(flat) as any as SubgenreGroup;
+		const typed = await convertNestedStrings(flat) as unknown as SubgenreGroup;
+		// eslint-disable-next-line no-underscore-dangle
 		return typed._elements as (Operator | Subgenre)[];
 	}
 
 	@FieldResolver()
 	lengthSeconds(@Root() track: Track) {
-		return track.length ? hmsToSeconds(track.length) : undefined;
+		if (!track.length) return undefined;
+		const seconds = hmsToSeconds(track.length);
+		if (Number.isNaN(seconds)) return undefined;
+		return seconds;
 	}
 
 	@FieldResolver()

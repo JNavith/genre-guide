@@ -33,10 +33,10 @@ import tailwindcssCustomNative from "tailwindcss-custom-native";
 import tailwindcssGradients from "tailwindcss-gradients";
 import defaultConfig from "tailwindcss/defaultConfig";
 import tailwindcssThemeVariants, {
-	active, focus, hover, prefersDark, prefersLight,
+	focus, hover, prefersDark, prefersLight, groupHover, groupFocus, selection,
 } from "tailwindcss-theme-variants";
 
-import { colors, fontFamily } from "./src/globals/design-system";
+import { colors, fontFamily } from "./src/node_modules/design-system";
 
 const { theme: defaultTheme, variants: defaultVariants } = defaultConfig;
 
@@ -46,7 +46,16 @@ const [_, l, c, h] = colors.green[400].match(/lch\(([.\d]+) ([.\d]+) ([.\d]+)\)/
 // eslint-disable-next-line camelcase
 const green_400_70 = lch(l, c, h, 0.70);
 // eslint-disable-next-line camelcase
+const black_70 = lch(0, 0, 0, 0.70);
+// eslint-disable-next-line camelcase
+const white_70 = lch(100, 0, 0, 0.70);
+
+// eslint-disable-next-line camelcase
 const shadowOutlineGreen = `0 0 0 3px ${green_400_70}`;
+// eslint-disable-next-line camelcase
+const shadowOutlineBlack = `0 0 0 3px ${black_70}`;
+// eslint-disable-next-line camelcase
+const shadowOutlineWhite = `0 0 0 3px ${white_70}`;
 
 export const theme = {
 	colors: {
@@ -70,6 +79,8 @@ export const theme = {
 
 		boxShadow: {
 			outline: shadowOutlineGreen,
+			"outline-black": shadowOutlineBlack,
+			"outline-white": shadowOutlineWhite,
 			"outline-with-lg": `${defaultTheme.boxShadow.lg}, ${shadowOutlineGreen}`,
 			"white-glow": `0 0 8px 4px ${tailwinduiColors.white}`,
 			"gray-900-glow": `0 0 8px 4px ${tailwinduiColors.gray[900]}`,
@@ -77,6 +88,12 @@ export const theme = {
 
 		customUtilities: {
 			borderSpacing: {},
+		},
+
+		fontSize: {
+			"7xl": "5rem",
+			"8xl": "6rem",
+			"9xl": "7rem",
 		},
 
 		minWidth: (theme_) => theme_("spacing"),
@@ -96,13 +113,15 @@ export const theme = {
 	},
 
 	linearGradientColors: {
-		"teal-300-blue-400": [tailwinduiColors.teal[300], tailwinduiColors.blue[400]],
-		"indigo-700-purple-900": [tailwinduiColors.indigo[700], tailwinduiColors.purple[900]],
+		day: ["lch(91 32.612 203.866)", "lch(68 50.636 276.408)"],
+		/* background-image: linear-gradient(to top, #505285 0%, #585e92 12%, #65689f 25%, #7474b0 37%, #7e7ebb 50%, #8389c7 62%, #9795d4 75%, #a2a1dc 87%, #b5aee4 100%); */
+		// night: ["lch(49 20.403 255.897)", defaultTheme.transitionTimingFunction.out, "lch(12 22.774 280.685)"],
+		night: ["lch(47 65.876 282)", "lch(40 70.572 290)", "lch(30 80 300)"],
 	},
 
 	radialGradientColors: {
-		"yellow-300-orange-300": [tailwinduiColors.yellow[300], tailwinduiColors.orange[300]],
-		"gray-100-gray-200": [tailwinduiColors.gray[100], tailwinduiColors.gray[200]],
+		sun: ["lch(95 90.845 93.996)", "lch(93 98.845 85.996)"],
+		moon: ["lch(87 0.702 18.519)", "lch(75 0.872 236.434)"],
 	},
 };
 
@@ -123,26 +142,33 @@ export const corePlugins = {
 export const variants = {
 	backgroundColor: [
 		...defaultVariants.backgroundColor,
-		"selection",
-		"selection:important",
 		"light-theme",
 		"light-theme:hover",
 		"light-theme:focus",
+		"light-theme:selection",
 		"dark-theme",
 		"dark-theme:hover",
 		"dark-theme:focus",
+		"dark-theme:selection",
+		"selection:important",
 	],
-	boxShadow: [...defaultVariants.boxShadow, "light-theme", "dark-theme"],
+	borderColor: [...defaultVariants.borderColor, "group-hover", "group-focus"],
+	boxShadow: [...defaultVariants.boxShadow, "light-theme", "light-theme:focus", "dark-theme", "dark-theme:focus"],
 	textColor: [
 		...defaultVariants.textColor,
-		"selection",
-		"selection:important",
 		"light-theme",
 		"light-theme:hover",
 		"light-theme:focus",
+		"light-theme:group-focus",
+		"light-theme:group-hover",
+		"light-theme:selection",
 		"dark-theme",
 		"dark-theme:hover",
 		"dark-theme:focus",
+		"dark-theme:group-focus",
+		"dark-theme:group-hover",
+		"dark-theme:selection",
+		"selection:important",
 	],
 };
 
@@ -152,29 +178,21 @@ export const plugins = [
 
 	tailwindcssThemeVariants({
 		baseSelector: "html",
-		fallback: "light",
-		rename: (themeName) => `${themeName}-theme`,
+		fallback: "light-theme",
 		themes: {
-			light: { selector: "[data-theme=light]", mediaQuery: prefersLight },
-			dark: { selector: "[data-theme=dark]", mediaQuery: prefersDark },
+			"light-theme": { selector: "[data-theme=light]", mediaQuery: prefersLight },
+			"dark-theme": { selector: "[data-theme=dark]", mediaQuery: prefersDark },
 		},
 		variants: {
-			hover,
 			focus,
-			active,
+			"group-focus": groupFocus,
+			"group-hover": groupHover,
+			hover,
+			selection,
 		},
 	}),
 
 	({ addVariant, e }) => {
-		// Add selection variant
-		addVariant("selection", ({ modifySelectors, separator }) => {
-			modifySelectors(({ className }) => {
-				const selectionClassName = e(`selection${separator}${className}`);
-
-				return `.${selectionClassName}::selection, .${selectionClassName} ::selection`;
-			});
-		});
-
 		// Add important selection variant
 		addVariant("selection:important", ({ container, modifySelectors, separator }) => {
 			container.walkRules((rule) => {

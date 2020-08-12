@@ -20,12 +20,13 @@ import {
 	createMachine, invoke, state, transition, reduce,
 } from "robot3";
 import { writable } from "svelte/store";
-import api, { FetchFunction } from "../../globals/api";
-import { Await } from "../../globals/utils";
+import { call, FetchFunction } from "api";
+import { Await, SerializableError, serializeError } from "utils";
+import type { Track } from "../../graphql/object-types/Track";
 
 const TRACK_FRAGMENT = `
 	artist
-	date
+	releaseDate
 	id
 	image
 	name
@@ -60,8 +61,8 @@ const GET_TRACKS_BEFORE_ID = `
 `;
 
 const loadTracks = async ({ fetch }: { fetch: FetchFunction }) => {
-	const { data } = await api({ fetch, query: GET_MOST_RECENT_TRACKS });
-	const tracks: Track[] = data?.tracks ?? [];
+	const { data } = await call({ fetch, query: GET_MOST_RECENT_TRACKS });
+	const tracks: TrackEntry[] = data?.tracks ?? [];
 
 	tracks.forEach((track, loadIndex) => {
 		// eslint-disable-next-line no-param-reassign
@@ -71,22 +72,13 @@ const loadTracks = async ({ fetch }: { fetch: FetchFunction }) => {
 	return tracks;
 };
 
-// TODO: just import the object type?
-interface Track {
-	artist: string;
-	date: string;
-	id: string;
-	image?: string;
-	name: string;
-	recordLabel: string;
-	subgenresFlat: any;
-
+export interface TrackEntry extends Track {
 	loadIndex: number;
 }
 
 interface Context {
-	error: Error;
-	tracks: Track[];
+	error: SerializableError ;
+	tracks: TrackEntry[];
 	fetch: FetchFunction;
 }
 
@@ -99,31 +91,31 @@ export enum State {
 
 export enum Send {
 	Load = "load",
-	Retry = "retry",
-	SetFetch = "set_fetch",
-	ClearFetch = "clear_fetch",
 }
 
 export const createStateMachine = (initialContext: Partial<Context>, initialState?: State) => createMachine(initialState ?? State.Empty, {
 	[State.Empty]: state(
-		transition(Send.Load, State.Loading),
-		transition(Send.SetFetch, State.Empty, reduce((ctx: Partial <Context>, { fetch }: { fetch: FetchFunction }) => ({ ...ctx, fetch }))),
+		transition(Send.Load, State.Loading,
+			reduce((ctx: Partial<Context>, { fetch }: { fetch: FetchFunction }): Partial<Context> & Pick<Context, "fetch"> => ({ ...ctx, fetch }))),
 	),
-	// TODO use @beyonk/sapper-httpclient
-	[State.Loading]: invoke(loadTracks,
+
+	[State.Loading]: invoke(
+		loadTracks,
 		transition("done", State.Loaded,
-			reduce((ctx: Partial<Context>, { data }: { data: Await<ReturnType<typeof loadTracks>> }): Partial<Context> & Pick<Context, "tracks"> => ({ ...ctx, tracks: data }))),
+			reduce((ctx: Partial<Context>, { data }: { data: Await<ReturnType<typeof loadTracks>> }): Partial<Context> & Pick<Context, "tracks"> => ({ ...ctx, tracks: data, fetch: undefined }))),
 		transition("error", State.Error,
-			reduce((ctx: Partial<Context>, { error }: { error: Error }): Partial<Context> & Pick<Context, "error"> => ({ ...ctx, error })))),
-	[State.Loaded]: state(
-		transition(Send.Load, State.Loading),
-		transition(Send.SetFetch, State.Loaded, reduce((ctx: Partial<Context>, { fetch }: { fetch: FetchFunction }): Partial<Context> & Pick<Context, "fetch"> => ({ ...ctx, fetch }))),
-		transition(Send.ClearFetch, State.Loaded, reduce(({ fetch = undefined, ...ctx }: Partial<Context>): Partial<Context> => (ctx))),
+			reduce((ctx: Partial<Context>, { error }: { error: Error }): Partial<Context> & Pick<Context, "error"> => ({ ...ctx, error: serializeError(error), fetch: undefined }))),
 	),
+
+	[State.Loaded]: state(
+		transition(Send.Load, State.Loading,
+			reduce((ctx: Partial<Context>, { fetch }: { fetch: FetchFunction }): Partial<Context> & Pick<Context, "fetch"> => ({ ...ctx, fetch }))),
+	),
+
 	[State.Error]: state(
-		transition(Send.Retry, State.Loading),
-		transition(Send.ClearFetch, State.Error, reduce(({ fetch = undefined, ...ctx }: Partial<Context>): Partial<Context> => (ctx))),
+		transition(Send.Load, State.Loading,
+			reduce((ctx: Partial<Context>, { fetch }: { fetch: FetchFunction }): Partial<Context> & Pick<Context, "fetch"> => ({ ...ctx, fetch }))),
 	),
 }, () => initialContext);
 
-export default writable(createStateMachine({ tracks: [] }));
+export const wrappedMachine = writable(createStateMachine({ tracks: [] }));

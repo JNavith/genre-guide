@@ -1,3 +1,14 @@
+<script>
+  import { stores } from "@sapper/app";
+
+  import { routes, name as siteName } from "site";
+
+  import { send, receive } from "./_navigation-bar-crossfade";
+  import SettingsTopLevel from "./_Settings.svelte";
+
+  const { page } = stores();
+</script>
+
 <!--
 	genre.guide - Top level navigation bar Svelte component
 	Copyright (C) 2020 Navith
@@ -15,80 +26,69 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
-
-<script lang="typescript">
-  import { stores } from "@sapper/app";
-
-  import { routes, name as siteName } from "../globals/site";
-
-  import { send, receive } from "./_navigation-bar-crossfade";
-  import SettingsTopLevel from "./_Settings.svelte";
-
-  const { page } = stores();
-</script>
-
 <nav
-	class="flex justify-between items-center py-3 sm:py-4 md:py-6"
-	in:receive={{ key: 'nav' }}
-	out:send={{ key: 'nav' }}>
+  class="flex items-center justify-between py-3 sm:py-4 md:py-6"
+  role="navigation"
+  in:receive={{ key: 'nav' }}
+  out:send={{ key: 'nav' }}>
 
-	<!-- Left side: site name -->
-	<div
-		class="mr-2">
-	
-		<a
-			class="block ml-3 sm:ml-4 md:ml-6 text-lg sm:text-xl md:text-2xl
-			font-heading font-medium light-theme:text-green-500
-			light-theme:hover:text-green-600 dark-theme:text-green-400
-			dark-theme:hover:text-green-300 
-			border-b-2 border-transparent hover:border-current focus:border-current"
-			href="/"
-			title="{siteName} homepage"
-			aria-current={$page.path === '/' ? 'page' : undefined}
-			rel="prefetch">
+  <!-- Left side: site name -->
+  <div class="mr-2">
 
-				<span class="inline-block"
-					in:receive={{ key: 'site-name' }} 
-					out:send={{ key: 'site-name' }}>
+    <a
+      class="block ml-3 text-lg font-medium border-b-2 border-transparent
+      sm:ml-4 md:ml-6 sm:text-xl md:text-2xl font-heading
+      light-theme:text-green-500 light-theme:hover:text-green-600
+      dark-theme:text-green-400 dark-theme:hover:text-green-300
+      hover:border-current focus:border-current"
+      href="/"
+      title="{siteName} homepage"
+      aria-current={$page.path === '/' ? 'page' : undefined}
+      rel="prefetch">
 
-					{siteName}
-				</span>
-				
-				<span class="opacity-50 inline-block"
-					in:receive={{ key: 'site-name-modifier' }}
-					out:send={{ key: 'site-name-modifier' }}>
-					
-					(beta)
-				</span>
-		</a>
-	</div>
+      <span
+        class="inline-block"
+        in:receive={{ key: 'site-name' }}
+        out:send={{ key: 'site-name' }}>
+        {siteName}
+      </span>
 
-	<!-- Right side -->
-	<div
-		class="ml-2 flex items-center"
-		in:receive={{ key: 'right-nav' }}
-		out:send={{ key: 'right-nav' }}>
+      <span
+        class="inline-block opacity-50"
+        in:receive={{ key: 'site-name-modifier' }}
+        out:send={{ key: 'site-name-modifier' }}>
+        (beta)
+      </span>
+    </a>
+  </div>
 
-		{#each Object.entries(routes) as [smallTitle, { route, description }]}
-			<a
-				class="block mr-3 sm:mr-4 md:mr-6 text-md sm:text-lg md:text-xl
-				font-heading light-theme:text-green-500 light-theme:hover:text-green-600
-				dark-theme:text-green-400 dark-theme:hover:text-green-300
-				border-b-2 border-transparent hover:border-current focus:border-current"
-				href={route}
-				title={description}
-				aria-current={$page.path === route ? 'page' : undefined}
-				rel="prefetch">
+  <!-- Right side -->
+  <div
+    class="flex items-center ml-2"
+    in:receive={{ key: 'right-nav' }}
+    out:send={{ key: 'right-nav' }}>
 
-					{smallTitle}
-			</a>
-		{/each}
+    {#each Object.entries(routes) as [smallTitle, { route, description }]}
+      <a
+        class="block mr-3 border-b-2 border-transparent sm:mr-4 md:mr-6 text-md
+        sm:text-lg md:text-xl font-heading light-theme:text-green-500
+        light-theme:hover:text-green-600 dark-theme:text-green-400
+        dark-theme:hover:text-green-300 hover:border-current
+        focus:border-current"
+        href={route}
+        title={description}
+        aria-current={$page.path === route ? 'page' : undefined}
+        rel="prefetch">
+        {smallTitle}
+      </a>
+    {/each}
 
-		<div class="relative"
-			in:receive={{ key: 'settings-button' }}
-			out:send={{ key: 'settings-button' }}>
+    <div
+      class="relative"
+      in:receive={{ key: 'settings-button' }}
+      out:send={{ key: 'settings-button' }}>
 
-			<SettingsTopLevel />
-		</div>
-	</div>
+      <SettingsTopLevel />
+    </div>
+  </div>
 </nav>

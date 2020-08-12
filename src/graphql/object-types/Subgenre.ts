@@ -19,7 +19,7 @@
 import { Field, ObjectType } from "type-graphql";
 
 @ObjectType({ description: "A subgenre, as understood on the Genre Sheet" })
-export default class Subgenre {
+export class Subgenre {
     @Field((type) => [String], { description: "The primary name of the subgenre, e.x. \"Brostep\", followed by alternative names for the subgenre, e.x. {\"DnB\", \"D&B\"} for Drum & Bass" })
     names!: string[];
 

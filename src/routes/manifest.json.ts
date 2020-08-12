@@ -16,11 +16,19 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Request as ExpressRequest, Response as ExpressResponse } from "express";
+import type { Request as ExpressRequest, Response as ExpressResponse } from "express";
 
-import { name, description } from "../globals/site";
-// @ts-ignore
-import { colors } from "../globals/design-system";
+import { lch } from "d3-color";
+
+// @ts-ignore -- need to write types for it
+import { colors } from "design-system";
+import { name, description } from "site";
+
+const [_, l, c, h] = colors.green[500].match(/lch\(([.\d]+) ([.\d]+) ([.\d]+)\)/);
+// eslint-disable-next-line camelcase
+const green_500 = lch(l, c, h);
+// eslint-disable-next-line camelcase
+const theme_color = green_500.hex();
 
 const MANIFEST = {
 	short_name: name,
@@ -46,9 +54,9 @@ const MANIFEST = {
 		},
 	],
 	start_url: "/",
-	display: "minimal-ui",
+	display: "standalone",
 	background_color: "#FFFFFF",
-	theme_color: colors.green[500],
+	theme_color,
 	screenshots: [
 		{
 			src: "screenshot-1.png",

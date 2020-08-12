@@ -16,7 +16,6 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-// @ts-ignore -- generated package
 import * as sapper from "@sapper/app"; // eslint-disable-line import/no-unresolved
 
 const ONLY_GRAPHQL_SERVER = process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring

@@ -16,13 +16,13 @@
 	along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-// @ts-ignore -- generated package
 import * as sapper from "@sapper/server"; // eslint-disable-line import/no-unresolved
 import compression from "compression";
-import express, { Express } from "express";
+import express from "express";
 import helmet from "helmet";
-// @ts-ignore -- doesn't package its own types until 1.0.0-next.6
 import sirv from "sirv";
+import type { Express } from "express";
+
 import { createApolloServer } from "./graphql";
 
 const PORT = process.env.PORT; // eslint-disable-line prefer-destructuring

@@ -1,62 +1,75 @@
-<script lang="typescript">
-	// @ts-ignore
+<script>
+	import { onMount } from "svelte";
+
+	import {
+		easingFunctions,
+		transitionDurations,
+		transitionFunctions,
+		// @ts-ignore -- need to write types for it
+	} from "design-system";
+
 	import Metadata from "../components/Renderless/Metadata.svelte";
-	// @ts-ignore
 	import AccentBar from "./_AccentBar.svelte";
+
+	const { short } = transitionDurations;
+	const { fade } = transitionFunctions;
+	const { smooth } = easingFunctions;
+	const { out: smoothOut } = smooth;
 
 	export let status: string;
 	export let error: Error;
 
-	// @ts-ignore
-	const dev = process.env.NODE_ENV === "development";
+	const mode = process.env.NODE_ENV;
+	const dev = mode === "development";
+
+	// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
+	let mounted = !process.browser;
+
+	onMount(() => {
+		mounted = true;
+
+		return () => {
+			mounted = false;
+		};
+	});
 </script>
 
-<!--
-	genre.guide - Error page Svelte route
-	Copyright (C) 2020 Navith
-
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with this program. If not, see <https://www.gnu.org/licenses/>.
--->
 <Metadata
 	pageTitle="{error.message} ({status})"
 	description="You've come across an error. This is so sad" />
 
-<AccentBar />
+{#if mounted}
+	<div
+		class="absolute flex flex-col w-full min-h-screen"
+		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
 
-<main class="flex-1 flex flex-col items-center justify-center text-center">
-	<h1
-		class="font-medium font-heading text-4xl sm:text-5xl md:text-6xl
-		light-theme:text-green-700 dark-theme:text-green-300 uppercase">
-		{error.message}
-	</h1>
-	<p
-		class="font-medium text-3xl sm:text-4xl md:text-5xl
-		light-theme:text-green-600 dark-theme:text-green-400">
-		{status}
-	</p>
+		<AccentBar />
 
-	<a
-		class="mt-16 text-xl sm:text-2xl md:text-3xl light-theme:text-green-400
-		light-theme:hover:text-green-500 dark-theme:text-green-600
-		dark-theme:hover:text-green-500"
-		href="/">
-		return to the homepage
-	</a>
+		<main class="flex flex-col items-center justify-center flex-1 text-center">
+			<h1
+				class="text-4xl font-medium uppercase font-heading sm:text-5xl
+				md:text-6xl light-theme:text-green-700 dark-theme:text-green-300">
+				{error.message}
+			</h1>
+			<p
+				class="text-3xl font-medium sm:text-4xl md:text-5xl
+				light-theme:text-green-600 dark-theme:text-green-400">
+				{status}
+			</p>
 
-	{#if dev && error.stack}
-		<pre class="mt-8">{error.stack}</pre>
-	{/if}
-</main>
+			<a
+				class="mt-16 text-xl sm:text-2xl md:text-3xl light-theme:text-green-400
+				light-theme:hover:text-green-500 dark-theme:text-green-600
+				dark-theme:hover:text-green-500"
+				href="/">
+				return to the homepage
+			</a>
 
-<AccentBar />
+			{#if dev && error.stack}
+				<pre class="mt-8">{error.stack}</pre>
+			{/if}
+		</main>
+
+		<AccentBar />
+	</div>
+{/if}

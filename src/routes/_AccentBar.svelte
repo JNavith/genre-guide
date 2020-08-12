@@ -16,4 +16,4 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 -->
 
-<div class="h-1 light-theme:bg-green-500 dark-theme:bg-green-400" />
+<div class="h-1 light-theme:bg-green-500 dark-theme:bg-green-400" aria-hidden="true" />
