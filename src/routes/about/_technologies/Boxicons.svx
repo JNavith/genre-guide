@@ -1,0 +1,14 @@
+---
+title: Boxicons
+background: "#0066FF"
+foreground: "#FFFFFF"
+---
+
+<script context="module">
+    import image from "./boxicons.svg";
+    metadata.image = image;
+</script>
+
+# {title}
+
+We use icons from the [Boxicons](https://boxicons.com/) pack (through [Iconify](https://iconify.design/)) in quite a few places.

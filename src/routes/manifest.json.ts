@@ -20,9 +20,10 @@ import type { Request as ExpressRequest, Response as ExpressResponse } from "exp
 
 import { lch } from "d3-color";
 
-// @ts-ignore -- need to write types for it
-import { colors } from "design-system";
 import { name, description } from "site";
+
+// @ts-ignore -- need to write types
+import colors from "design-system/colors";
 
 const [_, l, c, h] = colors.green[500].match(/lch\(([.\d]+) ([.\d]+) ([.\d]+)\)/);
 // eslint-disable-next-line camelcase

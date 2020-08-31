@@ -2,6 +2,8 @@
 layout: false
 ---
 
-<h1 class="font-heading font-normal text-3xl table border-b-4 mb-4">
-	<slot />
-</h1>
+<div class="table mb-4 pb-1 border-b-4">
+	<h1 class="text-3xl font-medium font-heading trim-both">
+		<slot />
+	</h1>
+</div>

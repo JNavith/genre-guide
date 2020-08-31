@@ -6,8 +6,7 @@
 	export let disabled: boolean | undefined;
 
 	const toggle = () => {
-		const nextState = state ? (states.indexOf(state) + 1) % states.length : 1;
-		state = states[nextState];
+		state = state === firstState ? lastState : firstState;
 	};
 </script>
 

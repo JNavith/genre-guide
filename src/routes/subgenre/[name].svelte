@@ -43,13 +43,13 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
-	} from "design-system";
+	} from "design-system/index";
 
 	import Metadata from "../../components/Renderless/Metadata.svelte";
 	import AccentBar from "../_AccentBar.svelte";
 	import NavigationBar from "../_NavigationBar.svelte";
 
-	const { short } = transitionDurations;
+	const { medium } = transitionDurations;
 	const { fade } = transitionFunctions;
 	const { smooth } = easingFunctions;
 	const { out: smoothOut } = smooth;
@@ -103,14 +103,14 @@
 	{#if $state === State.Loaded}
 		<div
 			class="absolute flex flex-col w-full min-h-screen"
-			transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
+			transition:fade={{ delay: 0, duration: medium, easing: smoothOut }}>
 
 			<AccentBar />
 			<NavigationBar />
 
 			<main
 				class="flex flex-col items-center flex-1"
-				transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
+				transition:fade={{ delay: 0, duration: medium, easing: smoothOut }}>
 				{#if $context.subgenre}
 					<article class="w-full max-w-5xl p-8 mt-8">
 						<h1

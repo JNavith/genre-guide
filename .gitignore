@@ -2,9 +2,12 @@
 .firebase/
 /.history/
 .rpt2_cache/
+.tmp/
 __sapper__/
 __pycache__/
 config/
 firebase-debug.log
 /node_modules/
 src/node_modules/@sapper/
+/static/global.css
+/static/global.css.map

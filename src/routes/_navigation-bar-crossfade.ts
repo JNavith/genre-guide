@@ -5,7 +5,7 @@ import {
 	transitionDurations,
 	transitionFunctions,
 	// @ts-ignore -- need to write types for it
-} from "design-system";
+} from "design-system/index";
 
 const { smoother: { inOut } } = easingFunctions;
 const { medium } = transitionDurations;

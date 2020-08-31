@@ -11,7 +11,7 @@
 	import Metadata from "../components/Renderless/Metadata.svelte";
 	import AccentBar from "./_AccentBar.svelte";
 
-	const { short } = transitionDurations;
+	const { medium } = transitionDurations;
 	const { fade } = transitionFunctions;
 	const { smooth } = easingFunctions;
 	const { out: smoothOut } = smooth;
@@ -41,7 +41,7 @@
 {#if mounted}
 	<div
 		class="absolute flex flex-col w-full min-h-screen"
-		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
+		transition:fade={{ delay: 0, duration: medium, easing: smoothOut }}>
 
 		<AccentBar />
 

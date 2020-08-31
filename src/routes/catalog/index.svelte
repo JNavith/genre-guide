@@ -1,17 +1,20 @@
 <script context="module">
 	import { get } from "svelte/store";
+	import type { Machine, MachineState } from "robot3";
 
 	import { svelteRobot } from "svelte-robot";
 	import {
 		createStateMachine, Send, State, wrappedMachine,
-} from "./state";
+	} from "./state";
+	import type { Context } from "./state";
 
 	export async function preload() {
-		const { context, send, state } = svelteRobot(get(wrappedMachine));
+		const machine: Machine<Record<State, MachineState>, Context> = get(wrappedMachine);
+		const { context, send, state } = svelteRobot(machine);
 
 		if (get(state) === State.Empty) { send({ type: Send.Load, fetch: this.fetch }); }
 		
-  // @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
+		// @ts-ignore -- doesn't exist until @rollup/plugin-replace makes it
 		if (!process.browser) {
 			// Stall until loaded (or failed to load) on the server
 			await new Promise((resolve, reject) => {
@@ -36,7 +39,7 @@
 		easingFunctions,
 		transitionDurations,
 		transitionFunctions,
-	} from "design-system";
+	} from "design-system/index";
 	import { name as siteName, repository, routes } from "site";
 
 	import Metadata from "../../components/Renderless/Metadata.svelte";
@@ -44,7 +47,7 @@
 	import TrackCatalog from "./_TrackCatalog.svelte";
 	import AccentBar from "../_AccentBar.svelte";
 
-	const { short } = transitionDurations;
+	const { medium } = transitionDurations;
 	const { fade } = transitionFunctions;
 	const { smooth } = easingFunctions;
 	const { out: smoothOut } = smooth;
@@ -88,7 +91,7 @@
 {#if mounted}
 	<div
 		class="absolute flex flex-col w-full min-h-screen"
-		transition:fade={{ delay: 0, duration: short, easing: smoothOut }}>
+		transition:fade={{ delay: 0, duration: medium, easing: smoothOut }}>
 
 		<AccentBar />
 		<NavigationBar />

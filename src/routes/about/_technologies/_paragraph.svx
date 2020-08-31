@@ -2,6 +2,8 @@
 layout: false
 ---
 
-<p class="font-body font-light text-xl leading-relaxed">
-	<slot />
-</p>
+<div>
+	<p class="font-body font-normal trim-both text-xl leading-relaxed">
+		<slot />
+	</p>
+</div>

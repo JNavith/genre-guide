@@ -1,7 +1,7 @@
 ---
 title: GitHub
 background: "#DCEEFE"
-foreground: "#4A5568"
+foreground: "#252E35"
 # TODO: find an abbreviation plugin to use on AGPL below
 ---
 

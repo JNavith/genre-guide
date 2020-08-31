@@ -15,8 +15,5 @@
 	if (segment) {}
 </script>
 
-<style global>
-	@import "../global.pcss";
-</style>
 
 <slot />

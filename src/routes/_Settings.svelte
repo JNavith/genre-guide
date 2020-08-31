@@ -1,7 +1,10 @@
 <script>
-	// @ts-ignore -- doesn't package types
-	import { SettingsIcon } from "svelte-feather-icons";
+	import Icon from "@iconify/svelte";
+	import cogIcon from "@iconify-icons/bx/bxs-cog";
+
 	import { writable } from "svelte/store";
+
+	import { tooltip } from "tooltip";
 
 	import StyledSwitch from "../components/Switches/Styled.svelte";
 	import ThemeSwitch from "../components/Switches/Theme.svelte";
@@ -37,11 +40,12 @@
 	class="flex-shrink-0 block w-4 h-4 mr-3 cursor-pointer sm:mr-4 md:mr-6
 	light-theme:text-green-500 light-theme:hover:text-green-600
 	dark-theme:text-green-400 dark-theme:hover:text-green-300"
-	on:click|stopPropagation={() => (open = !open)}
+	on:click|stopPropagation={() => { open = !open }}
+	use:tooltip
 	aria-haspopup="true"
 	aria-expanded={open}>
 
-	<SettingsIcon />
+	<Icon icon={cogIcon} width="100%" />
 </button>
 
 {#if open}

@@ -16,6 +16,8 @@
     along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { spawn } from "child_process";
+import { performance } from "perf_hooks";
 import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import commonjs from "@rollup/plugin-commonjs";
@@ -23,14 +25,15 @@ import json from "@rollup/plugin-json";
 import typescript from "@rollup/plugin-typescript";
 import svelte from "rollup-plugin-svelte";
 import babel from "@rollup/plugin-babel";
+import colors from "kleur";
 import smartAsset from "rollup-plugin-smart-asset";
 import { terser } from "rollup-plugin-terser";
-import { mdsvex } from "mdsvex";
-import remarkAbbr from "remark-abbr";
+import progress from "rollup-plugin-progress";
+import visualizer from "rollup-plugin-visualizer";
 import config from "sapper/config/rollup";
-import sveltePreprocess from "svelte-preprocess";
 import pkg from "./package.json";
-import * as postcss from "./postcss.config";
+
+const { createPreprocessors } = require("./svelte.config");
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
@@ -39,22 +42,13 @@ const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 const ONLY_GRAPHQL_SERVER = !!process.env.ONLY_GRAPHQL_SERVER; // eslint-disable-line prefer-destructuring
 const PORT = process.env.PORT || 3000; // eslint-disable-line prefer-destructuring
 
-const { defaults } = require("./svelte.config.js");
-
-const preprocess = [
-	sveltePreprocess({ defaults, postcss }),
-	mdsvex({
-		layout: {
-			_technologies: "./src/routes/about/_technologies/_layout.svx",
-		},
-		remarkPlugins: [remarkAbbr],
-	}),
-];
+const preprocess = createPreprocessors({ sourceMap: !!sourcemap });
 
 const smartAssetConfig = {
 	url: "inline",
 	sourceMap: sourcemap,
 	publicPath: "/",
+	useHash: true,
 };
 
 const warningIsIgnored = (warning) => warning.message.includes(
@@ -91,9 +85,52 @@ export default {
 				dedupe: ["svelte"],
 			}),
 			commonjs(),
-			typescript(),
+			typescript({
+				noEmitOnError: false,
+				sourceMap: !!sourcemap,
+			}),
 			json(),
 			smartAsset(smartAssetConfig),
+
+			(() => {
+				let builder;
+				const buildGlobalCSS = () => {
+					if (builder) return;
+					const start = performance.now();
+
+					try {
+						builder = spawn("node", ["--unhandled-rejections=strict", "build-global-css.mjs", sourcemap]);
+						builder.stdout.pipe(process.stdout);
+						builder.stderr.pipe(process.stderr);
+						builder.on("close", (code) => {
+							if (code === 0) {
+								const elapsed = parseInt(performance.now() - start, 10);
+								console.log(`${colors.bold().green("✔ global css")} (src/global.pcss → static/global.css${sourcemap === true ? " + static/global.css.map" : ""}) ${colors.gray(`(${elapsed}ms)`)}`);
+							} else if (code !== null) {
+								console.error(`global css builder exited with code ${code}`);
+								console.log(colors.bold().red("✗ global css"));
+							}
+							builder = undefined;
+						});
+					} catch (err) {
+						console.log(colors.bold().red("✗ global css"));
+						console.error(err);
+					}
+				};
+
+				return {
+					name: "build-global-css",
+					buildStart() {
+						buildGlobalCSS();
+						this.addWatchFile("postcss.config.js");
+						this.addWatchFile("tailwind.config.js");
+						this.addWatchFile("src/global.pcss");
+						this.addWatchFile("src/base.pcss");
+						this.addWatchFile("src/utilities.pcss");
+					},
+					generateBundle: buildGlobalCSS,
+				};
+			})(),
 
 			legacy && babel({
 				extensions: [".js", ".mjs", ".html", ".svelte", ".svx"],
@@ -114,6 +151,12 @@ export default {
 
 			!dev && terser({
 				module: true,
+			}),
+
+			dev && progress(),
+			dev && visualizer({
+				title: "Client side bundle",
+				filename: "./.tmp/client-stats.html",
 			}),
 		],
 
@@ -144,9 +187,14 @@ export default {
 				dedupe: ["svelte"],
 			}),
 			commonjs(),
-			typescript(),
+			typescript({
+				noEmitOnError: false,
+				sourceMap: !!sourcemap,
+			}),
 			json(),
 			smartAsset(smartAssetConfig),
+
+			dev && progress(),
 		],
 		external: Object.keys(pkg.dependencies).concat(
 			require("module").builtinModules || Object.keys(process.binding("natives")), // eslint-disable-line global-require
@@ -158,7 +206,7 @@ export default {
 
 	serviceworker: {
 		input: config.serviceworker.input().replace(/\.js$/, ".ts"),
-		output: config.serviceworker.output(),
+		output: { ...config.serviceworker.output(), sourcemap },
 		plugins: [
 			resolve(),
 			replace({
@@ -166,8 +214,13 @@ export default {
 				"process.env.NODE_ENV": JSON.stringify(mode),
 			}),
 			commonjs(),
-			typescript(),
+			typescript({
+				noEmitOnError: false,
+				sourceMap: !!sourcemap,
+			}),
 			!dev && terser(),
+
+			dev && progress(),
 		],
 
 		preserveEntrySignatures: false,
